@@ -30,6 +30,7 @@ import {
   miniWageCurve,
   nwSalaryAdjustment,
   nwTransitionAdjustment,
+  occupationIncomeFloor,
 } from "./model";
 import type {
   PublicQuizSet,
@@ -324,7 +325,6 @@ interface ShareCardPayload {
   quiz: string;
   title: string;
   marketSignal: string;
-  division: string;
   variant: "premium" | "surge" | "standard" | "warning";
   url: string;
 }
@@ -333,7 +333,6 @@ interface ResultFlavor {
   title: string;
   quizBadge: string;
   marketSignal: string;
-  division: string;
   variant: ShareCardPayload["variant"];
   repeating: boolean;
 }
@@ -366,15 +365,10 @@ function getResultFlavor(display: DisplayResult, ranking: RankingSnapshot | null
       : ranking && ranking.deviation < 50
         ? "TOPIXに負けています"
         : "市場平均をアウトパフォーム";
-  const occupationSegment = ranking?.segments.find((segment) => segment.kind === "occupation");
-  const division = occupationSegment
-    ? `${occupationSegment.label} ${occupationSegment.rank}位 / ${occupationSegment.total}人`
-    : "部門ランキング集計中";
   return {
     title,
     quizBadge,
     marketSignal,
-    division,
     variant: repeating ? "premium" : tier === "S" ? "surge" : tier === "D" ? "warning" : "standard",
     repeating,
   };
@@ -447,11 +441,6 @@ function createShareCardCanvas(payload: ShareCardPayload): HTMLCanvasElement {
   context.fillStyle = "#f2eee5";
   context.font = "600 25px 'Noto Serif JP', serif";
   context.fillText(`金融リテラシー ${payload.quiz}`, 78, 458);
-  context.textAlign = "right";
-  const divisionSize = fitCanvasText(context, payload.division, 560, 24, 18);
-  context.font = `600 ${divisionSize}px "Noto Serif JP", serif`;
-  context.fillText(payload.division, 1120, 458);
-  context.textAlign = "left";
 
   context.fillStyle = "#aaa59c";
   const occupationSize = fitCanvasText(context, payload.occupation, 1040, 27, 20);
@@ -655,7 +644,6 @@ export default function HumanMarketCapApp() {
         quiz: `${display.quizCorrect}/5｜${flavor.quizBadge}`,
         title: flavor.title,
         marketSignal: flavor.marketSignal,
-        division: flavor.division,
         variant: flavor.variant,
         url: challengeUrl(display.scoreYen).replace(/^https?:\/\//, ""),
       });
@@ -677,7 +665,6 @@ export default function HumanMarketCapApp() {
       position,
       `称号：${flavor?.title ?? "査定済み"}`,
       `金融リテラシー ${display.quizCorrect}/5点｜${flavor?.quizBadge ?? ""}`,
-      flavor?.division ?? "",
       flavor?.marketSignal ?? "",
       "※もちろん、人間の価値はこの数字では決まりません。",
       "#人間時価総額 #HMC",
@@ -699,7 +686,6 @@ export default function HumanMarketCapApp() {
         quiz: `${display.quizCorrect}/5｜${flavor.quizBadge}`,
         title: flavor.title,
         marketSignal: flavor.marketSignal,
-        division: flavor.division,
         variant: flavor.variant,
         url: challengeUrl(display.scoreYen).replace(/^https?:\/\//, ""),
       });
@@ -729,7 +715,7 @@ export default function HumanMarketCapApp() {
       <div className="app-shell">
         <header className="brand-bar">
           <a className="brand" href="#top"><span className="brand-mark">HMC</span><span>HUMAN CAPITAL<br />DESK</span></a>
-          <span className="model-tag">DCF MODEL / v17</span>
+          <span className="model-tag">DCF MODEL / v18</span>
         </header>
 
         <section className="intro" id="top">
@@ -821,6 +807,7 @@ export default function HumanMarketCapApp() {
               </div>
               <div className="curve-preview"><span>WAGE CURVE PREVIEW</span><MiniCurve occupation={inputs.occupation} /></div>
               <div className="risk-line"><span>主職{job.primaryEnd}歳まで / 転職後{Math.round(job.transitionIncomeRate * 100)}% / 容姿×{job.appearanceMultiplier.toFixed(1)}</span><b className={`risk-badge risk-${job.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>{job.riskLabel}</b></div>
+              <div className="job-income-floor">現在年齢の職業別基準年収：<strong>{occupationIncomeFloor(job, inputs.age).toLocaleString("ja-JP")}万円</strong></div>
               {job.specialNote && <div className={`job-special-note ${job.key === "aiEngineer" ? "ai-strongest" : ""}`}>{job.specialNote}</div>}
             </div>
           </section>
@@ -881,7 +868,7 @@ export default function HumanMarketCapApp() {
 
           {error && <p className="form-error" role="alert">{error}</p>}
           <button className="calculate-button" type="submit" disabled={questions.length !== 5 || quizPhase !== "done" || calculating}><span>{calculating ? "サーバーで査定中…" : "時価総額を算出する"}</span><b>→</b></button>
-          <p className="privacy-note">年収・資産・容姿・クイズ回答は保存しません。ランキングには匿名ID、最新スコア、職業・年齢・学歴の区分のみ保存します。この結果は金融助言ではなく、教育・娯楽目的の試算です。</p>
+          <p className="privacy-note">年収・資産・容姿・職業・年齢・学歴・クイズ回答は保存しません。ランキングには匿名IDと最新スコアのみ保存します。この結果は金融助言ではなく、教育・娯楽目的の試算です。</p>
         </form>
 
         {display && result && (
@@ -925,7 +912,7 @@ export default function HumanMarketCapApp() {
 
             <section className="result-card ranking-card">
               <div className="section-title"><div><span className="eyebrow">MARKET POSITION</span><h3>市場ポジション</h3></div><span className={`connection ${ranking ? "online" : ""}`}>{ranking ? "LIVE" : "WAIT"}</span></div>
-              {ranking ? <><div className="ranking-kpis"><div><span>総合順位</span><strong><em>{ranking.rank}</em> / {ranking.total}</strong></div><div><span>偏差値</span><strong><em>{ranking.deviation.toFixed(1)}</em></strong></div><div><span>上位</span><strong><em>{ranking.topPercent.toFixed(1)}</em>%</strong></div></div><Histogram ranking={ranking} score={display.scoreYen} /><div className="segment-rankings">{ranking.segments.map((segment) => <div key={segment.kind}><span>{segment.label}</span><strong><em>{segment.rank}</em>位 / {segment.total}人</strong></div>)}</div></> : <div className="ranking-loading"><span />ランキングを照合しています…</div>}
+              {ranking ? <><div className="ranking-kpis"><div><span>総合順位</span><strong><em>{ranking.rank}</em> / {ranking.total}</strong></div><div><span>偏差値</span><strong><em>{ranking.deviation.toFixed(1)}</em></strong></div><div><span>上位</span><strong><em>{ranking.topPercent.toFixed(1)}</em>%</strong></div></div><Histogram ranking={ranking} score={display.scoreYen} /></> : <div className="ranking-loading"><span />ランキングを照合しています…</div>}
             </section>
 
             <section className="kpi-grid">
@@ -945,14 +932,21 @@ export default function HumanMarketCapApp() {
                 <div><span>NW→給与</span><strong>{formatPercent(result.nwSalaryAdjustment, 2)} / 年</strong></div>
                 <div><span>NW→転職後所得</span><strong>{formatPercent(result.nwTransitionAdjustment, 1)}</strong></div>
                 <div><span>転職後所得率</span><strong>{(result.transitionIncomeRate * 100).toFixed(1)}%</strong></div>
+                <div><span>転職後の初期基準年収</span><strong>{Math.round(result.transitionBaseIncome).toLocaleString("ja-JP")}万円</strong></div>
+                <div><span>職業別基準年収</span><strong>{result.occupationIncomeFloor.toLocaleString("ja-JP")}万円</strong></div>
                 <div><span>容姿→給与</span><strong>{formatPercent(result.appearanceSalaryAdjustment, 2)} / 年</strong></div>
                 <div><span>容姿→利回り</span><strong>{formatPercent(result.appearanceReturnAdjustment, 1)}</strong></div>
                 <div><span>職業別基本利回り</span><strong>{formatPercent(result.occupation.baseReturn)}</strong></div>
                 {result.occupation.specialGrowthYears && <div className="highlight"><span>期間限定成長ブースト</span><strong>最初の{result.occupation.specialGrowthYears}年 ＋{Math.round((result.occupation.specialGrowthRate ?? 0) * 100)}% / 年</strong></div>}
-                {result.occupation.incomeFloor && <div><span>家事労働の換算額</span><strong>年{result.occupation.incomeFloor}万円</strong></div>}
                 <div><span>金融リテラシー</span><strong>{display.quizCorrect} / 5点・{formatPercent(result.financialAdjustment)}</strong></div>
                 <div className="highlight"><span>実効利回り</span><strong>{(result.effectiveReturn * 100).toFixed(2)}%（上限なし）</strong></div>
                 <div><span>キャリア変動リスク</span><strong>{(result.occupation.careerRisk * 100).toFixed(1)}% / 年</strong></div>
+              </div>
+              <div className="model-notes">
+                <p><b>INCOME FLOOR</b> 初年度は入力年収をそのまま採用します。年収が職業別基準の25%未満なら翌年に基準まで回復し、25%以上・基準未満なら毎年差額の35%ずつ近づく仮定です。</p>
+                <p><b>CAREER CHANGE</b> 転職後は元の職業カーブを引き継がず、年齢別の共通再就職水準と職業別の転職後所得率から始め、以後は年2%で推移する単純化モデルです。</p>
+                <p><b>SIMPLIFIED DCF</b> 厳密な現在価値への割引計算ではなく、キャリア継続確率で調整した将来所得を累計するDCF風の簡易モデルです。</p>
+                <p><b>ASSET MODEL</b> 現金・金融資産・不動産・その他資産を合算し、資産種別によらず同じ実効利回りで運用する簡易モデルです。</p>
               </div>
             </section>
 
@@ -987,7 +981,7 @@ export default function HumanMarketCapApp() {
           </section>
         )}
 
-        <footer><span>HMC CALCULATOR / v17</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
+        <footer><span>HMC CALCULATOR / v18</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
       </div>
     </main>
   );

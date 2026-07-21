@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { OCCUPATIONS, getOccupation } from "../app/model.ts";
+import { OCCUPATIONS, getOccupation, occupationIncomeFloor } from "../app/model.ts";
 
 test("wage curves have pronounced growth and decline phases", () => {
   const founder = getOccupation("founder");
@@ -27,14 +27,27 @@ test("hedge funds and AI engineering use intentionally extreme growth", () => {
 });
 
 test("expanded occupation catalog includes all requested culture segments", () => {
-  assert.equal(OCCUPATIONS.length, 55);
+  assert.equal(OCCUPATIONS.length, 60);
   for (const key of [
     "software", "aiEngineer", "foreignTech", "influencer", "unemployed", "homemaker",
     "proGamer", "comedian", "mangaArtist", "voiceActor", "nurse", "childcare",
     "fullTimeTrader", "boatCycleRacer", "boardGamePro", "bureaucrat", "politician",
     "pilot", "cabinCrew", "beautician", "farmerFisher", "monk", "sumo",
-    "traditionalActor", "sexWorker", "nightlifeFreelance",
+    "traditionalActor", "sexWorker", "nightlifeFreelance", "angelInvestor",
+    "reseller", "pokerLive", "pokerOnline", "slotProfessional",
   ]) assert.equal(getOccupation(key).key, key);
+  assert.equal(getOccupation("professionalGambler").label, "プロギャンブラー（競馬・スポーツベット等）");
+  assert.equal(getOccupation("slotProfessional").label, "スロット専業");
+  assert.equal(getOccupation("nightlifeFreelance").label, "港区フリーランス");
+});
+
+test("every occupation has an age-adjusted income floor without spouse credit", () => {
+  for (const occupation of OCCUPATIONS) {
+    assert.ok(Number.isFinite(occupationIncomeFloor(occupation, 35)), occupation.key);
+  }
+  assert.equal(occupationIncomeFloor(getOccupation("homemaker"), 35), 350);
+  assert.equal(getOccupation("homemaker").specialNote?.includes("配偶者の収入・与信は含めません"), true);
+  assert.equal(occupationIncomeFloor(getOccupation("unemployed"), 35), 0);
 });
 
 test("nightlife occupations receive extreme appearance sensitivity", () => {

@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const imageUrl = `${protocol}://${host}/og-v16.png`;
   return {
     title: "人間時価総額 CALCULATOR",
-    description: "55職業・学歴・資産・金融判断から、あなたの残りのキャリア価値をDCF的に査定します。",
+    description: "60職業・学歴・資産・金融判断から、あなたの残りのキャリア価値をDCF的に査定します。",
     openGraph: {
       title: "人間時価総額 CALCULATOR",
       description: "あなたの価値を、数字にする。",

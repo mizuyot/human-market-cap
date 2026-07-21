@@ -33,7 +33,6 @@ export interface OccupationParam {
   rampDown: [number, number];
   specialGrowthYears?: number;
   specialGrowthRate?: number;
-  incomeFloor?: number;
   specialNote?: string;
 }
 
@@ -98,7 +97,7 @@ const curve = {
 } as const;
 
 type OccupationExtras = Partial<Pick<OccupationParam,
-  "specialGrowthYears" | "specialGrowthRate" | "incomeFloor" | "specialNote"
+  "specialGrowthYears" | "specialGrowthRate" | "specialNote"
 >>;
 
 function occupation(
@@ -161,8 +160,10 @@ export const OCCUPATIONS = [
   occupation("beautician", "employee", "美容師", 70, 65, 48, .022, 2.0, .035, .55, "HIGH", "independent", { specialNote: "アシスタント期から独立後へ伸びるモデル" }),
 
   occupation("founder", "independent", "スタートアップ起業家", 70, 70, 50, .030, 1.0, .045, .55, "VERY HIGH", "founder"),
+  occupation("angelInvestor", "independent", "エンジェル投資家・連続起業家", 75, 75, 55, .045, .5, .060, .55, "VERY HIGH", "founder", { specialNote: "※未上場資産は流動性が低く、希薄化リスクも大きいモデル" }),
   occupation("businessOwner", "independent", "安定事業の経営者・自営業", 70, 70, 55, .028, 1.0, .025, .65, "HIGH", "independent"),
   occupation("freelancer", "independent", "高スキルフリーランス", 70, 67, 50, .030, .8, .025, .60, "HIGH", "independent"),
+  occupation("reseller", "independent", "転売ヤー・せどり", 70, 65, 42, .028, .3, .100, .45, "EXTREME", "gambling", { specialNote: "アカウントBAN・プラットフォーム規約変更による急落リスクを反映" }),
   occupation("farmerFisher", "independent", "農家・漁師", 75, 70, 55, .025, .3, .035, .60, "HIGH", "independent", { specialNote: "土地・船など事業資産を持つ一次産業モデル" }),
   occupation("monk", "independent", "僧侶・宗教家", 80, 80, 60, .024, .5, .015, .70, "MID-LOW", "stable"),
   occupation("politician", "independent", "政治家", 100, 100, 60, .030, 1.2, .150, .40, "EXTREME", "lottery", { specialNote: "引退年齢なし・落選リスク極大" }),
@@ -179,14 +180,17 @@ export const OCCUPATIONS = [
   occupation("traditionalActor", "entertainment", "歌舞伎役者・伝統芸能", 80, 75, 55, .028, 2.0, .030, .65, "HIGH", "entertainment", { specialNote: "世襲・家柄プレミアムを含む特殊モデル" }),
 
   occupation("host", "nightlife", "ホスト", 65, 45, 30, .018, 8.0, .080, .45, "EXTREME", "nightlife"),
-  occupation("hostess", "nightlife", "ホステス・キャバクラ", 65, 45, 28, .018, 8.0, .070, .45, "EXTREME", "nightlife"),
+  occupation("hostess", "nightlife", "ラウンジ嬢・ホステス・キャバクラ", 65, 45, 28, .018, 8.0, .070, .45, "EXTREME", "nightlife", { specialNote: "売上はシャンパンと太客の気分次第。夜の市場は寄り付きから値動き激しめ" }),
   occupation("sexWorker", "nightlife", "風俗", 65, 42, 27, .018, 10.0, .100, .40, "EXTREME", "nightlife"),
-  occupation("nightlifeFreelance", "nightlife", "夜職フリーランス（立ちんぼ・港区女子等）", 65, 40, 26, .016, 9.0, .120, .35, "EXTREME", "nightlife"),
+  occupation("nightlifeFreelance", "nightlife", "港区フリーランス", 65, 40, 26, .016, 9.0, .120, .35, "EXTREME", "nightlife"),
   occupation("clubOwner", "nightlife", "クラブママ・夜職経営", 70, 70, 52, .022, 4.0, .040, .55, "HIGH", "independent"),
 
-  occupation("professionalGambler", "gambling", "プロギャンブラー（ポーカー・競馬・スロット等）", 65, 55, 38, .037, .1, .085, .40, "EXTREME", "gambling"),
+  occupation("pokerLive", "gambling", "ポーカー専業（ライブ）", 65, 55, 38, .045, .2, .090, .40, "EXTREME", "gambling", { specialNote: "EVの見積もり違いと遠征費で、バンクロール崩壊の警告が点灯します" }),
+  occupation("pokerOnline", "gambling", "ポーカー専業（オンライン）", 65, 55, 35, .047, .1, .110, .40, "EXTREME", "gambling", { specialNote: "レーキ・規約変更・アカウント停止を含むバンクロール変動モデル" }),
+  occupation("slotProfessional", "gambling", "スロット専業", 60, 50, 35, .035, .1, .120, .35, "EXTREME", "gambling", { specialNote: "設定読みと期待値が外れると、バンクロールは静かに崩壊します" }),
+  occupation("professionalGambler", "gambling", "プロギャンブラー（競馬・スポーツベット等）", 65, 55, 38, .037, .1, .085, .40, "EXTREME", "gambling"),
 
-  occupation("homemaker", "lifestyle", "専業主婦・主夫", 75, 75, 55, .020, .4, .010, .65, "LOW", "stable", { incomeFloor: 350, specialNote: "家事労働を年350万円の市場価値として換算" }),
+  occupation("homemaker", "lifestyle", "専業主婦・主夫", 75, 75, 55, .020, .4, .010, .65, "LOW", "stable", { specialNote: "本人の家事労働を市場価値へ換算。配偶者の収入・与信は含めません" }),
   occupation("unemployed", "lifestyle", "無職・ニート", 65, 65, 35, .010, 0, .100, .30, "EXTREME", "flat", { specialNote: "収入0円でも資産運用分は時価総額に反映" }),
 ] as const;
 
@@ -194,6 +198,31 @@ export type EducationKey = typeof EDUCATIONS[number]["key"];
 export type AppearanceKey = typeof APPEARANCES[number]["key"];
 export type OccupationKey = typeof OCCUPATIONS[number]["key"];
 export type OccupationCategoryKey = typeof OCCUPATION_CATEGORIES[number]["key"];
+
+export const OCCUPATION_BASE_INCOME: Record<string, number> = {
+  fund: 1200, investmentBank: 1000, bankFinance: 450, consultant: 600, fullTimeTrader: 400,
+  doctor: 900, dentist: 500, lawyer: 500, accountant: 450, nurse: 400, medicalSpecialist: 380,
+  software: 450, aiEngineer: 600, foreignTech: 800, productData: 550, researcher: 400, creative: 300, mangaArtist: 240,
+  listedManager: 700, listedGeneral: 400, sme: 300, nonRegular: 180, skilled: 320, service: 260, public: 350,
+  teacher: 350, childcare: 260, bureaucrat: 450, pilot: 900, cabinCrew: 350, beautician: 240,
+  founder: 300, angelInvestor: 500, businessOwner: 350, freelancer: 350, reseller: 300, farmerFisher: 300,
+  monk: 250, politician: 600,
+  entertainment: 240, influencer: 200, athlete: 400, proGamer: 200, comedian: 120, voiceActor: 180,
+  boatCycleRacer: 600, boardGamePro: 300, sumo: 300, traditionalActor: 400,
+  host: 300, hostess: 300, sexWorker: 350, nightlifeFreelance: 280, clubOwner: 500,
+  pokerLive: 350, pokerOnline: 350, slotProfessional: 300, professionalGambler: 300,
+  homemaker: 350, unemployed: 0,
+};
+
+export function occupationIncomeFloor(job: OccupationParam, age: number): number {
+  const base = OCCUPATION_BASE_INCOME[job.key] ?? 0;
+  if (job.key === "homemaker" || base === 0) return base;
+  const distance = age - job.peak;
+  const ageFactor = distance < 0
+    ? Math.max(.65, 1 - Math.abs(distance) * .02)
+    : Math.max(.55, 1 - distance * .025);
+  return Math.round(base * ageFactor);
+}
 
 export interface CalculatorInputs {
   age: number;
@@ -233,6 +262,8 @@ export interface CalculationResult {
   nwSalaryAdjustment: number;
   nwTransitionAdjustment: number;
   transitionIncomeRate: number;
+  transitionBaseIncome: number;
+  occupationIncomeFloor: number;
   appearanceSalaryAdjustment: number;
   appearanceReturnAdjustment: number;
   yearsRemaining: number;

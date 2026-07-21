@@ -27,9 +27,6 @@ interface AttemptRow {
 interface ScoreRow {
   uid: string;
   score: number;
-  occupation: string | null;
-  age: number | null;
-  education: string | null;
 }
 
 const isKey = <T extends readonly { key: string }[]>(items: T, key: unknown) =>
@@ -93,14 +90,7 @@ function rankingFromScores(scores: number[], ownScore: number): RankingSnapshot 
     minScore,
     maxScore,
     mode: "global",
-    segments: [],
   };
-}
-
-function segmentRank(scores: number[], ownScore: number) {
-  const sorted = (scores.length ? [...scores] : [ownScore]).sort((a, b) => b - a);
-  const index = sorted.findIndex((score) => score <= ownScore);
-  return { rank: (index < 0 ? sorted.length - 1 : index) + 1, total: sorted.length };
 }
 
 export async function POST(request: Request) {
@@ -159,15 +149,12 @@ export async function POST(request: Request) {
     const scoreYen = Math.round(calculation.marketCapMan * 10_000);
     if (!Number.isSafeInteger(scoreYen)) throw new ApiError(400, "入力値が大きすぎて査定できませんでした。");
     await db.prepare(`
-      INSERT INTO hmc_scores (uid, score, occupation, age, education, updated_at)
-      VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+      INSERT INTO hmc_scores (uid, score, updated_at)
+      VALUES (?1, ?2, ?3)
       ON CONFLICT(uid) DO UPDATE SET
         score = excluded.score,
-        occupation = excluded.occupation,
-        age = excluded.age,
-        education = excluded.education,
         updated_at = excluded.updated_at
-    `).bind(uid, scoreYen, inputs.occupation, inputs.age, inputs.education, now).run();
+    `).bind(uid, scoreYen, now).run();
     await db.prepare(`
       DELETE FROM hmc_scores
       WHERE uid IN (
@@ -175,22 +162,14 @@ export async function POST(request: Request) {
       )
     `).run();
     const rows = await db.prepare(`
-      SELECT uid, score, occupation, age, education
+      SELECT uid, score
       FROM hmc_scores ORDER BY score DESC LIMIT 1000
     `).all<ScoreRow>();
     const rankingRows = rows.results.some((row) => row.uid === uid)
       ? rows.results
-      : [...rows.results, { uid, score: scoreYen, occupation: inputs.occupation, age: inputs.age, education: inputs.education }];
+      : [...rows.results, { uid, score: scoreYen }];
     const scores = rankingRows.map((row) => Number(row.score)).filter(Number.isFinite);
-    const occupationScores = rankingRows.filter((row) => row.occupation === inputs.occupation).map((row) => Number(row.score)).filter(Number.isFinite);
-    const ageScores = rankingRows.filter((row) => Number(row.age) === inputs.age).map((row) => Number(row.score)).filter(Number.isFinite);
-    const educationScores = rankingRows.filter((row) => row.education === inputs.education).map((row) => Number(row.score)).filter(Number.isFinite);
     const globalRanking = rankingFromScores(scores, scoreYen);
-    globalRanking.segments = [
-      { kind: "occupation", label: `${calculation.occupation.label}部門`, ...segmentRank(occupationScores, scoreYen) },
-      { kind: "age", label: `${inputs.age}歳部門`, ...segmentRank(ageScores, scoreYen) },
-      { kind: "education", label: `${calculation.education.label}部門`, ...segmentRank(educationScores, scoreYen) },
-    ];
     const response: ValuationResponse = {
       calculation,
       scoreYen,

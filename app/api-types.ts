@@ -20,13 +20,6 @@ export interface QuizSetAnswer {
 
 export type QuizAnswers = Record<string, QuizSetAnswer>;
 
-export interface SegmentRanking {
-  kind: "occupation" | "age" | "education";
-  label: string;
-  rank: number;
-  total: number;
-}
-
 export interface QuizReviewItem extends PublicQuizSet {
   answer: QuizSetAnswer;
   passed: boolean;
@@ -43,7 +36,6 @@ export interface RankingSnapshot {
   minScore: number;
   maxScore: number;
   mode: "global";
-  segments: SegmentRanking[];
 }
 
 export interface QuizStartResponse {

@@ -7,11 +7,28 @@ import {
   getOccupation,
   nwSalaryAdjustment,
   nwTransitionAdjustment,
+  occupationIncomeFloor,
   wageCurveRate,
-} from "../model";
+} from "../model.ts";
 
 const financialLiteracyAdjustment = (correct: number) =>
   (Math.min(5, Math.max(0, correct)) / 5 - .5) * .1;
+
+function commonTransitionIncome(age: number): number {
+  if (age < 30) return 300;
+  if (age < 40) return 350;
+  if (age < 50) return 380;
+  if (age < 60) return 340;
+  if (age < 70) return 250;
+  return 180;
+}
+
+function recoverTowardOccupationFloor(current: number, projected: number, floor: number): number {
+  if (floor <= 0) return Math.max(0, projected);
+  if (current < floor * .25) return floor;
+  if (projected < floor) return projected + (floor - projected) * .35;
+  return projected;
+}
 
 export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationResult {
   const education = getEducation(input.education);
@@ -22,12 +39,17 @@ export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationRe
   const salaryNw = nwSalaryAdjustment(education.nw);
   const transitionNw = nwTransitionAdjustment(education.nw);
   const transitionIncomeRate = Math.min(.9, Math.max(.2, job.transitionIncomeRate + transitionNw));
+  const transitionBaseIncome = Math.max(
+    Math.max(0, input.annualIncome) * transitionIncomeRate,
+    commonTransitionIncome(input.age),
+  );
+  const initialOccupationIncomeFloor = occupationIncomeFloor(job, input.age);
   const appearanceSalaryAdjustment = appearance.salaryBase * job.appearanceMultiplier;
   const appearanceReturnAdjustment = appearance.returnAdjustment;
   const effectiveReturn = job.baseReturn + financialAdjustment + appearanceReturnAdjustment;
   const initialAssets = Math.max(0, input.financialAssets) + Math.max(0, input.realEstateAssets) + Math.max(0, input.otherAssets);
   let balance = initialAssets;
-  let rawSalary = Math.max(0, input.annualIncome, job.incomeFloor ?? 0);
+  let rawSalary = Math.max(0, input.annualIncome);
   let salaryTotal = 0;
   let assetTotal = 0;
   let reinvested = 0;
@@ -36,9 +58,10 @@ export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationRe
 
   for (let year = 0; year < yearsRemaining; year += 1) {
     const age = input.age + year;
-    const survival = age >= job.primaryEnd ? 0 : Math.pow(1 - job.careerRisk, year);
-    const careerFactor = survival + (1 - survival) * transitionIncomeRate;
-    const salary = rawSalary * careerFactor;
+    const survival = year === 0 ? 1 : age >= job.primaryEnd ? 0 : Math.pow(1 - job.careerRisk, year);
+    const transitionSalary = transitionBaseIncome * Math.pow(1.02, year);
+    const salary = rawSalary * survival + transitionSalary * (1 - survival);
+    const careerFactor = rawSalary > 0 ? salary / rawSalary : survival;
     salaryTotal += salary;
     const add = salary * Math.min(1, Math.max(0, input.reinvestmentRate));
     reinvested += add;
@@ -50,7 +73,12 @@ export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationRe
     const specialGrowth = year < (job.specialGrowthYears ?? 0) ? (job.specialGrowthRate ?? 0) : 0;
     const curveRate = wageCurveRate(job, input.age, year) + specialGrowth;
     projections.push({ age, rawSalary, salary, survival, careerFactor, curveRate, initialAssets, reinvested, gains, balance });
-    rawSalary = Math.max(0, rawSalary * (1 + curveRate + .02 + salaryNw + appearanceSalaryAdjustment));
+    const projectedSalary = Math.max(0, rawSalary * (1 + curveRate + .02 + salaryNw + appearanceSalaryAdjustment));
+    rawSalary = recoverTowardOccupationFloor(
+      rawSalary,
+      projectedSalary,
+      occupationIncomeFloor(job, age + 1),
+    );
   }
 
   const salaryIncomeMan = salaryTotal * education.multiplier;
@@ -63,6 +91,8 @@ export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationRe
     nwSalaryAdjustment: salaryNw,
     nwTransitionAdjustment: transitionNw,
     transitionIncomeRate,
+    transitionBaseIncome,
+    occupationIncomeFloor: initialOccupationIncomeFloor,
     appearanceSalaryAdjustment,
     appearanceReturnAdjustment,
     yearsRemaining,
