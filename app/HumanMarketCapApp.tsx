@@ -972,8 +972,7 @@ export default function HumanMarketCapApp() {
             <section className="closing-message">
               <span className="eyebrow">ONE LAST THING</span>
               <h3>人生は、決算書ではありません。</h3>
-              <p>でも、人間の価値と時価総額は一致しません。企業はお金を稼ぐのが目的ですが、人間の目的は、たぶんもっとややこしくて、もっと面白いものです。</p>
-              <p>死ぬときに口座残高が過去最高でも、あの世へ持ち込めないのだから。</p>
+              <p>企業はお金を稼ぐのが目的。でも人間の目的は、お金ではありません。死ぬ時にいくら資産があってもあの世に持ち込めないのだから。</p>
             </section>
 
             <button className="revise-button" type="button" onClick={() => { setDisplay(null); setRanking(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>条件を修正して再計算する</button>
