@@ -216,7 +216,9 @@ fieldset legend { padding: 0; }
 .curve-preview > span { color: var(--dim); font-size: 7px; letter-spacing: .09em; }
 .mini-curve { height: 56px; display: flex; gap: 4px; align-items: flex-end; margin-top: 10px; border-bottom: 1px solid #34312a; background: repeating-linear-gradient(to top, transparent 0 17px, rgba(255,255,255,.025) 17px 18px); }
 .mini-curve span { flex: 1; min-height: 4px; background: linear-gradient(to top, rgba(212,168,67,.18), var(--gold)); opacity: .85; }
-.risk-line { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 9px; }
+.risk-line { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 8px; }
+.risk-line > span { line-height: 1.55; }
+.risk-line .risk-badge { flex: 0 0 auto; }
 .risk-badge { font-size: 7px; letter-spacing: .08em; padding: 6px 7px; border: 1px solid currentColor; font-weight: 500; }
 .risk-very-low, .risk-low { color: var(--green); }
 .risk-mid-low, .risk-mid { color: #f0cf72; }
@@ -381,9 +383,10 @@ fieldset legend { padding: 0; }
 .charts-card { padding-inline: 0; overflow: hidden; }
 .charts-card > .section-title { padding-inline: 15px; }
 .scroll-hint { color: var(--dim); font-size: 7px; letter-spacing: .08em; }
-.chart-scroll { overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-color: var(--gold) #222; scrollbar-width: thin; }
+.chart-scroll { overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-color: var(--gold) #222; scrollbar-width: thin; padding-bottom: 8px; }
 .chart-stage { min-width: 100%; }
-.chart-heading-row { height: 45px; padding: 0 20px 0 54px; display: flex; align-items: center; justify-content: space-between; }
+.chart-stage canvas { display: block; max-width: none; }
+.chart-heading-row { height: 50px; padding: 0 28px 0 64px; display: flex; align-items: center; justify-content: space-between; }
 .chart-heading-row h4 { margin: 2px 0 0; font: 600 14px var(--serif); }
 .chart-heading-row .eyebrow { font-size: 6px; }
 .legend-dot { font-size: 7px; color: var(--muted); white-space: nowrap; }
@@ -394,16 +397,16 @@ fieldset legend { padding: 0; }
 .legend-dot.gold { color: var(--gold); }
 .asset-heading { border-top: 1px solid var(--border); margin-top: 8px; }
 .asset-legend { display: flex; gap: 11px; }
-.asset-chart { height: 235px; display: flex; align-items: flex-end; padding-bottom: 25px; background: repeating-linear-gradient(to top, transparent 0 51px, rgba(255,255,255,.03) 51px 52px); }
-.asset-column { width: 56px; height: 198px; flex: 0 0 56px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; position: relative; }
+.asset-chart { height: 335px; display: flex; align-items: flex-end; padding-bottom: 31px; background: repeating-linear-gradient(to top, transparent 0 68px, rgba(255,255,255,.03) 68px 69px); }
+.asset-column { width: 68px; height: 292px; flex: 0 0 68px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; position: relative; }
 .asset-total { color: #d8d3ca; font-size: 7px; margin-bottom: 5px; white-space: nowrap; }
-.asset-bar { width: 22px; display: flex; flex-direction: column; justify-content: flex-end; position: relative; }
+.asset-bar { width: 28px; display: flex; flex-direction: column; justify-content: flex-end; position: relative; }
 .asset-layer { display: block; width: 100%; min-height: 0; }
 .asset-layer.gain { background: var(--gold); }
 .asset-layer.reinvested { background: var(--green); }
 .asset-layer.initial { background: var(--purple); }
 .loss-mark { position: absolute; right: 0; color: var(--red); font-size: 5px; }
-.age-label { position: absolute; bottom: -20px; color: var(--dim); font-size: 7px; }
+.age-label { position: absolute; bottom: -23px; color: var(--dim); font-size: 7px; }
 .empty-note { color: var(--muted); font-size: 9px; line-height: 1.7; padding: 20px; }
 
 .assumption-list { border-top: 1px solid var(--border); }
@@ -452,9 +455,9 @@ fieldset legend { padding: 0; }
 .closing-message::after { content: "0"; position: absolute; right: -6px; bottom: -38px; color: rgba(212,168,67,.055); font: 700 150px/1 var(--serif); }
 .closing-message h3 { margin: 9px 0 17px; color: var(--gold-light); font: 700 24px/1.45 var(--serif); letter-spacing: -.03em; position: relative; z-index: 1; }
 .closing-message p { margin: 0 0 12px; color: var(--muted); font-size: 9px; line-height: 2; position: relative; z-index: 1; }
-.closing-message strong { display: block; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--text); font: 600 12px/1.8 var(--serif); position: relative; z-index: 1; }
 .revise-button { width: 100%; min-height: 56px; color: var(--gold-light); background: transparent; border: 1px solid var(--border-gold); font-size: 10px; transition: .2s; }
 .revise-button:hover { background: rgba(212,168,67,.07); }
+.x-share-button-bottom { margin-top: 10px; border: 1px solid #393939; }
 
 footer { border-top: 1px solid var(--border); padding: 28px 20px 34px; text-align: center; color: var(--dim); }
 footer span { font-size: 8px; letter-spacing: .12em; }

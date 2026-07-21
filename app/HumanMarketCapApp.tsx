@@ -88,7 +88,7 @@ function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas || !data.length) return;
-    const height = 272;
+    const height = 360;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
@@ -98,11 +98,17 @@ function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number
     if (!context) return;
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     context.clearRect(0, 0, width, height);
-    const left = 54;
-    const top = 32;
-    const bottom = 30;
+    const left = 64;
+    const top = 48;
+    const bottom = 44;
     const chartHeight = height - top - bottom;
-    const max = Math.max(100, ...data.map((item) => item.salary)) * 1.18;
+    const salaries = data.map((item) => item.salary);
+    const dataMin = Math.min(...salaries);
+    const dataMax = Math.max(...salaries);
+    const spread = Math.max(100, dataMax - dataMin);
+    const axisMin = Math.max(0, dataMin - spread * .18);
+    const axisMax = dataMax + spread * .12;
+    const axisRange = Math.max(1, axisMax - axisMin);
     context.font = "10px 'DM Mono', monospace";
     context.textAlign = "right";
     for (let tick = 0; tick <= 4; tick += 1) {
@@ -113,21 +119,22 @@ function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number
       context.lineTo(width - 20, y);
       context.stroke();
       context.fillStyle = "#77736b";
-      context.fillText(`${Math.round(max * tick / 4).toLocaleString("ja-JP")}万`, left - 8, y + 3);
+      const tickValue = axisMin + axisRange * tick / 4;
+      context.fillText(`${Math.round(tickValue).toLocaleString("ja-JP")}万`, left - 8, y + 3);
     }
     context.strokeStyle = "#4a9eff";
     context.lineWidth = 2.5;
     context.beginPath();
     data.forEach((item, index) => {
-      const x = left + index * 56 + 28;
-      const y = top + chartHeight - item.salary / max * chartHeight;
+      const x = left + index * 68 + 34;
+      const y = top + chartHeight - (item.salary - axisMin) / axisRange * chartHeight;
       if (index) context.lineTo(x, y);
       else context.moveTo(x, y);
     });
     context.stroke();
     data.forEach((item, index) => {
-      const x = left + index * 56 + 28;
-      const y = top + chartHeight - item.salary / max * chartHeight;
+      const x = left + index * 68 + 34;
+      const y = top + chartHeight - (item.salary - axisMin) / axisRange * chartHeight;
       context.fillStyle = "#0a0a0a";
       context.strokeStyle = "#4a9eff";
       context.lineWidth = 2;
@@ -147,14 +154,14 @@ function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number
 function Charts({ result }: { result: CalculationResult }) {
   const data = result.projections;
   if (!data.length) return <p className="empty-note">就労終了年齢を超えているため、残余期間のチャートはありません。</p>;
-  const width = 74 + data.length * 56;
+  const width = 92 + data.length * 68;
   const max = Math.max(1, ...data.map((item) => item.balance));
   return (
     <div className="chart-scroll">
       <div className="chart-stage" style={{ width }}>
         <div className="chart-heading-row">
           <div><span className="eyebrow">INCOME CURVE</span><h4>年収推移</h4></div>
-          <span className="legend-dot blue">期待年収</span>
+          <span className="legend-dot blue">期待年収・拡大表示</span>
         </div>
         <SalaryCanvas data={data} width={width} />
         <div className="chart-heading-row asset-heading">
@@ -165,14 +172,14 @@ function Charts({ result }: { result: CalculationResult }) {
             <span className="legend-dot gold">運用益</span>
           </div>
         </div>
-        <div className="asset-chart" style={{ paddingLeft: 54, paddingRight: 20 }}>
+        <div className="asset-chart" style={{ paddingLeft: 64, paddingRight: 28 }}>
           {data.map((item) => (
             <div className="asset-column" key={item.age}>
               <span className="asset-total">{Math.round(item.balance).toLocaleString("ja-JP")}万</span>
               <div className="asset-bar" title={`${item.age}歳：${formatMan(item.balance)}`}>
-                <span className="asset-layer gain" style={{ height: Math.max(0, item.gains / max * 158) }} />
-                <span className="asset-layer reinvested" style={{ height: Math.max(0, item.reinvested / max * 158) }} />
-                <span className="asset-layer initial" style={{ height: Math.max(2, item.initialAssets / max * 158) }} />
+                <span className="asset-layer gain" style={{ height: Math.max(0, item.gains / max * 245) }} />
+                <span className="asset-layer reinvested" style={{ height: Math.max(0, item.reinvested / max * 245) }} />
+                <span className="asset-layer initial" style={{ height: Math.max(2, item.initialAssets / max * 245) }} />
               </div>
               {item.gains < 0 && <span className="loss-mark">LOSS</span>}
               <span className="age-label">{item.age}歳</span>
@@ -476,7 +483,7 @@ export default function HumanMarketCapApp() {
               </div>
             </fieldset>
             <div className="parameter-card two">
-              <div><span>給与成長ベース</span><strong>{formatPercent(appearance.salaryBase, 2)}</strong></div>
+              <div><span>給与成長（職業補正後）</span><strong>{formatPercent(appearance.salaryBase * job.appearanceMultiplier, 2)}</strong></div>
               <div><span>資産利回り</span><strong>{formatPercent(appearance.returnAdjustment, 1)}</strong></div>
             </div>
           </section>
@@ -506,7 +513,7 @@ export default function HumanMarketCapApp() {
                 <div><span>RISK</span><strong>{(job.careerRisk * 100).toFixed(1)}%</strong></div>
               </div>
               <div className="curve-preview"><span>WAGE CURVE PREVIEW</span><MiniCurve occupation={inputs.occupation} /></div>
-              <div className="risk-line"><span>主職{job.primaryEnd}歳まで / 転職後所得{Math.round(job.transitionIncomeRate * 100)}%</span><b className={`risk-badge risk-${job.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>{job.riskLabel}</b></div>
+              <div className="risk-line"><span>主職{job.primaryEnd}歳まで / 転職後{Math.round(job.transitionIncomeRate * 100)}% / 容姿×{job.appearanceMultiplier.toFixed(1)}</span><b className={`risk-badge risk-${job.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>{job.riskLabel}</b></div>
             </div>
           </section>
 
@@ -646,11 +653,11 @@ export default function HumanMarketCapApp() {
               <span className="eyebrow">ONE LAST THING</span>
               <h3>人生は、決算書ではありません。</h3>
               <p>でも、人間の価値と時価総額は一致しません。企業はお金を稼ぐのが目的ですが、人間の目的は、たぶんもっとややこしくて、もっと面白いものです。</p>
-              <p>死ぬときに口座残高が過去最高でも、あの世へ持ち越せるポイントは0。稼ぐのも、使うのも、生きるための手段です。</p>
-              <strong>この査定額より、今日をどう使うかのほうが大事です。</strong>
+              <p>死ぬときに口座残高が過去最高でも、あの世へ持ち越せるポイントは0。</p>
             </section>
 
             <button className="revise-button" type="button" onClick={() => { setDisplay(null); setRanking(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>条件を修正して再計算する</button>
+            <button type="button" className="x-share-button x-share-button-bottom" onClick={shareToX}><span>𝕏</span><strong>Xで査定サマリーを投稿</strong><b>→</b></button>
           </section>
         )}
 

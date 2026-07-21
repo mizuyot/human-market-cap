@@ -71,20 +71,20 @@ export const OCCUPATION_CATEGORIES = [
 ] as const satisfies readonly OccupationCategory[];
 
 const curve = {
-  financeElite: [[.06, .04, .02, .005], [-.01, -.025]],
-  financeStable: [[.04, .03, .015, .005], [-.008, -.02]],
-  professional: [[.04, .03, .01, .003], [-.01, -.025]],
-  tech: [[.05, .035, .015, .003], [-.015, -.03]],
-  stable: [[.03, .02, .01, .003], [-.008, -.015]],
-  service: [[.025, .015, .005, 0], [-.01, -.02]],
-  public: [[.02, .015, .01, .003], [0, -.008]],
-  independent: [[.04, .03, .01, .003], [-.01, -.025]],
-  founder: [[.07, .04, .01, 0], [-.02, -.04]],
-  entertainment: [[.08, .04, 0, -.04], [-.08, -.12]],
-  influencer: [[.10, .05, -.02, -.06], [-.10, -.15]],
-  athlete: [[.10, .05, 0, -.06], [-.12, -.18]],
-  nightlife: [[.08, .04, 0, -.04], [-.08, -.12]],
-  gambling: [[.06, .03, 0, -.02], [-.05, -.08]],
+  financeElite: [[.10, .065, .025, -.010], [-.040, -.070]],
+  financeStable: [[.065, .040, .015, -.005], [-.030, -.055]],
+  professional: [[.065, .045, .015, -.010], [-.035, -.060]],
+  tech: [[.085, .055, .015, -.020], [-.050, -.085]],
+  stable: [[.045, .030, .010, -.005], [-.030, -.050]],
+  service: [[.040, .025, .005, -.015], [-.040, -.065]],
+  public: [[.030, .022, .012, 0], [-.015, -.035]],
+  independent: [[.075, .050, .015, -.015], [-.050, -.080]],
+  founder: [[.140, .080, .020, -.040], [-.080, -.140]],
+  entertainment: [[.180, .100, -.030, -.120], [-.180, -.280]],
+  influencer: [[.220, .120, -.080, -.160], [-.220, -.320]],
+  athlete: [[.200, .100, -.050, -.150], [-.250, -.380]],
+  nightlife: [[.180, .090, -.040, -.120], [-.180, -.280]],
+  gambling: [[.120, .065, -.020, -.080], [-.120, -.200]],
 } as const;
 
 function occupation(
@@ -141,9 +141,9 @@ export const OCCUPATIONS = [
   occupation("influencer", "entertainment", "インフルエンサー・配信者", 65, 50, 32, .028, 1.6, .080, .40, "EXTREME", "influencer"),
   occupation("athlete", "entertainment", "プロスポーツ選手", 65, 40, 29, .025, 1.0, .050, .55, "EXTREME", "athlete"),
 
-  occupation("host", "nightlife", "ホスト", 65, 45, 30, .018, 2.0, .080, .45, "EXTREME", "nightlife"),
-  occupation("hostess", "nightlife", "ホステス・キャバクラ", 65, 45, 28, .018, 2.0, .070, .45, "EXTREME", "nightlife"),
-  occupation("clubOwner", "nightlife", "クラブママ・夜職経営", 70, 70, 52, .022, 1.2, .040, .55, "HIGH", "independent"),
+  occupation("host", "nightlife", "ホスト", 65, 45, 30, .018, 8.0, .080, .45, "EXTREME", "nightlife"),
+  occupation("hostess", "nightlife", "ホステス・キャバクラ", 65, 45, 28, .018, 8.0, .070, .45, "EXTREME", "nightlife"),
+  occupation("clubOwner", "nightlife", "クラブママ・夜職経営", 70, 70, 52, .022, 4.0, .040, .55, "HIGH", "independent"),
 
   occupation("professionalGambler", "gambling", "プロギャンブラー（ポーカー・競馬・スロット等）", 65, 55, 38, .037, .1, .085, .40, "EXTREME", "gambling"),
 ] as const;
