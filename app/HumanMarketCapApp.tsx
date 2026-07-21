@@ -83,8 +83,49 @@ function MiniCurve({ occupation }: { occupation: OccupationKey }) {
   );
 }
 
-function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number }) {
+function compactMoney(value: number): string {
+  const absolute = Math.abs(value);
+  const sign = value < 0 ? "−" : "";
+  if (absolute >= 10000) return `${sign}${(absolute / 10000).toFixed(absolute >= 100000 ? 0 : 1)}億`;
+  return `${sign}${Math.round(absolute).toLocaleString("ja-JP")}万`;
+}
+
+function formatShareScore(value: number): string {
+  if (Math.abs(value) < 10000) return formatMan(value);
+  const amount = (value / 10000).toFixed(1).replace(/\.0$/, "");
+  return `${amount}億円`;
+}
+
+function compactProjections(data: AnnualProjection[], maxPoints = 6): AnnualProjection[] {
+  if (data.length <= maxPoints) return data;
+  const last = data.length - 1;
+  const selected = Array.from({ length: maxPoints }, (_, index) => Math.round(index * last / (maxPoints - 1)));
+  const peakIndex = data.reduce((best, item, index) => item.salary > data[best].salary ? index : best, 0);
+  if (!selected.includes(peakIndex)) {
+    const replaceAt = selected
+      .map((index, position) => ({ distance: Math.abs(index - peakIndex), position }))
+      .filter(({ position }) => position > 0 && position < selected.length - 1)
+      .sort((a, b) => a.distance - b.distance)[0]?.position;
+    if (replaceAt !== undefined) selected[replaceAt] = peakIndex;
+  }
+  return [...new Set(selected)].sort((a, b) => a - b).map((index) => data[index]);
+}
+
+function SalaryCanvas({ data }: { data: AnnualProjection[] }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const [width, setWidth] = useState(420);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    const container = canvas?.parentElement;
+    if (!container) return;
+    const update = () => setWidth(Math.max(280, Math.floor(container.clientWidth)));
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas || !data.length) return;
@@ -98,7 +139,8 @@ function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number
     if (!context) return;
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     context.clearRect(0, 0, width, height);
-    const left = 64;
+    const left = 58;
+    const right = 16;
     const top = 48;
     const bottom = 44;
     const chartHeight = height - top - bottom;
@@ -116,7 +158,7 @@ function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number
       context.strokeStyle = "#292722";
       context.beginPath();
       context.moveTo(left, y);
-      context.lineTo(width - 20, y);
+      context.lineTo(width - right, y);
       context.stroke();
       context.fillStyle = "#77736b";
       const tickValue = axisMin + axisRange * tick / 4;
@@ -126,14 +168,14 @@ function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number
     context.lineWidth = 2.5;
     context.beginPath();
     data.forEach((item, index) => {
-      const x = left + index * 68 + 34;
+      const x = left + (width - left - right) * index / Math.max(1, data.length - 1);
       const y = top + chartHeight - (item.salary - axisMin) / axisRange * chartHeight;
       if (index) context.lineTo(x, y);
       else context.moveTo(x, y);
     });
     context.stroke();
     data.forEach((item, index) => {
-      const x = left + index * 68 + 34;
+      const x = left + (width - left - right) * index / Math.max(1, data.length - 1);
       const y = top + chartHeight - (item.salary - axisMin) / axisRange * chartHeight;
       context.fillStyle = "#0a0a0a";
       context.strokeStyle = "#4a9eff";
@@ -145,25 +187,24 @@ function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number
       context.fillStyle = "#b8d6ff";
       context.font = "10px 'DM Mono', monospace";
       context.textAlign = "center";
-      context.fillText(`${Math.round(item.salary).toLocaleString("ja-JP")}万`, x, Math.max(12, y - 10 - (index % 2) * 11));
+      context.fillText(compactMoney(item.salary), x, Math.max(12, y - 10 - (index % 2) * 11));
     });
   }, [data, width]);
   return <canvas ref={ref} role="img" aria-label="年齢別の期待年収推移" />;
 }
 
 function Charts({ result }: { result: CalculationResult }) {
-  const data = result.projections;
+  const data = compactProjections(result.projections);
   if (!data.length) return <p className="empty-note">就労終了年齢を超えているため、残余期間のチャートはありません。</p>;
-  const width = 92 + data.length * 68;
   const max = Math.max(1, ...data.map((item) => item.balance));
   return (
     <div className="chart-scroll">
-      <div className="chart-stage" style={{ width }}>
+      <div className="chart-stage">
         <div className="chart-heading-row">
           <div><span className="eyebrow">INCOME CURVE</span><h4>年収推移</h4></div>
           <span className="legend-dot blue">期待年収・拡大表示</span>
         </div>
-        <SalaryCanvas data={data} width={width} />
+        <SalaryCanvas data={data} />
         <div className="chart-heading-row asset-heading">
           <div><span className="eyebrow">ASSET BUILD-UP</span><h4>資産推移</h4></div>
           <div className="asset-legend">
@@ -172,10 +213,10 @@ function Charts({ result }: { result: CalculationResult }) {
             <span className="legend-dot gold">運用益</span>
           </div>
         </div>
-        <div className="asset-chart" style={{ paddingLeft: 64, paddingRight: 28 }}>
+        <div className="asset-chart">
           {data.map((item) => (
             <div className="asset-column" key={item.age}>
-              <span className="asset-total">{Math.round(item.balance).toLocaleString("ja-JP")}万</span>
+              <span className="asset-total">{compactMoney(item.balance)}</span>
               <div className="asset-bar" title={`${item.age}歳：${formatMan(item.balance)}`}>
                 <span className="asset-layer gain" style={{ height: Math.max(0, item.gains / max * 245) }} />
                 <span className="asset-layer reinvested" style={{ height: Math.max(0, item.reinvested / max * 245) }} />
@@ -275,6 +316,98 @@ function QuizReview({ reviews }: { reviews: QuizReviewItem[] }) {
   );
 }
 
+interface ShareCardPayload {
+  score: string;
+  tier: string;
+  deviation: string;
+  occupation: string;
+  url: string;
+}
+
+function fitCanvasText(context: CanvasRenderingContext2D, text: string, maxWidth: number, startingSize: number, minimumSize: number) {
+  let size = startingSize;
+  while (size > minimumSize) {
+    context.font = `700 ${size}px "Noto Serif JP", serif`;
+    if (context.measureText(text).width <= maxWidth) break;
+    size -= 2;
+  }
+  return size;
+}
+
+function createShareCardCanvas(payload: ShareCardPayload): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200;
+  canvas.height = 630;
+  const context = canvas.getContext("2d");
+  if (!context) return canvas;
+
+  context.fillStyle = "#0a0a0a";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  const glow = context.createRadialGradient(1060, 40, 0, 1060, 40, 600);
+  glow.addColorStop(0, "rgba(212,168,67,.24)");
+  glow.addColorStop(1, "rgba(212,168,67,0)");
+  context.fillStyle = glow;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = "#6b5527";
+  context.lineWidth = 3;
+  context.strokeRect(29, 29, 1142, 572);
+  context.fillStyle = "#d4a843";
+  context.fillRect(29, 29, 10, 572);
+
+  context.fillStyle = "#d4a843";
+  context.font = "500 24px 'DM Mono', monospace";
+  context.fillText("HMC / HUMAN MARKET CAPITAL", 78, 84);
+  context.fillStyle = "#8d8980";
+  context.font = "500 25px 'Noto Serif JP', serif";
+  context.fillText("あなたの人間時価総額", 78, 154);
+
+  context.fillStyle = "#f0d487";
+  const scoreSize = fitCanvasText(context, payload.score, 1035, 104, 64);
+  context.font = `700 ${scoreSize}px "Noto Serif JP", serif`;
+  context.fillText(payload.score, 72, 286);
+
+  context.fillStyle = "#d4a843";
+  context.fillRect(76, 337, 208, 76);
+  context.fillStyle = "#15110a";
+  context.font = "700 39px 'DM Mono', monospace";
+  context.fillText(`${payload.tier} TIER`, 102, 388);
+  context.fillStyle = "#f2eee5";
+  context.font = "700 42px 'Noto Serif JP', serif";
+  context.fillText(`偏差値 ${payload.deviation}`, 326, 389);
+
+  context.fillStyle = "#aaa59c";
+  const occupationSize = fitCanvasText(context, payload.occupation, 1040, 30, 22);
+  context.font = `600 ${occupationSize}px "Noto Serif JP", serif`;
+  context.fillText(payload.occupation, 78, 464);
+  context.strokeStyle = "#38342d";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(78, 496);
+  context.lineTo(1122, 496);
+  context.stroke();
+
+  context.fillStyle = "#f2eee5";
+  context.font = "600 27px 'Noto Serif JP', serif";
+  context.fillText("あなたも算出してみる →", 78, 548);
+  context.fillStyle = "#9c978e";
+  context.font = "500 19px 'DM Mono', monospace";
+  context.fillText(payload.url, 78, 581);
+  context.fillStyle = "#d4a843";
+  context.textAlign = "right";
+  context.font = "500 22px 'Noto Serif JP', serif";
+  context.fillText("#人間時価総額", 1120, 578);
+  context.textAlign = "left";
+  return canvas;
+}
+
+function canvasToPngFile(canvas: HTMLCanvasElement): File {
+  const dataUrl = canvas.toDataURL("image/png");
+  const binary = atob(dataUrl.split(",")[1]);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return new File([bytes], "human-market-cap-result.png", { type: "image/png" });
+}
+
 export default function HumanMarketCapApp() {
   const [inputs, setInputs] = useState<InputState>(DEFAULTS);
   const [questions, setQuestions] = useState<PublicQuizSet[]>([]);
@@ -288,6 +421,9 @@ export default function HumanMarketCapApp() {
   const [calculating, setCalculating] = useState(false);
   const [display, setDisplay] = useState<DisplayResult | null>(null);
   const [ranking, setRanking] = useState<RankingSnapshot | null>(null);
+  const [shareImageUrl, setShareImageUrl] = useState("");
+  const [sharingImage, setSharingImage] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState("");
   const resultRef = useRef<HTMLElement>(null);
 
   const education = useMemo(() => getEducation(inputs.education), [inputs.education]);
@@ -408,7 +544,29 @@ export default function HumanMarketCapApp() {
   const activeQuiz = questions[quizIndex];
   const activePart = activeQuiz && (quizPhase === "A" || quizPhase === "B") ? activeQuiz[quizPhase.toLowerCase() as "a" | "b"] : null;
 
-  function shareToX() {
+  useEffect(() => {
+    if (!display || !result) {
+      setShareImageUrl("");
+      return;
+    }
+    let active = true;
+    const render = async () => {
+      await document.fonts?.ready;
+      if (!active) return;
+      const canvas = createShareCardCanvas({
+        score: formatShareScore(result.marketCapMan),
+        tier,
+        deviation: ranking ? ranking.deviation.toFixed(1) : "—",
+        occupation: result.occupation.label,
+        url: `${window.location.host}${window.location.pathname}`,
+      });
+      setShareImageUrl(canvas.toDataURL("image/png"));
+    };
+    void render();
+    return () => { active = false; };
+  }, [display, ranking, result, tier]);
+
+  function shareText() {
     if (!display || !result) return;
     const position = ranking
       ? `順位 ${ranking.rank}/${ranking.total}｜偏差値 ${ranking.deviation.toFixed(1)}｜上位${ranking.topPercent.toFixed(1)}%`
@@ -423,7 +581,40 @@ export default function HumanMarketCapApp() {
       "#人間時価総額 #HMC",
       `${window.location.origin}${window.location.pathname}`,
     ].join("\n");
-    window.open(`https://x.com/intent/post?text=${encodeURIComponent(summary)}`, "_blank", "noopener,noreferrer");
+    return summary;
+  }
+
+  async function shareResultImage() {
+    if (!display || !result) return;
+    setSharingImage(true);
+    setShareFeedback("");
+    try {
+      const canvas = createShareCardCanvas({
+        score: formatShareScore(result.marketCapMan),
+        tier,
+        deviation: ranking ? ranking.deviation.toFixed(1) : "—",
+        occupation: result.occupation.label,
+        url: `${window.location.host}${window.location.pathname}`,
+      });
+      const file = canvasToPngFile(canvas);
+      const summary = shareText() ?? "#人間時価総額";
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], text: summary });
+        setShareFeedback("結果カードを共有しました。");
+        return;
+      }
+      const download = document.createElement("a");
+      download.href = canvas.toDataURL("image/png");
+      download.download = file.name;
+      download.click();
+      window.open(`https://x.com/intent/post?text=${encodeURIComponent(summary)}`, "_blank", "noopener,noreferrer");
+      setShareFeedback("結果カードを保存しました。開いたXの投稿画面へ画像を添付してください。");
+    } catch (shareError) {
+      if (shareError instanceof DOMException && shareError.name === "AbortError") return;
+      setShareFeedback("共有を開始できませんでした。もう一度お試しください。");
+    } finally {
+      setSharingImage(false);
+    }
   }
 
   return (
@@ -586,13 +777,18 @@ export default function HumanMarketCapApp() {
             </section>
 
             <section className="result-card share-card">
-              <div className="share-summary">
-                <span>SHARE SNAPSHOT</span>
-                <div><strong>{formatMan(result.marketCapMan)}</strong><b>{tier} TIER</b></div>
-                <p>{result.occupation.label}｜金融リテラシー {display.quizCorrect}/5点</p>
-                {ranking && <p>第{ranking.rank}位 / {ranking.total}人・偏差値{ranking.deviation.toFixed(1)}・上位{ranking.topPercent.toFixed(1)}%</p>}
+              <div className="share-card-heading">
+                <span>SHARE CARD</span>
+                <strong>結果カードができました</strong>
               </div>
-              <button type="button" className="x-share-button" onClick={shareToX}><span>𝕏</span><strong>Xで査定サマリーを共有</strong><b>→</b></button>
+              <div className="share-image-frame">
+                {shareImageUrl
+                  ? <img src={shareImageUrl} alt={`人間時価総額 ${formatShareScore(result.marketCapMan)}、${tier} TIER${ranking ? `、偏差値${ranking.deviation.toFixed(1)}` : ""}のシェアカード`} />
+                  : <div className="share-image-loading"><span />結果カードを生成しています…</div>}
+              </div>
+              <button type="button" className="x-share-button" onClick={shareResultImage} disabled={sharingImage}><span>𝕏</span><strong>{sharingImage ? "シェア画像を準備中…" : "Xで結果カードをシェア"}</strong><b>→</b></button>
+              <p className="share-helper">スマホは共有先でXを選択。未対応端末では画像を保存してXを開きます。</p>
+              {shareFeedback && <p className="share-feedback" role="status">{shareFeedback}</p>}
             </section>
 
             {display.previousScoreYen !== null && (
@@ -609,7 +805,7 @@ export default function HumanMarketCapApp() {
               <article className="result-card kpi-card"><span className="kpi-icon gold">02</span><p>資産所得総額</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の計算トレース"><p>初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)} に年収の{Math.round(display.inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用。</p></Trace></article>
             </section>
 
-            <section className="result-card charts-card"><div className="section-title"><div><span className="eyebrow">LIFETIME PROJECTION</span><h3>生涯キャッシュフロー</h3></div><span className="scroll-hint">← SWIPE →</span></div><Charts result={result} /></section>
+            <section className="result-card charts-card"><div className="section-title"><div><span className="eyebrow">LIFETIME PROJECTION</span><h3>生涯キャッシュフロー</h3></div><span className="scroll-hint">代表年齢を表示</span></div><Charts result={result} /></section>
 
             <section className="result-card assumptions-card">
               <div className="section-title"><div><span className="eyebrow">APPLIED ASSUMPTIONS</span><h3>試算の前提条件</h3></div></div>
@@ -653,11 +849,11 @@ export default function HumanMarketCapApp() {
               <span className="eyebrow">ONE LAST THING</span>
               <h3>人生は、決算書ではありません。</h3>
               <p>でも、人間の価値と時価総額は一致しません。企業はお金を稼ぐのが目的ですが、人間の目的は、たぶんもっとややこしくて、もっと面白いものです。</p>
-              <p>死ぬときに口座残高が過去最高でも、あの世へ持ち越せるポイントは0。</p>
+              <p>死ぬときに口座残高が過去最高でも、あの世へ持ち込めないのだから。</p>
             </section>
 
             <button className="revise-button" type="button" onClick={() => { setDisplay(null); setRanking(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>条件を修正して再計算する</button>
-            <button type="button" className="x-share-button x-share-button-bottom" onClick={shareToX}><span>𝕏</span><strong>Xで査定サマリーを投稿</strong><b>→</b></button>
+            <button type="button" className="x-share-button x-share-button-bottom" onClick={shareResultImage} disabled={sharingImage}><span>𝕏</span><strong>Xで結果カードをシェア</strong><b>→</b></button>
           </section>
         )}
 

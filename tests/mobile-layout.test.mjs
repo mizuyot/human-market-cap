@@ -23,6 +23,14 @@ test("small screens keep controls readable and responsive", async () => {
   assert.match(css, /\.choice-grid label,[\s\S]*?min-height:\s*54px/);
   assert.match(css, /@media \(max-width:\s*420px\)/);
   assert.match(css, /@media \(max-width:\s*340px\)/);
-  assert.match(css, /-webkit-overflow-scrolling:\s*touch/);
-  assert.match(css, /scroll-snap-type:\s*x proximity/);
+  assert.match(css, /\.chart-scroll\s*\{[^}]*overflow:\s*hidden/);
+  assert.match(css, /\.asset-column\s*\{[^}]*flex:\s*1 1 0/);
+});
+
+test("lifetime charts use a compact set of representative ages", async () => {
+  const source = await readFile(new URL("app/HumanMarketCapApp.tsx", appRoot), "utf8");
+
+  assert.match(source, /compactProjections\(data: AnnualProjection\[\], maxPoints = 6\)/);
+  assert.doesNotMatch(source, /92 \+ data\.length \* 68/);
+  assert.match(source, /代表年齢を表示/);
 });
