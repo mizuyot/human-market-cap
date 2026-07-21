@@ -143,7 +143,7 @@ function SalaryCanvas({ data, width }: { data: AnnualProjection[]; width: number
       context.fill();
       context.stroke();
       context.fillStyle = "#b8d6ff";
-      context.font = "9px 'DM Mono', monospace";
+      context.font = "10px 'DM Mono', monospace";
       context.textAlign = "center";
       context.fillText(`${Math.round(item.salary).toLocaleString("ja-JP")}万`, x, Math.max(12, y - 10 - (index % 2) * 11));
     });
@@ -194,7 +194,7 @@ function Charts({ result }: { result: CalculationResult }) {
 function Histogram({ ranking, score }: { ranking: RankingSnapshot; score: number }) {
   const span = Math.max(1, ranking.maxScore - ranking.minScore);
   const peak = Math.max(...ranking.bins, 1);
-  const marker = Math.min(100, Math.max(0, (score - ranking.minScore) / span * 100));
+  const marker = Math.min(97, Math.max(3, (score - ranking.minScore) / span * 100));
   return (
     <div className="histogram-wrap">
       <div className="you-marker" style={{ left: `${marker}%` }}><span>YOU</span></div>
