@@ -1,156 +1,317 @@
 export interface EducationParam {
-  key: string; label: string; multiplier: number; salaryAdj: number;
-  nw: number; nwSalary: number; nwReturn: number;
+  key: string;
+  label: string;
+  multiplier: number;
+  nw: number;
 }
 
 export interface AppearanceParam {
-  key: string; label: string; salaryBase: number; returnBase: number;
+  key: string;
+  label: string;
+  salaryBase: number;
+}
+
+export interface OccupationCategory {
+  key: string;
+  label: string;
 }
 
 export interface OccupationParam {
-  key: string; label: string; retirement: number; peak: number; baseReturn: number;
-  appearanceMultiplier: number; careerRisk: number; riskLabel: string;
-  rampUp: [number, number, number, number]; rampDown: [number, number];
+  key: string;
+  category: string;
+  label: string;
+  retirement: number;
+  primaryEnd: number;
+  peak: number;
+  baseReturn: number;
+  appearanceMultiplier: number;
+  careerRisk: number;
+  transitionIncomeRate: number;
+  riskLabel: string;
+  rampUp: [number, number, number, number];
+  rampDown: [number, number];
 }
 
 export const EDUCATIONS = [
-  { key: "top100", label: "海外有名大学（Top100圏）", multiplier: 1.50, salaryAdj: .12, nw: 92, nwSalary: .028, nwReturn: .016 },
-  { key: "imperialDoctor", label: "旧帝大 博士課程", multiplier: 1.30, salaryAdj: .04, nw: 85, nwSalary: .020, nwReturn: .012 },
-  { key: "imperialMaster", label: "旧帝大 修士", multiplier: 1.20, salaryAdj: .03, nw: 80, nwSalary: .016, nwReturn: .010 },
-  { key: "sokeiMaster", label: "早慶等 修士", multiplier: 1.15, salaryAdj: .025, nw: 75, nwSalary: .013, nwReturn: .008 },
-  { key: "eliteBachelor", label: "旧帝大・早慶 学部", multiplier: 1.10, salaryAdj: .02, nw: 70, nwSalary: .010, nwReturn: .006 },
-  { key: "overseasOther", label: "海外その他大学", multiplier: 1.05, salaryAdj: .02, nw: 55, nwSalary: .005, nwReturn: .002 },
-  { key: "march", label: "MARCH・上位国公立", multiplier: 1.05, salaryAdj: .01, nw: 60, nwSalary: .006, nwReturn: .003 },
-  { key: "university", label: "大学卒（その他）", multiplier: 1.00, salaryAdj: 0, nw: 50, nwSalary: .003, nwReturn: .001 },
-  { key: "vocational", label: "専門学校・短大卒", multiplier: .92, salaryAdj: -.01, nw: 35, nwSalary: .001, nwReturn: 0 },
-  { key: "highSchool", label: "高卒", multiplier: .85, salaryAdj: -.02, nw: 25, nwSalary: 0, nwReturn: 0 },
-  { key: "middleSchool", label: "中卒", multiplier: .75, salaryAdj: -.03, nw: 15, nwSalary: 0, nwReturn: 0 },
+  { key: "top100", label: "海外有名大学（Top100圏）", multiplier: 1.060, nw: 95 },
+  { key: "tokyoKyotoDoctor", label: "東京大学・京都大学 博士", multiplier: 1.055, nw: 93 },
+  { key: "tokyoKyotoMaster", label: "東京大学・京都大学 修士", multiplier: 1.050, nw: 90 },
+  { key: "tokyoKyotoBachelor", label: "東京大学・京都大学 学部", multiplier: 1.045, nw: 88 },
+  { key: "eliteDoctor", label: "一橋・東京科学・その他旧帝大 博士", multiplier: 1.040, nw: 85 },
+  { key: "eliteMaster", label: "一橋・東京科学・その他旧帝大 修士", multiplier: 1.035, nw: 82 },
+  { key: "eliteBachelor", label: "一橋・東京科学・その他旧帝大 学部", multiplier: 1.030, nw: 80 },
+  { key: "sokeiGraduate", label: "早稲田・慶應 大学院", multiplier: 1.025, nw: 77 },
+  { key: "sokeiBachelor", label: "早稲田・慶應 学部", multiplier: 1.020, nw: 74 },
+  { key: "upperUniversity", label: "上位国公立・上智・東京理科", multiplier: 1.015, nw: 68 },
+  { key: "march", label: "MARCH・関関同立", multiplier: 1.010, nw: 61 },
+  { key: "university", label: "大学卒（その他）", multiplier: 1.000, nw: 50 },
+  { key: "vocational", label: "専門学校・短大卒", multiplier: .995, nw: 42 },
+  { key: "highSchool", label: "高卒", multiplier: .990, nw: 35 },
+  { key: "middleSchool", label: "中卒", multiplier: .980, nw: 25 },
 ] as const satisfies readonly EducationParam[];
 
 export const APPEARANCES = [
-  { key: "top10", label: "上位10%", salaryBase: .04, returnBase: .015 },
-  { key: "top35", label: "上位35%", salaryBase: .02, returnBase: .008 },
-  { key: "middle", label: "中間", salaryBase: 0, returnBase: 0 },
-  { key: "lower35", label: "下位35%", salaryBase: -.01, returnBase: -.003 },
-  { key: "lower10", label: "下位10%", salaryBase: -.02, returnBase: -.008 },
+  { key: "top10", label: "上位10%", salaryBase: .006 },
+  { key: "top35", label: "上位35%", salaryBase: .003 },
+  { key: "middle", label: "中間", salaryBase: 0 },
+  { key: "lower35", label: "下位35%", salaryBase: -.002 },
+  { key: "lower10", label: "下位10%", salaryBase: -.004 },
 ] as const satisfies readonly AppearanceParam[];
 
+export const OCCUPATION_CATEGORIES = [
+  { key: "finance", label: "金融・コンサル" },
+  { key: "professional", label: "医療・士業" },
+  { key: "knowledge", label: "IT・研究・クリエイティブ" },
+  { key: "employee", label: "会社員・公共・サービス" },
+  { key: "independent", label: "経営・独立" },
+  { key: "entertainment", label: "芸能・スポーツ" },
+  { key: "nightlife", label: "夜職" },
+  { key: "gambling", label: "ギャンブルプロ" },
+] as const satisfies readonly OccupationCategory[];
+
 const curve = {
-  elite: [[.08,.06,.04,.018],[-.02,-.05]], stable: [[.04,.032,.022,.01],[-.008,-.025]],
-  independent: [[.06,.045,.025,.008],[-.02,-.05]], volatile: [[.09,.05,.015,-.025],[-.07,-.12]],
-  extreme: [[.14,.09,.02,-.06],[-.14,-.22]], public: [[.026,.022,.016,.008],[-.004,-.012]],
+  financeElite: [[.06, .04, .02, .005], [-.01, -.025]],
+  financeStable: [[.04, .03, .015, .005], [-.008, -.02]],
+  professional: [[.04, .03, .01, .003], [-.01, -.025]],
+  tech: [[.05, .035, .015, .003], [-.015, -.03]],
+  stable: [[.03, .02, .01, .003], [-.008, -.015]],
+  service: [[.025, .015, .005, 0], [-.01, -.02]],
+  public: [[.02, .015, .01, .003], [0, -.008]],
+  independent: [[.04, .03, .01, .003], [-.01, -.025]],
+  founder: [[.07, .04, .01, 0], [-.02, -.04]],
+  entertainment: [[.08, .04, 0, -.04], [-.08, -.12]],
+  influencer: [[.10, .05, -.02, -.06], [-.10, -.15]],
+  athlete: [[.10, .05, 0, -.06], [-.12, -.18]],
+  nightlife: [[.08, .04, 0, -.04], [-.08, -.12]],
+  gambling: [[.06, .03, 0, -.02], [-.05, -.08]],
+  slot: [[.04, .01, -.02, -.04], [-.08, -.12]],
 } as const;
 
-function occupation(key: string, label: string, retirement: number, peak: number, baseReturn: number, appearanceMultiplier: number, careerRisk: number, riskLabel: string, wage: keyof typeof curve): OccupationParam {
-  return { key, label, retirement, peak, baseReturn, appearanceMultiplier, careerRisk, riskLabel, rampUp: [...curve[wage][0]], rampDown: [...curve[wage][1]] };
+function occupation(
+  key: string,
+  category: string,
+  label: string,
+  retirement: number,
+  primaryEnd: number,
+  peak: number,
+  baseReturn: number,
+  appearanceMultiplier: number,
+  careerRisk: number,
+  transitionIncomeRate: number,
+  riskLabel: string,
+  wage: keyof typeof curve,
+): OccupationParam {
+  return {
+    key, category, label, retirement, primaryEnd, peak, baseReturn,
+    appearanceMultiplier, careerRisk, transitionIncomeRate, riskLabel,
+    rampUp: [...curve[wage][0]], rampDown: [...curve[wage][1]],
+  };
 }
 
 export const OCCUPATIONS = [
-  occupation("fund", "ヘッジファンド・PEファンド", 55, 42, .05, .5, .12, "VERY HIGH", "elite"),
-  occupation("finance", "大手金融・コンサル・外資", 60, 45, .045, 1.5, .05, "MID", "elite"),
-  occupation("poker", "プロポーカー", 55, 38, .045, .2, .25, "VERY HIGH", "volatile"),
-  occupation("betting", "競馬・スポーツベット", 60, 45, .04, .1, .20, "VERY HIGH", "volatile"),
-  occupation("listed", "大手企業（上場）", 60, 55, .035, .8, .02, "LOW", "stable"),
-  occupation("freelance", "中堅・フリーランス", 60, 45, .035, 1, .08, "MID", "independent"),
-  occupation("selfEmployed", "自営業", 65, 50, .032, 1.2, .10, "HIGH", "independent"),
-  occupation("founder", "起業家・経営者", 70, 55, .03, 1.3, .20, "VERY HIGH", "elite"),
-  occupation("entertainment", "芸能（俳優・タレント等）", 55, 32, .03, 3, .20, "EXTREME", "extreme"),
-  occupation("athlete", "スポーツ選手（プロ）", 38, 27, .028, 1.8, .18, "EXTREME", "extreme"),
-  occupation("sme", "中小企業", 60, 50, .028, .7, .08, "MID-LOW", "stable"),
-  occupation("public", "公務員", 60, 55, .025, .2, .01, "VERY LOW", "public"),
-  occupation("slot", "スロットプロ", 45, 32, .025, .1, .40, "EXTREME", "extreme"),
-  occupation("nonRegular", "非正規雇用", 60, 40, .02, 1, .15, "HIGH", "stable"),
-  occupation("professional", "医師・弁護士・会計士", 65, 50, .015, .3, .02, "LOW", "independent"),
-  occupation("host", "ホスト", 35, 28, .01, 2.8, .30, "EXTREME", "extreme"),
-  occupation("hostess", "ホステス・キャバクラ", 32, 25, .01, 3, .25, "EXTREME", "extreme"),
-  occupation("clubOwner", "クラブ ママ・経営", 65, 50, .01, 1.5, .12, "HIGH", "independent"),
+  occupation("fund", "finance", "ヘッジファンド・PE", 65, 60, 42, .040, .3, .030, .70, "HIGH", "financeElite"),
+  occupation("investmentBank", "finance", "投資銀行・マーケット・トレーダー", 65, 60, 43, .038, .5, .025, .70, "HIGH", "financeElite"),
+  occupation("bankFinance", "finance", "銀行・証券・保険", 65, 65, 52, .032, .5, .010, .75, "LOW", "financeStable"),
+  occupation("consultant", "finance", "戦略・総合・ITコンサルタント", 67, 65, 47, .033, .9, .020, .70, "MID", "financeElite"),
+
+  occupation("doctor", "professional", "医師", 70, 70, 55, .025, .3, .004, .80, "LOW", "professional"),
+  occupation("dentist", "professional", "歯科医師", 70, 70, 50, .025, .5, .015, .70, "MID-LOW", "independent"),
+  occupation("lawyer", "professional", "弁護士", 70, 70, 52, .028, .6, .015, .70, "MID-LOW", "professional"),
+  occupation("accountant", "professional", "会計士・税理士", 70, 70, 55, .028, .4, .010, .75, "LOW", "professional"),
+  occupation("medicalSpecialist", "professional", "薬剤師・看護師・医療専門職", 67, 65, 50, .023, .3, .008, .75, "LOW", "stable"),
+
+  occupation("software", "knowledge", "ソフトウェア・AIエンジニア", 67, 65, 45, .032, .4, .015, .65, "MID-LOW", "tech"),
+  occupation("productData", "knowledge", "プロダクト・データ・IT専門職", 67, 65, 48, .032, .7, .015, .70, "MID-LOW", "tech"),
+  occupation("researcher", "knowledge", "研究者・大学教員", 70, 70, 55, .025, .2, .010, .70, "LOW", "professional"),
+  occupation("creative", "knowledge", "デザイナー・編集・ライター", 67, 65, 42, .026, 1.0, .030, .55, "HIGH", "independent"),
+
+  occupation("listedManager", "employee", "上場企業 管理職・高度専門職", 65, 65, 55, .030, .6, .008, .75, "LOW", "stable"),
+  occupation("listedGeneral", "employee", "上場企業 一般社員", 65, 65, 55, .028, .5, .008, .75, "LOW", "stable"),
+  occupation("sme", "employee", "中小企業 事務・営業職", 65, 65, 53, .025, .5, .012, .65, "MID-LOW", "stable"),
+  occupation("skilled", "employee", "製造・建設・物流・技能職", 65, 65, 52, .024, .3, .015, .65, "MID-LOW", "stable"),
+  occupation("service", "employee", "小売・飲食・宿泊・介護サービス", 65, 65, 48, .022, .8, .020, .60, "MID", "service"),
+  occupation("public", "employee", "公務員", 65, 65, 60, .023, .2, .002, .80, "VERY LOW", "public"),
+  occupation("teacher", "employee", "教員・教育職", 65, 65, 55, .023, .4, .006, .75, "LOW", "public"),
+
+  occupation("founder", "independent", "スタートアップ起業家", 70, 70, 50, .030, 1.0, .045, .55, "VERY HIGH", "founder"),
+  occupation("businessOwner", "independent", "安定事業の経営者・自営業", 70, 70, 55, .028, 1.0, .025, .65, "HIGH", "independent"),
+  occupation("freelancer", "independent", "高スキルフリーランス", 70, 67, 50, .030, .8, .025, .60, "HIGH", "independent"),
+
+  occupation("entertainment", "entertainment", "俳優・タレント・音楽家", 65, 55, 35, .025, 2.0, .070, .45, "EXTREME", "entertainment"),
+  occupation("influencer", "entertainment", "インフルエンサー・配信者", 65, 50, 32, .028, 1.6, .080, .40, "EXTREME", "influencer"),
+  occupation("athlete", "entertainment", "プロスポーツ選手", 65, 40, 29, .025, 1.0, .050, .55, "EXTREME", "athlete"),
+
+  occupation("host", "nightlife", "ホスト", 65, 45, 30, .018, 2.0, .080, .45, "EXTREME", "nightlife"),
+  occupation("hostess", "nightlife", "ホステス・キャバクラ", 65, 45, 28, .018, 2.0, .070, .45, "EXTREME", "nightlife"),
+  occupation("clubOwner", "nightlife", "クラブママ・夜職経営", 70, 70, 52, .022, 1.2, .040, .55, "HIGH", "independent"),
+
+  occupation("poker", "gambling", "プロポーカー", 65, 55, 38, .040, .1, .080, .40, "VERY HIGH", "gambling"),
+  occupation("betting", "gambling", "競馬・スポーツベット", 65, 60, 45, .035, .1, .070, .40, "VERY HIGH", "gambling"),
+  occupation("slot", "gambling", "スロットプロ", 65, 50, 32, .030, .1, .100, .35, "EXTREME", "slot"),
 ] as const;
 
 export type EducationKey = typeof EDUCATIONS[number]["key"];
 export type AppearanceKey = typeof APPEARANCES[number]["key"];
 export type OccupationKey = typeof OCCUPATIONS[number]["key"];
+export type OccupationCategoryKey = typeof OCCUPATION_CATEGORIES[number]["key"];
 
-export interface QuizQuestion { id: string; question: string; options: string[]; answer: number; explanation: string; }
-const quiz = (id: string, question: string, options: string[], answer: number, explanation: string): QuizQuestion => ({ id, question, options, answer, explanation });
-
-export const QUIZ_BANK: QuizQuestion[] = [
-  quiz("q01","複利とは、どのような増え方ですか？",["元本だけに利息","元本と過去の利息に利息","毎年固定額","税金がゼロ"],1,"過去の利息も次の元本になります。"),
-  quiz("q02","分散投資の主な目的は？",["必ず利益を出す","損失をなくす","特定資産への偏りを抑える","税率を下げる"],2,"値動きの偏りを抑える考え方です。"),
-  quiz("q03","インフレ率が預金金利を上回ると、実質購買力は？",["増える","変わらない","下がる","必ず2倍"],2,"物価上昇に追いつかなければ購買力は下がります。"),
-  quiz("q04","債券価格と市場金利の一般的な関係は？",["同方向","逆方向","無関係","常に一定"],1,"金利上昇時は既発債価格が下がりやすくなります。"),
-  quiz("q05","リスクと期待リターンの一般的な関係は？",["高リスクほど期待リターンも高い傾向","高リスクは必ず損","低リスクほど高収益","無関係"],0,"高い期待収益には通常より大きな変動が伴います。"),
-  quiz("q06","生活防衛資金で重視される性質は？",["高い換金性","最大の値上がり","長い解約制限","大きな為替変動"],0,"急な支出に使える流動性が重要です。"),
-  quiz("q07","株式を保有することは基本的に何を意味しますか？",["企業への貸付","企業の所有権の一部","国への寄付","元本保証預金"],1,"株式は企業の所有権を小口化したものです。"),
-  quiz("q08","為替ヘッジの主な目的は？",["株価変動をなくす","為替変動の影響を抑える","配当を増やす","手数料をなくす"],1,"円換算価値の為替による揺れを抑えます。"),
-  quiz("q09","投資信託の信託報酬は何に影響しますか？",["保有中の運用コスト","預金保険上限","為替レート","所得税率"],0,"保有中に継続して差し引かれる費用です。"),
-  quiz("q10","ドルコスト平均法とは？",["同じ金額を定期投資","高値だけで買う","必ず底値で買う","一度だけ全額投資"],0,"定額を定期購入する方法です。"),
-  quiz("q11","PERは一般に何を比較しますか？",["株価と1株利益","配当と金利","売上と現金","債券価格と満期"],0,"株価が1株利益の何倍かを示します。"),
-  quiz("q12","レバレッジ取引の注意点は？",["損失も拡大しうる","損失は必ずゼロ","元本保証","変動がなくなる"],0,"利益だけでなく損失も拡大します。"),
-  quiz("q13","実質金利の概算として近いものは？",["名目＋インフレ","名目−インフレ","名目×税率","インフレのみ"],1,"名目金利からインフレ率を差し引きます。"),
-  quiz("q14","ETFの特徴として一般的に正しいものは？",["取引所で売買できる","価格が変わらない","必ず元本保証","法人専用"],0,"ETFは上場投資信託です。"),
-  quiz("q15","流動性リスクとは？",["希望価格で売買しにくいリスク","金利が必ず上がる","配当が必ず増える","税率が固定"],0,"売りたい時に適正価格で売れない可能性です。"),
-  quiz("q16","長期投資で手数料が重要な理由は？",["複利でコスト差が積み上がる","後で全額戻る","利益と無関係","高いほど保証"],0,"小さな年率差が長期で大きくなります。"),
-  quiz("q17","倒産時、一般に株主の弁済順位は？",["債権者より先","債権者より後","常に国より先","順位なし"],1,"株主は債権者への支払い後です。"),
-  quiz("q18","相関が低い資産を組み合わせる狙いは？",["値動きの偏りを和らげる","税金をなくす","利益を固定","為替を固定"],0,"異なる値動きで全体の振れを抑えます。"),
-  quiz("q19","インデックス運用とは？",["特定指数への連動を目指す","毎日全銘柄を予想","元本保証","現金だけ"],0,"市場指数と同等の動きを目指します。"),
-  quiz("q20","外貨資産を円評価するとき影響するものは？",["為替レート","郵便料金","保有者の年齢","銘柄コード"],0,"資産価格と為替の両方が影響します。"),
-  quiz("q21","元本保証でまず確認することは？",["保証主体と条件","広告の色","名称の長さ","購入人数"],0,"誰がどの範囲を保証するかが重要です。"),
-  quiz("q22","リバランスとは？",["資産配分を目標比率へ戻す","全資産を現金化","借入を増やす","毎日銘柄変更"],0,"崩れた資産配分を当初方針へ戻します。"),
-  quiz("q23","配当落ち日に株価が下がりやすい理由は？",["配当権利の価値が切り離される","必ず倒産","市場閉鎖","税率100%"],0,"配当を受け取る権利の価値が外れます。"),
-  quiz("q24","シャープレシオが示すものは？",["リスク当たりの超過リターン","従業員数","暗証番号","債券額面"],0,"リスク1単位当たりの超過収益です。"),
-  quiz("q25","期待リターン5%とは？",["毎年必ず5%増","長期平均の見込みで年ごとに変動","損失なし","税引後固定"],1,"期待値は保証ではありません。"),
-];
-
-export interface CalculatorInputs { age:number; annualIncome:number; education:EducationKey; appearance:AppearanceKey; occupation:OccupationKey; financialAssets:number; realEstateAssets:number; reinvestmentRate:number; correctAnswers:number; }
-export interface AnnualProjection { age:number; rawSalary:number; salary:number; survival:number; curveRate:number; initialAssets:number; reinvested:number; gains:number; balance:number; }
-export interface CalculationResult {
-  marketCapMan:number; salaryIncomeMan:number; assetIncomeMan:number; effectiveReturn:number;
-  financialAdjustment:number; appearanceSalaryAdjustment:number; appearanceReturnAdjustment:number;
-  yearsRemaining:number; education:EducationParam; appearance:AppearanceParam; occupation:OccupationParam; projections:AnnualProjection[];
+export interface CalculatorInputs {
+  age: number;
+  annualIncome: number;
+  education: EducationKey;
+  appearance: AppearanceKey;
+  occupation: OccupationKey;
+  financialAssets: number;
+  realEstateAssets: number;
+  reinvestmentRate: number;
+  correctAnswers: number;
 }
 
-export function getEducation(key: EducationKey): EducationParam { return EDUCATIONS.find(x => x.key === key) ?? EDUCATIONS[7]; }
-export function getAppearance(key: AppearanceKey): AppearanceParam { return APPEARANCES.find(x => x.key === key) ?? APPEARANCES[2]; }
-export function getOccupation(key: OccupationKey): OccupationParam { return OCCUPATIONS.find(x => x.key === key) ?? OCCUPATIONS[4]; }
-export const financialLiteracyAdjustment = (correct: number) => (Math.min(5,Math.max(0,correct))/5-.5)*.1;
+export interface AnnualProjection {
+  age: number;
+  rawSalary: number;
+  salary: number;
+  survival: number;
+  careerFactor: number;
+  curveRate: number;
+  initialAssets: number;
+  reinvested: number;
+  gains: number;
+  balance: number;
+}
+
+export interface CalculationResult {
+  marketCapMan: number;
+  salaryIncomeMan: number;
+  assetIncomeMan: number;
+  effectiveReturn: number;
+  financialAdjustment: number;
+  nwSalaryAdjustment: number;
+  nwTransitionAdjustment: number;
+  transitionIncomeRate: number;
+  appearanceSalaryAdjustment: number;
+  yearsRemaining: number;
+  education: EducationParam;
+  appearance: AppearanceParam;
+  occupation: OccupationParam;
+  projections: AnnualProjection[];
+}
+
+export function getEducation(key: EducationKey): EducationParam {
+  return EDUCATIONS.find((item) => item.key === key) ?? EDUCATIONS[11];
+}
+
+export function getAppearance(key: AppearanceKey): AppearanceParam {
+  return APPEARANCES.find((item) => item.key === key) ?? APPEARANCES[2];
+}
+
+export function getOccupation(key: OccupationKey): OccupationParam {
+  return OCCUPATIONS.find((item) => item.key === key) ?? OCCUPATIONS[14];
+}
+
+export function getOccupationsByCategory(category: OccupationCategoryKey): OccupationParam[] {
+  return OCCUPATIONS.filter((item) => item.category === category);
+}
+
+export const financialLiteracyAdjustment = (correct: number) =>
+  (Math.min(5, Math.max(0, correct)) / 5 - .5) * .1;
+
+export const nwSalaryAdjustment = (nw: number) => Math.min(.0045, Math.max(-.0025, (nw - 50) * .0001));
+export const nwTransitionAdjustment = (nw: number) => Math.min(.045, Math.max(-.025, (nw - 50) * .001));
 
 export function wageCurveRate(job: OccupationParam, startAge: number, elapsed: number): number {
   const age = startAge + elapsed;
+  if (age >= job.primaryEnd) return -.005;
   if (age < job.peak) {
-    const segment = Math.max(.25, Math.max(1, job.peak-startAge)/4);
-    return job.rampUp[Math.min(3,Math.floor(elapsed/segment))];
+    const segment = Math.max(.25, Math.max(1, job.peak - startAge) / 4);
+    return job.rampUp[Math.min(3, Math.floor(elapsed / segment))];
   }
-  return job.rampDown[Math.min(1,Math.floor(Math.max(0,age-job.peak)/5))];
+  return job.rampDown[Math.min(1, Math.floor(Math.max(0, age - job.peak) / 5))];
 }
 
 export function miniWageCurve(job: OccupationParam): number[] {
-  const start = Math.max(20,job.peak-16); let value=100; const points:number[]=[];
-  for(let year=0;year<28;year+=2){ value*=Math.pow(1+wageCurveRate(job,start,year)+.02,2); points.push(Math.max(10,value)); }
+  const start = Math.max(20, job.peak - 16);
+  let value = 100;
+  const points: number[] = [];
+  for (let year = 0; year < 28; year += 2) {
+    value *= Math.pow(1 + wageCurveRate(job, start, year) + .02, 2);
+    points.push(Math.max(10, value));
+  }
   return points;
 }
 
 export function calculateMarketCap(input: CalculatorInputs): CalculationResult {
-  const education=getEducation(input.education), appearance=getAppearance(input.appearance), job=getOccupation(input.occupation);
-  const yearsRemaining=Math.max(0,job.retirement-input.age), financialAdjustment=financialLiteracyAdjustment(input.correctAnswers);
-  const appearanceSalaryAdjustment=appearance.salaryBase*job.appearanceMultiplier;
-  const returnMultiplier=job.appearanceMultiplier>1?job.appearanceMultiplier*.5:job.appearanceMultiplier;
-  const appearanceReturnAdjustment=appearance.returnBase*returnMultiplier;
-  const effectiveReturn=Math.min(.05,job.baseReturn+financialAdjustment+education.nwReturn+appearanceReturnAdjustment);
-  const initialAssets=Math.max(0,input.financialAssets)+Math.max(0,input.realEstateAssets);
-  let balance=initialAssets, rawSalary=Math.max(0,input.annualIncome)*(1+education.salaryAdj), salaryTotal=0, assetTotal=0, reinvested=0, gains=0;
-  const projections:AnnualProjection[]=[];
-  for(let year=0;year<yearsRemaining;year+=1){
-    const survival=Math.pow(1-job.careerRisk,year), salary=rawSalary*survival; salaryTotal+=salary;
-    const add=salary*Math.min(1,Math.max(0,input.reinvestmentRate)); reinvested+=add; balance+=add;
-    const gain=balance*effectiveReturn; gains+=gain; assetTotal+=gain; balance+=gain;
-    const curveRate=wageCurveRate(job,input.age,year);
-    projections.push({age:input.age+year,rawSalary,salary,survival,curveRate,initialAssets,reinvested,gains,balance});
-    rawSalary=Math.max(0,rawSalary*(1+curveRate+.02+education.nwSalary+appearanceSalaryAdjustment));
+  const education = getEducation(input.education);
+  const appearance = getAppearance(input.appearance);
+  const job = getOccupation(input.occupation);
+  const yearsRemaining = Math.max(0, job.retirement - input.age);
+  const financialAdjustment = financialLiteracyAdjustment(input.correctAnswers);
+  const salaryNw = nwSalaryAdjustment(education.nw);
+  const transitionNw = nwTransitionAdjustment(education.nw);
+  const transitionIncomeRate = Math.min(.9, Math.max(.2, job.transitionIncomeRate + transitionNw));
+  const appearanceSalaryAdjustment = appearance.salaryBase * job.appearanceMultiplier;
+  const effectiveReturn = Math.min(.05, job.baseReturn + financialAdjustment);
+  const initialAssets = Math.max(0, input.financialAssets) + Math.max(0, input.realEstateAssets);
+  let balance = initialAssets;
+  let rawSalary = Math.max(0, input.annualIncome);
+  let salaryTotal = 0;
+  let assetTotal = 0;
+  let reinvested = 0;
+  let gains = 0;
+  const projections: AnnualProjection[] = [];
+
+  for (let year = 0; year < yearsRemaining; year += 1) {
+    const age = input.age + year;
+    const survival = age >= job.primaryEnd ? 0 : Math.pow(1 - job.careerRisk, year);
+    const careerFactor = survival + (1 - survival) * transitionIncomeRate;
+    const salary = rawSalary * careerFactor;
+    salaryTotal += salary;
+    const add = salary * Math.min(1, Math.max(0, input.reinvestmentRate));
+    reinvested += add;
+    balance += add;
+    const gain = balance * effectiveReturn;
+    gains += gain;
+    assetTotal += gain;
+    balance += gain;
+    const curveRate = wageCurveRate(job, input.age, year);
+    projections.push({ age, rawSalary, salary, survival, careerFactor, curveRate, initialAssets, reinvested, gains, balance });
+    rawSalary = Math.max(0, rawSalary * (1 + curveRate + .02 + salaryNw + appearanceSalaryAdjustment));
   }
-  const salaryIncomeMan=salaryTotal*education.multiplier;
-  return {marketCapMan:salaryIncomeMan+assetTotal,salaryIncomeMan,assetIncomeMan:assetTotal,effectiveReturn,financialAdjustment,appearanceSalaryAdjustment,appearanceReturnAdjustment,yearsRemaining,education,appearance,occupation:job,projections};
+
+  const salaryIncomeMan = salaryTotal * education.multiplier;
+  return {
+    marketCapMan: salaryIncomeMan + assetTotal,
+    salaryIncomeMan,
+    assetIncomeMan: assetTotal,
+    effectiveReturn,
+    financialAdjustment,
+    nwSalaryAdjustment: salaryNw,
+    nwTransitionAdjustment: transitionNw,
+    transitionIncomeRate,
+    appearanceSalaryAdjustment,
+    yearsRemaining,
+    education,
+    appearance,
+    occupation: job,
+    projections,
+  };
 }
 
-export function getTier(value:number):"S"|"A"|"B"|"C"|"D" { return value>=50000?"S":value>=20000?"A":value>=8000?"B":value>=2000?"C":"D"; }
-export function formatMan(value:number):string { const n=Math.round(Math.abs(value)),sign=value<0?"−":""; if(n>=10000){const o=Math.floor(n/10000),m=n%10000;return `${sign}${o}億${m?`${m.toLocaleString("ja-JP")}万`:""}円`;} return `${sign}${n.toLocaleString("ja-JP")}万円`; }
-export function formatPercent(value:number,digits=1):string { return `${value>0?"+":""}${(value*100).toFixed(digits)}%`; }
+export function getTier(value: number): "S" | "A" | "B" | "C" | "D" {
+  return value >= 50000 ? "S" : value >= 20000 ? "A" : value >= 8000 ? "B" : value >= 2000 ? "C" : "D";
+}
+
+export function formatMan(value: number): string {
+  const n = Math.round(Math.abs(value));
+  const sign = value < 0 ? "−" : "";
+  if (n >= 10000) {
+    const oku = Math.floor(n / 10000);
+    const man = n % 10000;
+    return `${sign}${oku}億${man ? `${man.toLocaleString("ja-JP")}万` : ""}円`;
+  }
+  return `${sign}${n.toLocaleString("ja-JP")}万円`;
+}
+
+export function formatPercent(value: number, digits = 1): string {
+  return `${value > 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`;
+}
