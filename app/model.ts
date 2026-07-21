@@ -9,6 +9,7 @@ export interface AppearanceParam {
   key: string;
   label: string;
   salaryBase: number;
+  returnAdjustment: number;
 }
 
 export interface OccupationCategory {
@@ -51,11 +52,11 @@ export const EDUCATIONS = [
 ] as const satisfies readonly EducationParam[];
 
 export const APPEARANCES = [
-  { key: "top10", label: "上位10%", salaryBase: .006 },
-  { key: "top35", label: "上位35%", salaryBase: .003 },
-  { key: "middle", label: "中間", salaryBase: 0 },
-  { key: "lower35", label: "下位35%", salaryBase: -.002 },
-  { key: "lower10", label: "下位10%", salaryBase: -.004 },
+  { key: "top10", label: "上位10%", salaryBase: .006, returnAdjustment: -.010 },
+  { key: "top35", label: "上位35%", salaryBase: .003, returnAdjustment: -.005 },
+  { key: "middle", label: "中間", salaryBase: 0, returnAdjustment: 0 },
+  { key: "lower35", label: "下位35%", salaryBase: -.002, returnAdjustment: .003 },
+  { key: "lower10", label: "下位10%", salaryBase: -.004, returnAdjustment: .005 },
 ] as const satisfies readonly AppearanceParam[];
 
 export const OCCUPATION_CATEGORIES = [
@@ -84,7 +85,6 @@ const curve = {
   athlete: [[.10, .05, 0, -.06], [-.12, -.18]],
   nightlife: [[.08, .04, 0, -.04], [-.08, -.12]],
   gambling: [[.06, .03, 0, -.02], [-.05, -.08]],
-  slot: [[.04, .01, -.02, -.04], [-.08, -.12]],
 } as const;
 
 function occupation(
@@ -145,9 +145,7 @@ export const OCCUPATIONS = [
   occupation("hostess", "nightlife", "ホステス・キャバクラ", 65, 45, 28, .018, 2.0, .070, .45, "EXTREME", "nightlife"),
   occupation("clubOwner", "nightlife", "クラブママ・夜職経営", 70, 70, 52, .022, 1.2, .040, .55, "HIGH", "independent"),
 
-  occupation("poker", "gambling", "プロポーカー", 65, 55, 38, .040, .1, .080, .40, "VERY HIGH", "gambling"),
-  occupation("betting", "gambling", "競馬・スポーツベット", 65, 60, 45, .035, .1, .070, .40, "VERY HIGH", "gambling"),
-  occupation("slot", "gambling", "スロットプロ", 65, 50, 32, .030, .1, .100, .35, "EXTREME", "slot"),
+  occupation("professionalGambler", "gambling", "プロギャンブラー（ポーカー・競馬・スロット等）", 65, 55, 38, .037, .1, .085, .40, "EXTREME", "gambling"),
 ] as const;
 
 export type EducationKey = typeof EDUCATIONS[number]["key"];
@@ -163,6 +161,7 @@ export interface CalculatorInputs {
   occupation: OccupationKey;
   financialAssets: number;
   realEstateAssets: number;
+  otherAssets: number;
   reinvestmentRate: number;
   correctAnswers: number;
 }
@@ -190,6 +189,7 @@ export interface CalculationResult {
   nwTransitionAdjustment: number;
   transitionIncomeRate: number;
   appearanceSalaryAdjustment: number;
+  appearanceReturnAdjustment: number;
   yearsRemaining: number;
   education: EducationParam;
   appearance: AppearanceParam;
@@ -250,8 +250,9 @@ export function calculateMarketCap(input: CalculatorInputs): CalculationResult {
   const transitionNw = nwTransitionAdjustment(education.nw);
   const transitionIncomeRate = Math.min(.9, Math.max(.2, job.transitionIncomeRate + transitionNw));
   const appearanceSalaryAdjustment = appearance.salaryBase * job.appearanceMultiplier;
-  const effectiveReturn = Math.min(.05, job.baseReturn + financialAdjustment);
-  const initialAssets = Math.max(0, input.financialAssets) + Math.max(0, input.realEstateAssets);
+  const appearanceReturnAdjustment = appearance.returnAdjustment;
+  const effectiveReturn = job.baseReturn + financialAdjustment + appearanceReturnAdjustment;
+  const initialAssets = Math.max(0, input.financialAssets) + Math.max(0, input.realEstateAssets) + Math.max(0, input.otherAssets);
   let balance = initialAssets;
   let rawSalary = Math.max(0, input.annualIncome);
   let salaryTotal = 0;
@@ -289,6 +290,7 @@ export function calculateMarketCap(input: CalculatorInputs): CalculationResult {
     nwTransitionAdjustment: transitionNw,
     transitionIncomeRate,
     appearanceSalaryAdjustment,
+    appearanceReturnAdjustment,
     yearsRemaining,
     education,
     appearance,

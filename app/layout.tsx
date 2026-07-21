@@ -8,10 +8,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = forwardedHost || requestHeaders.get("host") || "localhost:3000";
   const forwardedProtocol = requestHeaders.get("x-forwarded-proto")?.split(",")[0]?.trim();
   const protocol = forwardedProtocol || (host.startsWith("localhost") ? "http" : "https");
-  const imageUrl = `${protocol}://${host}/og-v14.png`;
+  const imageUrl = `${protocol}://${host}/og-v15.png`;
   return {
     title: "人間時価総額 CALCULATOR",
-    description: "31職業・学歴・資産・金融判断から、あなたの残りのキャリア価値をDCF的に査定します。",
+    description: "30職業・学歴・資産・金融判断から、あなたの残りのキャリア価値をDCF的に査定します。",
     openGraph: {
       title: "人間時価総額 CALCULATOR",
       description: "あなたの価値を、数字にする。",

@@ -73,6 +73,7 @@ const DEFAULTS: InputState = {
   occupation: "listedGeneral",
   financialAssets: 300,
   realEstateAssets: 0,
+  otherAssets: 0,
   reinvestmentRate: .2,
 };
 
@@ -283,8 +284,8 @@ function notes(result: CalculationResult): string[] {
       : result.occupation.careerRisk <= .01
         ? "キャリア持続性が高く、長期間の給与キャッシュフローが評価を下支えしています。"
         : "キャリアの成長余地と継続リスクは中位です。専門性の更新が評価維持の鍵になります。",
-    result.effectiveReturn >= .045
-      ? "実効利回りは上限に近い水準です。追加リターンより、分散と下方リスク管理が重要です。"
+    result.effectiveReturn >= .06
+      ? "実効利回りはかなり高い水準です。上限は設けていませんが、期待値が高いほど下方リスク管理も重要です。"
       : result.effectiveReturn < .01
         ? "資産運用の寄与が弱く、金融リテラシーの改善効果が大きい状態です。"
         : "資産所得は健全な補助エンジンです。再投資率を維持すると後半ほど複利が効きます。",
@@ -430,12 +431,30 @@ export default function HumanMarketCapApp() {
   const activeQuiz = questions[quizIndex];
   const activePart = activeQuiz && (quizPhase === "A" || quizPhase === "B") ? activeQuiz[quizPhase.toLowerCase() as "a" | "b"] : null;
 
+  function shareToX() {
+    if (!display || !result) return;
+    const position = ranking
+      ? `順位 ${ranking.rank}/${ranking.total}｜偏差値 ${ranking.deviation.toFixed(1)}｜上位${ranking.topPercent.toFixed(1)}%`
+      : "市場ポジションを査定中";
+    const summary = [
+      "【人間時価総額 CALCULATOR】",
+      `査定額：${formatMan(result.marketCapMan)}`,
+      `${tier} TIER｜${result.occupation.label}`,
+      position,
+      `金融リテラシー ${display.quizCorrect}/5点`,
+      "※もちろん、人間の価値はこの数字では決まりません。",
+      "#人間時価総額 #HMC",
+      `${window.location.origin}${window.location.pathname}`,
+    ].join("\n");
+    window.open(`https://x.com/intent/post?text=${encodeURIComponent(summary)}`, "_blank", "noopener,noreferrer");
+  }
+
   return (
     <main>
       <div className="app-shell">
         <header className="brand-bar">
           <a className="brand" href="#top"><span className="brand-mark">HMC</span><span>HUMAN CAPITAL<br />DESK</span></a>
-          <span className="model-tag">DCF MODEL / v14</span>
+          <span className="model-tag">DCF MODEL / v15</span>
         </header>
 
         <section className="intro" id="top">
@@ -488,7 +507,7 @@ export default function HumanMarketCapApp() {
             </fieldset>
             <div className="parameter-card two">
               <div><span>給与成長ベース</span><strong>{formatPercent(appearance.salaryBase, 2)}</strong></div>
-              <div><span>資産利回り</span><strong>影響なし</strong></div>
+              <div><span>資産利回り</span><strong>{formatPercent(appearance.returnAdjustment, 1)}</strong></div>
             </div>
           </section>
 
@@ -529,7 +548,11 @@ export default function HumanMarketCapApp() {
           <section className="question-card">
             <label htmlFor="realestate"><span className="question-number">07</span><span>不動産資産</span></label>
             <div className="number-input"><input id="realestate" type="number" inputMode="decimal" min="0" value={inputs.realEstateAssets} onChange={(event) => number("realEstateAssets", Number(event.target.value))} /><span>万円</span></div>
-            <p className="field-note">現金・金融資産と合算して初期資産に計上</p>
+            <div className="sub-asset-field">
+              <label htmlFor="other-assets">その他資産 <small>債券・金・時計など</small></label>
+              <div className="number-input"><input id="other-assets" type="number" inputMode="decimal" min="0" value={inputs.otherAssets} onChange={(event) => number("otherAssets", Number(event.target.value))} /><span>万円</span></div>
+            </div>
+            <p className="field-note">現金・金融資産・不動産・その他資産を合算して初期資産に計上</p>
           </section>
 
           <section className="question-card">
@@ -585,6 +608,16 @@ export default function HumanMarketCapApp() {
               <Trace title="時価総額の計算トレース"><p>給与所得 {formatMan(result.salaryIncomeMan)} ＋ 資産所得 {formatMan(result.assetIncomeMan)}</p><p>残余{result.yearsRemaining}年の期待キャッシュフローを全補正で調整しています。</p></Trace>
             </section>
 
+            <section className="result-card share-card">
+              <div className="share-summary">
+                <span>SHARE SNAPSHOT</span>
+                <div><strong>{formatMan(result.marketCapMan)}</strong><b>{tier} TIER</b></div>
+                <p>{result.occupation.label}｜金融リテラシー {display.quizCorrect}/5点</p>
+                {ranking && <p>第{ranking.rank}位 / {ranking.total}人・偏差値{ranking.deviation.toFixed(1)}・上位{ranking.topPercent.toFixed(1)}%</p>}
+              </div>
+              <button type="button" className="x-share-button" onClick={shareToX}><span>𝕏</span><strong>Xで査定サマリーを共有</strong><b>→</b></button>
+            </section>
+
             {display.previousScoreYen !== null && (
               <div className={`delta-banner ${display.scoreYen >= display.previousScoreYen ? "positive" : "negative"}`}><span>前回査定との差分</span><strong>{display.scoreYen >= display.previousScoreYen ? "＋" : "−"}{formatMan(Math.abs(display.scoreYen - display.previousScoreYen) / 10000)}</strong></div>
             )}
@@ -596,7 +629,7 @@ export default function HumanMarketCapApp() {
 
             <section className="kpi-grid">
               <article className="result-card kpi-card"><span className="kpi-icon blue">01</span><p>給与所得総額</p><h3>{formatMan(result.salaryIncomeMan)}</h3><Trace title="給与所得の計算トレース"><p>年収起点へ職業カーブ・インフレ2%・NW力・容姿を毎年適用。</p><p>離職時は所得ゼロではなく、職業別の転職後所得率へ移行する期待値モデルです。</p></Trace></article>
-              <article className="result-card kpi-card"><span className="kpi-icon gold">02</span><p>資産所得総額</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の計算トレース"><p>初期資産 {formatMan(inputs.financialAssets + inputs.realEstateAssets)} に年収の{Math.round(inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用。</p></Trace></article>
+              <article className="result-card kpi-card"><span className="kpi-icon gold">02</span><p>資産所得総額</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の計算トレース"><p>初期資産 {formatMan(inputs.financialAssets + inputs.realEstateAssets + inputs.otherAssets)} に年収の{Math.round(inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用。</p></Trace></article>
             </section>
 
             <section className="result-card charts-card"><div className="section-title"><div><span className="eyebrow">LIFETIME PROJECTION</span><h3>生涯キャッシュフロー</h3></div><span className="scroll-hint">← SWIPE →</span></div><Charts result={result} /></section>
@@ -612,9 +645,10 @@ export default function HumanMarketCapApp() {
                 <div><span>NW→転職後所得</span><strong>{formatPercent(result.nwTransitionAdjustment, 1)}</strong></div>
                 <div><span>転職後所得率</span><strong>{(result.transitionIncomeRate * 100).toFixed(1)}%</strong></div>
                 <div><span>容姿→給与</span><strong>{formatPercent(result.appearanceSalaryAdjustment, 2)} / 年</strong></div>
+                <div><span>容姿→利回り</span><strong>{formatPercent(result.appearanceReturnAdjustment, 1)}</strong></div>
                 <div><span>職業別基本利回り</span><strong>{formatPercent(result.occupation.baseReturn)}</strong></div>
                 <div><span>金融リテラシー</span><strong>{display.quizCorrect} / 5点・{formatPercent(result.financialAdjustment)}</strong></div>
-                <div className="highlight"><span>実効利回り</span><strong>{(result.effectiveReturn * 100).toFixed(2)}%（上限5.0%）</strong></div>
+                <div className="highlight"><span>実効利回り</span><strong>{(result.effectiveReturn * 100).toFixed(2)}%（上限なし）</strong></div>
                 <div><span>キャリア変動リスク</span><strong>{(result.occupation.careerRisk * 100).toFixed(1)}% / 年</strong></div>
               </div>
             </section>
@@ -622,7 +656,7 @@ export default function HumanMarketCapApp() {
             <section className="result-card factors-card">
               <div className="section-title"><div><span className="eyebrow">VALUATION FACTORS</span><h3>評価ファクター</h3></div></div>
               <Factor label="金融リテラシー" value={display.quizCorrect / 5 * 100} caption={`${display.quizCorrect}/5`} />
-              <Factor label="実効利回り" value={(result.effectiveReturn + .05) / .1 * 100} caption={`${(result.effectiveReturn * 100).toFixed(2)}%`} />
+              <Factor label="実効利回り" value={(result.effectiveReturn + .06) / .16 * 100} caption={`${(result.effectiveReturn * 100).toFixed(2)}%`} />
               <Factor label="NW力" value={result.education.nw} caption={`${result.education.nw}`} />
               <Factor label="容姿補正" value={50 + result.appearanceSalaryAdjustment * 2000} caption={formatPercent(result.appearanceSalaryAdjustment, 2)} />
               <Factor label="キャリア持続性" value={100 - result.occupation.careerRisk * 800} caption={`${((1 - result.occupation.careerRisk) * 100).toFixed(1)}%`} />
@@ -638,11 +672,19 @@ export default function HumanMarketCapApp() {
               <p className="risk-warning"><b>RISK NOTICE</b> この査定は入力条件に基づく期待値です。実際の収入・運用成果を保証するものではありません。</p>
             </section>
 
+            <section className="closing-message">
+              <span className="eyebrow">ONE LAST THING</span>
+              <h3>人生は、決算書ではありません。</h3>
+              <p>でも、人間の価値と時価総額は一致しません。企業はお金を稼ぐのが目的ですが、人間の目的は、たぶんもっとややこしくて、もっと面白いものです。</p>
+              <p>死ぬときに口座残高が過去最高でも、あの世へ持ち越せるポイントは0。稼ぐのも、使うのも、生きるための手段です。</p>
+              <strong>この査定額より、今日をどう使うかのほうが大事です。</strong>
+            </section>
+
             <button className="revise-button" type="button" onClick={() => { setDisplay(null); setRanking(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>条件を修正して再計算する</button>
           </section>
         )}
 
-        <footer><span>HMC CALCULATOR / v14</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
+        <footer><span>HMC CALCULATOR / v15</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
       </div>
     </main>
   );

@@ -154,6 +154,9 @@ main { min-height: 100vh; overflow: hidden; }
 }
 .number-input span { color: var(--muted); font-size: 12px; }
 .field-note { margin: 10px 1px 0; color: var(--dim); font-size: 9px; line-height: 1.7; }
+.sub-asset-field { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.sub-asset-field > label { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 9px; color: var(--text); font: 600 12px var(--serif); }
+.sub-asset-field > label small { color: var(--dim); font: 400 7px var(--mono); }
 select {
   appearance: none;
   width: 100%;
@@ -328,6 +331,19 @@ fieldset legend { padding: 0; }
 .delta-banner.negative { background: rgba(248,113,113,.06); }
 .delta-banner.negative strong { color: var(--red); }
 
+.share-card { padding: 0; overflow: hidden; }
+.share-summary { padding: 16px; background: linear-gradient(135deg, rgba(212,168,67,.1), transparent 60%), #10100f; }
+.share-summary > span { color: var(--gold); font-size: 7px; letter-spacing: .13em; }
+.share-summary > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 9px; }
+.share-summary > div strong { color: var(--gold-light); font: 700 26px var(--serif); letter-spacing: -.04em; }
+.share-summary > div b { border: 1px solid var(--border-gold); color: var(--gold); padding: 6px 8px; font-size: 8px; }
+.share-summary p { margin: 8px 0 0; color: var(--muted); font-size: 8px; line-height: 1.6; }
+.x-share-button { width: 100%; min-height: 57px; display: grid; grid-template-columns: 32px 1fr auto; align-items: center; gap: 8px; padding: 0 15px; border: 0; border-top: 1px solid #393939; background: #f2f2f2; color: #0a0a0a; }
+.x-share-button > span { font: 500 22px/1 Arial, sans-serif; }
+.x-share-button > strong { text-align: left; font: 600 12px var(--serif); }
+.x-share-button > b { font: 400 19px var(--mono); }
+.x-share-button:hover { background: #fff; }
+
 .result-card { background: var(--surface); border: 1px solid var(--border); padding: 18px 15px; margin-bottom: 10px; }
 .section-title { margin-bottom: 18px; }
 .section-title h3 { font-size: 20px; }
@@ -432,6 +448,11 @@ fieldset legend { padding: 0; }
 .analysis-card li::before { content: "0" counter(analysis); position: absolute; left: 0; top: 2px; color: var(--gold); font-size: 8px; }
 .risk-warning { margin: 0; padding: 11px; background: rgba(248,113,113,.055); border-left: 2px solid var(--red); color: #a9a39a; font-size: 7px; line-height: 1.7; }
 .risk-warning b { color: var(--red); margin-right: 6px; }
+.closing-message { margin: 18px 0 10px; padding: 28px 19px; border: 1px solid var(--border-gold); background: radial-gradient(circle at 100% 0, rgba(212,168,67,.12), transparent 48%), #11100e; position: relative; overflow: hidden; }
+.closing-message::after { content: "0"; position: absolute; right: -6px; bottom: -38px; color: rgba(212,168,67,.055); font: 700 150px/1 var(--serif); }
+.closing-message h3 { margin: 9px 0 17px; color: var(--gold-light); font: 700 24px/1.45 var(--serif); letter-spacing: -.03em; position: relative; z-index: 1; }
+.closing-message p { margin: 0 0 12px; color: var(--muted); font-size: 9px; line-height: 2; position: relative; z-index: 1; }
+.closing-message strong { display: block; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--text); font: 600 12px/1.8 var(--serif); position: relative; z-index: 1; }
 .revise-button { width: 100%; min-height: 56px; color: var(--gold-light); background: transparent; border: 1px solid var(--border-gold); font-size: 10px; transition: .2s; }
 .revise-button:hover { background: rgba(212,168,67,.07); }
 
