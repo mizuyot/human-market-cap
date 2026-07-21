@@ -20,7 +20,6 @@ import {
   type EducationKey,
   type OccupationCategoryKey,
   type OccupationKey,
-  calculateMarketCap,
   formatMan,
   formatPercent,
   getAppearance,
@@ -32,37 +31,25 @@ import {
   nwSalaryAdjustment,
   nwTransitionAdjustment,
 } from "./model";
-import {
-  QUIZ_SETS,
-  type QuizSet,
-  type QuizSetAnswer,
-  isQuizSetCorrect,
-} from "./quiz-data";
+import type {
+  PublicQuizSet,
+  QuizAnswers,
+  QuizReviewItem,
+  QuizStartResponse,
+  RankingSnapshot,
+  ValuationResponse,
+} from "./api-types";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "") ?? "";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
-
-type InputState = Omit<CalculatorInputs, "correctAnswers">;
-type RankingMode = "global" | "demo";
+type InputState = CalculatorInputs;
 type QuizPhase = "idle" | "A" | "B" | "done";
-type QuizAnswers = Record<string, QuizSetAnswer>;
-
-interface Ranking {
-  rank: number;
-  total: number;
-  deviation: number;
-  topPercent: number;
-  scores: number[];
-  mode: RankingMode;
-}
 
 interface DisplayResult {
   calculation: CalculationResult;
   scoreYen: number;
   previousScoreYen: number | null;
-  quizSets: QuizSet[];
-  quizAnswers: QuizAnswers;
+  reviews: QuizReviewItem[];
   quizCorrect: number;
+  inputs: InputState;
 }
 
 const DEFAULTS: InputState = {
@@ -77,15 +64,6 @@ const DEFAULTS: InputState = {
   reinvestmentRate: .2,
 };
 
-function pickQuestions(): QuizSet[] {
-  const list = [...QUIZ_SETS];
-  for (let i = list.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [list[i], list[j]] = [list[j], list[i]];
-  }
-  return list.slice(0, 5);
-}
-
 function uid(): string {
   const key = "hmc_uid";
   const old = localStorage.getItem(key);
@@ -93,47 +71,6 @@ function uid(): string {
   const value = crypto?.randomUUID?.() ?? `hmc-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   localStorage.setItem(key, value);
   return value;
-}
-
-function demoScores(): number[] {
-  return Array.from({ length: 180 }, (_, i) =>
-    Math.round((650 + Math.pow(i / 179, 2.35) * 68000 + (i % 9) * 55) * 10000));
-}
-
-function rankScores(source: number[], score: number, mode: RankingMode): Ranking {
-  const scores = source.some((item) => Math.abs(item - score) < 1) ? [...source] : [...source, score];
-  scores.sort((a, b) => b - a);
-  const index = scores.findIndex((item) => item <= score);
-  const rank = (index < 0 ? scores.length - 1 : index) + 1;
-  const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
-  const sd = Math.sqrt(scores.reduce((sum, item) => sum + (item - mean) ** 2, 0) / scores.length);
-  return {
-    rank,
-    total: scores.length,
-    deviation: sd ? Math.min(99, Math.max(1, 50 + (score - mean) / sd * 10)) : 50,
-    topPercent: rank / scores.length * 100,
-    scores,
-    mode,
-  };
-}
-
-async function saveRanking(score: number): Promise<Ranking> {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return rankScores(demoScores(), score, "demo");
-  const headers = {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    "Content-Type": "application/json",
-  };
-  const saved = await fetch(`${SUPABASE_URL}/rest/v1/hmc_scores?on_conflict=uid`, {
-    method: "POST",
-    headers: { ...headers, Prefer: "resolution=merge-duplicates,return=minimal" },
-    body: JSON.stringify({ uid: uid(), score, updated_at: new Date().toISOString() }),
-  });
-  if (!saved.ok) throw new Error("upsert");
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/hmc_scores?select=score&order=score.desc&limit=1000`, { headers });
-  if (!response.ok) throw new Error("select");
-  const rows = await response.json() as { score: number | string }[];
-  return rankScores(rows.map((row) => Number(row.score)).filter(Number.isFinite), score, "global");
 }
 
 function MiniCurve({ occupation }: { occupation: OccupationKey }) {
@@ -247,18 +184,14 @@ function Charts({ result }: { result: CalculationResult }) {
   );
 }
 
-function Histogram({ ranking, score }: { ranking: Ranking; score: number }) {
-  const min = Math.min(...ranking.scores);
-  const max = Math.max(...ranking.scores);
-  const span = Math.max(1, max - min);
-  const bins = Array.from({ length: 12 }, () => 0);
-  ranking.scores.forEach((item) => bins[Math.min(11, Math.floor((item - min) / span * 12))] += 1);
-  const peak = Math.max(...bins, 1);
-  const marker = Math.min(100, Math.max(0, (score - min) / span * 100));
+function Histogram({ ranking, score }: { ranking: RankingSnapshot; score: number }) {
+  const span = Math.max(1, ranking.maxScore - ranking.minScore);
+  const peak = Math.max(...ranking.bins, 1);
+  const marker = Math.min(100, Math.max(0, (score - ranking.minScore) / span * 100));
   return (
     <div className="histogram-wrap">
       <div className="you-marker" style={{ left: `${marker}%` }}><span>YOU</span></div>
-      <div className="histogram">{bins.map((item, index) => <span key={index} style={{ height: `${Math.max(5, item / peak * 100)}%` }} />)}</div>
+      <div className="histogram">{ranking.bins.map((item, index) => <span key={index} style={{ height: `${Math.max(5, item / peak * 100)}%` }} />)}</div>
       <div className="histogram-axis"><span>LOW</span><span>MARKET VALUE</span><span>HIGH</span></div>
     </div>
   );
@@ -295,14 +228,14 @@ function notes(result: CalculationResult): string[] {
   ];
 }
 
-function answerLabel(set: QuizSet, phase: "a" | "b", answer: number | null): string {
+function answerLabel(set: PublicQuizSet, phase: "a" | "b", answer: number | null): string {
   if (answer === null) return "時間切れ・未回答";
   const option = set[phase].options[answer];
   return `${answer + 1}．${option}`;
 }
 
-function QuizReview({ sets, answers }: { sets: QuizSet[]; answers: QuizAnswers }) {
-  const correct = sets.filter((set) => isQuizSetCorrect(set, answers[set.id])).length;
+function QuizReview({ reviews }: { reviews: QuizReviewItem[] }) {
+  const correct = reviews.filter((review) => review.passed).length;
   return (
     <section className="result-card quiz-review-card">
       <div className="section-title">
@@ -311,9 +244,9 @@ function QuizReview({ sets, answers }: { sets: QuizSet[]; answers: QuizAnswers }
       </div>
       <p className="quiz-review-intro">各セットを開くと、あなたの回答と判断原則の解説を確認できます。</p>
       <div className="quiz-review-list">
-        {sets.map((set, index) => {
-          const answer = answers[set.id] ?? { a: null, b: null };
-          const passed = isQuizSetCorrect(set, answer);
+        {reviews.map((set, index) => {
+          const answer = set.answer;
+          const passed = set.passed;
           return (
             <details className={`quiz-review-item ${passed ? "correct" : "incorrect"}`} key={set.id}>
               <summary>
@@ -337,14 +270,17 @@ function QuizReview({ sets, answers }: { sets: QuizSet[]; answers: QuizAnswers }
 
 export default function HumanMarketCapApp() {
   const [inputs, setInputs] = useState<InputState>(DEFAULTS);
-  const [questions, setQuestions] = useState<QuizSet[]>([]);
+  const [questions, setQuestions] = useState<PublicQuizSet[]>([]);
+  const [attemptId, setAttemptId] = useState("");
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [quizIndex, setQuizIndex] = useState(0);
   const [quizPhase, setQuizPhase] = useState<QuizPhase>("idle");
   const [timeLeft, setTimeLeft] = useState(10);
   const [error, setError] = useState("");
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [calculating, setCalculating] = useState(false);
   const [display, setDisplay] = useState<DisplayResult | null>(null);
-  const [ranking, setRanking] = useState<Ranking | null>(null);
+  const [ranking, setRanking] = useState<RankingSnapshot | null>(null);
   const resultRef = useRef<HTMLElement>(null);
 
   const education = useMemo(() => getEducation(inputs.education), [inputs.education]);
@@ -389,41 +325,75 @@ export default function HumanMarketCapApp() {
     setInputs((current) => ({ ...current, [field]: Number.isFinite(value) ? value : 0 }));
   }
 
-  async function refresh(score: number) {
+  async function startQuiz() {
+    setQuizLoading(true);
+    setError("");
     try {
-      setRanking(await saveRanking(score));
-    } catch {
-      setRanking(rankScores(demoScores(), score, "demo"));
+      const response = await fetch("/api/quiz/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const payload = await response.json() as QuizStartResponse & { error?: string };
+      if (!response.ok) throw new Error(payload.error || "クイズを開始できませんでした。");
+      setQuestions(payload.sets);
+      setAttemptId(payload.attemptId);
+      setQuizPhase("A");
+      setTimeLeft(10);
+      setQuizIndex(0);
+      setQuizAnswers({});
+    } catch (startError) {
+      setError(startError instanceof Error ? startError.message : "クイズを開始できませんでした。");
+    } finally {
+      setQuizLoading(false);
     }
   }
 
-  function submit(event: FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
     if (inputs.age < 18 || inputs.age > 80) {
       setError("年齢は18〜80歳で入力してください。");
       return;
     }
-    if (quizPhase !== "done") {
+    if (quizPhase !== "done" || !attemptId) {
       setError("金融リテラシーテストを最後まで回答してください。");
       return;
     }
     setError("");
-    const correct = questions.filter((set) => isQuizSetCorrect(set, quizAnswers[set.id])).length;
-    const calculation = calculateMarketCap({ ...inputs, correctAnswers: correct });
-    const scoreYen = Math.round(calculation.marketCapMan * 10000);
-    const previous = localStorage.getItem("hmc_previous_score");
-    localStorage.setItem("hmc_previous_score", String(scoreYen));
-    setDisplay({
-      calculation,
-      scoreYen,
-      previousScoreYen: previous === null ? null : Number(previous),
-      quizSets: [...questions],
-      quizAnswers: { ...quizAnswers },
-      quizCorrect: correct,
-    });
-    setRanking(null);
-    void refresh(scoreYen);
-    window.setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth" }), 80);
+    setCalculating(true);
+    try {
+      const response = await fetch("/api/valuation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ attemptId, uid: uid(), inputs, answers: quizAnswers }),
+      });
+      const payload = await response.json() as ValuationResponse & { error?: string };
+      if (!response.ok) {
+        if (response.status === 409 || response.status === 410) {
+          setQuestions([]);
+          setAttemptId("");
+          setQuizAnswers({});
+          setQuizPhase("idle");
+        }
+        throw new Error(payload.error || "査定できませんでした。");
+      }
+      const previous = localStorage.getItem("hmc_previous_score");
+      localStorage.setItem("hmc_previous_score", String(payload.scoreYen));
+      setDisplay({
+        calculation: payload.calculation,
+        scoreYen: payload.scoreYen,
+        previousScoreYen: previous === null ? null : Number(previous),
+        reviews: payload.reviews,
+        quizCorrect: payload.quizCorrect,
+        inputs: { ...inputs },
+      });
+      setRanking(payload.ranking);
+      window.setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth" }), 80);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "査定できませんでした。");
+    } finally {
+      setCalculating(false);
+    }
   }
 
   const result = display?.calculation;
@@ -454,7 +424,7 @@ export default function HumanMarketCapApp() {
       <div className="app-shell">
         <header className="brand-bar">
           <a className="brand" href="#top"><span className="brand-mark">HMC</span><span>HUMAN CAPITAL<br />DESK</span></a>
-          <span className="model-tag">DCF MODEL / v15</span>
+          <span className="model-tag">DCF MODEL / v16</span>
         </header>
 
         <section className="intro" id="top">
@@ -567,7 +537,7 @@ export default function HumanMarketCapApp() {
             {quizPhase === "idle" && (
               <div className="quiz-start-panel">
                 <p>15セットから選ばれた5セットに挑戦します。Aに答えるとBが表示され、Aの回答は変更できません。A・Bの両方を満たした場合のみ1点です。</p>
-                <button type="button" onClick={() => { setQuestions(pickQuestions()); setQuizPhase("A"); setTimeLeft(10); setQuizIndex(0); setQuizAnswers({}); }}>5問を開始する</button>
+                <button type="button" onClick={startQuiz} disabled={quizLoading}>{quizLoading ? "クイズを準備中…" : "5問を開始する"}</button>
               </div>
             )}
             {activeQuiz && activePart && (quizPhase === "A" || quizPhase === "B") && (
@@ -595,8 +565,8 @@ export default function HumanMarketCapApp() {
           </section>
 
           {error && <p className="form-error" role="alert">{error}</p>}
-          <button className="calculate-button" type="submit" disabled={questions.length !== 5 || quizPhase !== "done"}><span>時価総額を算出する</span><b>→</b></button>
-          <p className="privacy-note">入力内容はランキング用スコア以外保存しません。この結果は金融助言ではなく、教育・娯楽目的の試算です。</p>
+          <button className="calculate-button" type="submit" disabled={questions.length !== 5 || quizPhase !== "done" || calculating}><span>{calculating ? "サーバーで査定中…" : "時価総額を算出する"}</span><b>→</b></button>
+          <p className="privacy-note">査定条件は保存せず、ランキングには匿名IDと最新スコアのみ保存します。クイズ回答と不正防止情報は短時間で失効します。この結果は金融助言ではなく、教育・娯楽目的の試算です。</p>
         </form>
 
         {display && result && (
@@ -623,13 +593,13 @@ export default function HumanMarketCapApp() {
             )}
 
             <section className="result-card ranking-card">
-              <div className="section-title"><div><span className="eyebrow">MARKET POSITION</span><h3>市場ポジション</h3></div><span className={`connection ${ranking?.mode === "global" ? "online" : ""}`}>{ranking?.mode === "global" ? "LIVE" : "DEMO"}</span></div>
-              {ranking ? <><div className="ranking-kpis"><div><span>総合順位</span><strong><em>{ranking.rank}</em> / {ranking.total}</strong></div><div><span>偏差値</span><strong><em>{ranking.deviation.toFixed(1)}</em></strong></div><div><span>上位</span><strong><em>{ranking.topPercent.toFixed(1)}</em>%</strong></div></div><Histogram ranking={ranking} score={display.scoreYen} />{ranking.mode === "demo" && <p className="demo-note">Supabase接続前のため、比較用デモ分布で順位を表示しています。</p>}</> : <div className="ranking-loading"><span />ランキングを照合しています…</div>}
+              <div className="section-title"><div><span className="eyebrow">MARKET POSITION</span><h3>市場ポジション</h3></div><span className={`connection ${ranking ? "online" : ""}`}>{ranking ? "LIVE" : "WAIT"}</span></div>
+              {ranking ? <><div className="ranking-kpis"><div><span>総合順位</span><strong><em>{ranking.rank}</em> / {ranking.total}</strong></div><div><span>偏差値</span><strong><em>{ranking.deviation.toFixed(1)}</em></strong></div><div><span>上位</span><strong><em>{ranking.topPercent.toFixed(1)}</em>%</strong></div></div><Histogram ranking={ranking} score={display.scoreYen} /></> : <div className="ranking-loading"><span />ランキングを照合しています…</div>}
             </section>
 
             <section className="kpi-grid">
               <article className="result-card kpi-card"><span className="kpi-icon blue">01</span><p>給与所得総額</p><h3>{formatMan(result.salaryIncomeMan)}</h3><Trace title="給与所得の計算トレース"><p>年収起点へ職業カーブ・インフレ2%・NW力・容姿を毎年適用。</p><p>離職時は所得ゼロではなく、職業別の転職後所得率へ移行する期待値モデルです。</p></Trace></article>
-              <article className="result-card kpi-card"><span className="kpi-icon gold">02</span><p>資産所得総額</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の計算トレース"><p>初期資産 {formatMan(inputs.financialAssets + inputs.realEstateAssets + inputs.otherAssets)} に年収の{Math.round(inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用。</p></Trace></article>
+              <article className="result-card kpi-card"><span className="kpi-icon gold">02</span><p>資産所得総額</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の計算トレース"><p>初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)} に年収の{Math.round(display.inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用。</p></Trace></article>
             </section>
 
             <section className="result-card charts-card"><div className="section-title"><div><span className="eyebrow">LIFETIME PROJECTION</span><h3>生涯キャッシュフロー</h3></div><span className="scroll-hint">← SWIPE →</span></div><Charts result={result} /></section>
@@ -637,7 +607,7 @@ export default function HumanMarketCapApp() {
             <section className="result-card assumptions-card">
               <div className="section-title"><div><span className="eyebrow">APPLIED ASSUMPTIONS</span><h3>試算の前提条件</h3></div></div>
               <div className="assumption-list">
-                <div><span>残余就労年数</span><strong>{result.yearsRemaining}年（{inputs.age}→{result.occupation.retirement}歳）</strong></div>
+                <div><span>残余就労年数</span><strong>{result.yearsRemaining}年（{display.inputs.age}→{result.occupation.retirement}歳）</strong></div>
                 <div><span>主職終了年齢</span><strong>{result.occupation.primaryEnd}歳</strong></div>
                 <div><span>キャリア乗数</span><strong>×{result.education.multiplier.toFixed(3)}</strong></div>
                 <div><span>NW力</span><strong>{result.education.nw}</strong></div>
@@ -663,7 +633,7 @@ export default function HumanMarketCapApp() {
               <Factor label="残余就労年数" value={result.yearsRemaining / 50 * 100} caption={`${result.yearsRemaining}年`} />
             </section>
 
-            <QuizReview sets={display.quizSets} answers={display.quizAnswers} />
+            <QuizReview reviews={display.reviews} />
 
             <section className="result-card analysis-card">
               <div className="section-title"><div><span className="eyebrow">ANALYST NOTES</span><h3>分析コメント</h3></div></div>
@@ -684,7 +654,7 @@ export default function HumanMarketCapApp() {
           </section>
         )}
 
-        <footer><span>HMC CALCULATOR / v15</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
+        <footer><span>HMC CALCULATOR / v16</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
       </div>
     </main>
   );
