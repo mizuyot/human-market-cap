@@ -31,6 +31,10 @@ export interface OccupationParam {
   riskLabel: string;
   rampUp: [number, number, number, number];
   rampDown: [number, number];
+  specialGrowthYears?: number;
+  specialGrowthRate?: number;
+  incomeFloor?: number;
+  specialNote?: string;
 }
 
 export const EDUCATIONS = [
@@ -68,24 +72,34 @@ export const OCCUPATION_CATEGORIES = [
   { key: "entertainment", label: "芸能・スポーツ" },
   { key: "nightlife", label: "夜職" },
   { key: "gambling", label: "ギャンブルプロ" },
+  { key: "lifestyle", label: "生活・無業" },
 ] as const satisfies readonly OccupationCategory[];
 
 const curve = {
+  hedgeFund: [[.36, .24, .12, .030], [-.100, -.180]],
   financeElite: [[.10, .065, .025, -.010], [-.040, -.070]],
   financeStable: [[.065, .040, .015, -.005], [-.030, -.055]],
   professional: [[.065, .045, .015, -.010], [-.035, -.060]],
   tech: [[.085, .055, .015, -.020], [-.050, -.085]],
+  ai: [[.180, .120, .050, -.020], [-.080, -.150]],
+  foreignTech: [[.140, .090, .030, -.010], [-.050, -.090]],
   stable: [[.045, .030, .010, -.005], [-.030, -.050]],
   service: [[.040, .025, .005, -.015], [-.040, -.065]],
   public: [[.030, .022, .012, 0], [-.015, -.035]],
   independent: [[.075, .050, .015, -.015], [-.050, -.080]],
   founder: [[.140, .080, .020, -.040], [-.080, -.140]],
+  lottery: [[.300, .150, -.100, -.250], [-.300, -.450]],
   entertainment: [[.180, .100, -.030, -.120], [-.180, -.280]],
   influencer: [[.220, .120, -.080, -.160], [-.220, -.320]],
   athlete: [[.200, .100, -.050, -.150], [-.250, -.380]],
   nightlife: [[.180, .090, -.040, -.120], [-.180, -.280]],
   gambling: [[.120, .065, -.020, -.080], [-.120, -.200]],
+  flat: [[0, 0, 0, 0], [0, 0]],
 } as const;
+
+type OccupationExtras = Partial<Pick<OccupationParam,
+  "specialGrowthYears" | "specialGrowthRate" | "incomeFloor" | "specialNote"
+>>;
 
 function occupation(
   key: string,
@@ -100,52 +114,80 @@ function occupation(
   transitionIncomeRate: number,
   riskLabel: string,
   wage: keyof typeof curve,
+  extras: OccupationExtras = {},
 ): OccupationParam {
   return {
     key, category, label, retirement, primaryEnd, peak, baseReturn,
     appearanceMultiplier, careerRisk, transitionIncomeRate, riskLabel,
     rampUp: [...curve[wage][0]], rampDown: [...curve[wage][1]],
+    ...extras,
   };
 }
 
 export const OCCUPATIONS = [
-  occupation("fund", "finance", "ヘッジファンド・PE", 65, 60, 42, .040, .3, .030, .70, "HIGH", "financeElite"),
+  occupation("fund", "finance", "ヘッジファンド・PE", 65, 60, 45, .040, .3, .030, .70, "HIGH", "hedgeFund", { specialNote: "報酬カーブ極端：成果報酬で急伸" }),
   occupation("investmentBank", "finance", "投資銀行・マーケット・トレーダー", 65, 60, 43, .038, .5, .025, .70, "HIGH", "financeElite"),
   occupation("bankFinance", "finance", "銀行・証券・保険", 65, 65, 52, .032, .5, .010, .75, "LOW", "financeStable"),
   occupation("consultant", "finance", "戦略・総合・ITコンサルタント", 67, 65, 47, .033, .9, .020, .70, "MID", "financeElite"),
+  occupation("fullTimeTrader", "finance", "専業トレーダー・仮想通貨", 65, 55, 38, .050, .1, .100, .35, "EXTREME", "gambling", { specialNote: "高ボラティリティ：上振れも下振れも最大級" }),
 
   occupation("doctor", "professional", "医師", 70, 70, 55, .025, .3, .004, .80, "LOW", "professional"),
   occupation("dentist", "professional", "歯科医師", 70, 70, 50, .025, .5, .015, .70, "MID-LOW", "independent"),
   occupation("lawyer", "professional", "弁護士", 70, 70, 52, .028, .6, .015, .70, "MID-LOW", "professional"),
   occupation("accountant", "professional", "会計士・税理士", 70, 70, 55, .028, .4, .010, .75, "LOW", "professional"),
-  occupation("medicalSpecialist", "professional", "薬剤師・看護師・医療専門職", 67, 65, 50, .023, .3, .008, .75, "LOW", "stable"),
+  occupation("nurse", "professional", "看護師", 67, 65, 50, .024, .4, .012, .75, "MID-LOW", "stable", { specialNote: "夜勤手当と高い職業可搬性を反映" }),
+  occupation("medicalSpecialist", "professional", "薬剤師・医療専門職", 67, 65, 50, .023, .3, .008, .75, "LOW", "stable"),
 
-  occupation("software", "knowledge", "ソフトウェア・AIエンジニア", 67, 65, 45, .032, .4, .015, .65, "MID-LOW", "tech"),
+  occupation("software", "knowledge", "ITエンジニア", 67, 65, 45, .032, .4, .015, .68, "MID-LOW", "tech"),
+  occupation("aiEngineer", "knowledge", "AIエンジニア", 67, 65, 45, .042, .3, .018, .75, "MID", "ai", { specialGrowthYears: 5, specialGrowthRate: .30, specialNote: "今後5年間の成長率：全職業で最強" }),
+  occupation("foreignTech", "knowledge", "外資IT（GAFA系・RSU込み）", 67, 65, 48, .045, .4, .018, .75, "MID", "foreignTech", { specialNote: "RSU込みの高成長・高利回りモデル" }),
   occupation("productData", "knowledge", "プロダクト・データ・IT専門職", 67, 65, 48, .032, .7, .015, .70, "MID-LOW", "tech"),
   occupation("researcher", "knowledge", "研究者・大学教員", 70, 70, 55, .025, .2, .010, .70, "LOW", "professional"),
   occupation("creative", "knowledge", "デザイナー・編集・ライター", 67, 65, 42, .026, 1.0, .030, .55, "HIGH", "independent"),
+  occupation("mangaArtist", "knowledge", "漫画家・イラストレーター", 70, 60, 42, .028, 1.2, .060, .45, "VERY HIGH", "lottery", { specialNote: "印税・ヒット作による極端な上振れモデル" }),
 
   occupation("listedManager", "employee", "上場企業 管理職・高度専門職", 65, 65, 55, .030, .6, .008, .75, "LOW", "stable"),
   occupation("listedGeneral", "employee", "上場企業 一般社員", 65, 65, 55, .028, .5, .008, .75, "LOW", "stable"),
   occupation("sme", "employee", "中小企業 事務・営業職", 65, 65, 53, .025, .5, .012, .65, "MID-LOW", "stable"),
+  occupation("nonRegular", "employee", "非正規雇用", 65, 65, 45, .018, .7, .045, .50, "HIGH", "service"),
   occupation("skilled", "employee", "製造・建設・物流・技能職", 65, 65, 52, .024, .3, .015, .65, "MID-LOW", "stable"),
   occupation("service", "employee", "小売・飲食・宿泊・介護サービス", 65, 65, 48, .022, .8, .020, .60, "MID", "service"),
   occupation("public", "employee", "公務員", 65, 65, 60, .023, .2, .002, .80, "VERY LOW", "public"),
-  occupation("teacher", "employee", "教員・教育職", 65, 65, 55, .023, .4, .006, .75, "LOW", "public"),
+  occupation("teacher", "employee", "教師", 65, 65, 55, .023, .4, .006, .75, "LOW", "public"),
+  occupation("childcare", "employee", "保育士", 65, 65, 50, .020, .7, .015, .65, "MID-LOW", "service"),
+  occupation("bureaucrat", "employee", "官僚（キャリア）", 70, 65, 58, .030, .2, .012, .80, "MID-LOW", "public", { specialNote: "薄給激務から後半に伸びる特殊カーブ" }),
+  occupation("pilot", "employee", "パイロット", 67, 65, 55, .030, .4, .010, .80, "LOW", "professional"),
+  occupation("cabinCrew", "employee", "客室乗務員（CA）", 65, 60, 45, .023, 1.6, .025, .60, "HIGH", "service"),
+  occupation("beautician", "employee", "美容師", 70, 65, 48, .022, 2.0, .035, .55, "HIGH", "independent", { specialNote: "アシスタント期から独立後へ伸びるモデル" }),
 
   occupation("founder", "independent", "スタートアップ起業家", 70, 70, 50, .030, 1.0, .045, .55, "VERY HIGH", "founder"),
   occupation("businessOwner", "independent", "安定事業の経営者・自営業", 70, 70, 55, .028, 1.0, .025, .65, "HIGH", "independent"),
   occupation("freelancer", "independent", "高スキルフリーランス", 70, 67, 50, .030, .8, .025, .60, "HIGH", "independent"),
+  occupation("farmerFisher", "independent", "農家・漁師", 75, 70, 55, .025, .3, .035, .60, "HIGH", "independent", { specialNote: "土地・船など事業資産を持つ一次産業モデル" }),
+  occupation("monk", "independent", "僧侶・宗教家", 80, 80, 60, .024, .5, .015, .70, "MID-LOW", "stable"),
+  occupation("politician", "independent", "政治家", 100, 100, 60, .030, 1.2, .150, .40, "EXTREME", "lottery", { specialNote: "引退年齢なし・落選リスク極大" }),
 
   occupation("entertainment", "entertainment", "俳優・タレント・音楽家", 65, 55, 35, .025, 2.0, .070, .45, "EXTREME", "entertainment"),
-  occupation("influencer", "entertainment", "インフルエンサー・配信者", 65, 50, 32, .028, 1.6, .080, .40, "EXTREME", "influencer"),
+  occupation("influencer", "entertainment", "YouTuber・配信者・VTuber", 65, 50, 32, .028, 1.6, .080, .40, "EXTREME", "influencer", { specialNote: "この査定、ぜひ動画や配信のネタにしてね！" }),
   occupation("athlete", "entertainment", "プロスポーツ選手", 65, 40, 29, .025, 1.0, .050, .55, "EXTREME", "athlete"),
+  occupation("proGamer", "entertainment", "プロゲーマー・eスポーツ", 60, 38, 26, .026, .5, .100, .35, "EXTREME", "athlete"),
+  occupation("comedian", "entertainment", "お笑い芸人", 70, 60, 42, .020, 1.8, .100, .35, "EXTREME", "lottery", { specialNote: "売れるまで低収入、当たれば急騰の極端モデル" }),
+  occupation("voiceActor", "entertainment", "声優", 70, 60, 40, .023, 2.0, .070, .45, "EXTREME", "entertainment"),
+  occupation("boatCycleRacer", "entertainment", "競艇・競輪選手", 60, 45, 32, .030, .4, .060, .55, "VERY HIGH", "athlete", { specialNote: "知られざる高収入アスリート枠" }),
+  occupation("boardGamePro", "entertainment", "プロ棋士・プロ雀士", 75, 70, 50, .030, .2, .045, .55, "VERY HIGH", "independent"),
+  occupation("sumo", "entertainment", "力士", 65, 35, 27, .022, .5, .120, .35, "EXTREME", "athlete", { specialNote: "番付ピラミッドと早期引退を反映" }),
+  occupation("traditionalActor", "entertainment", "歌舞伎役者・伝統芸能", 80, 75, 55, .028, 2.0, .030, .65, "HIGH", "entertainment", { specialNote: "世襲・家柄プレミアムを含む特殊モデル" }),
 
   occupation("host", "nightlife", "ホスト", 65, 45, 30, .018, 8.0, .080, .45, "EXTREME", "nightlife"),
   occupation("hostess", "nightlife", "ホステス・キャバクラ", 65, 45, 28, .018, 8.0, .070, .45, "EXTREME", "nightlife"),
+  occupation("sexWorker", "nightlife", "風俗", 65, 42, 27, .018, 10.0, .100, .40, "EXTREME", "nightlife"),
+  occupation("nightlifeFreelance", "nightlife", "夜職フリーランス（立ちんぼ・港区女子等）", 65, 40, 26, .016, 9.0, .120, .35, "EXTREME", "nightlife"),
   occupation("clubOwner", "nightlife", "クラブママ・夜職経営", 70, 70, 52, .022, 4.0, .040, .55, "HIGH", "independent"),
 
   occupation("professionalGambler", "gambling", "プロギャンブラー（ポーカー・競馬・スロット等）", 65, 55, 38, .037, .1, .085, .40, "EXTREME", "gambling"),
+
+  occupation("homemaker", "lifestyle", "専業主婦・主夫", 75, 75, 55, .020, .4, .010, .65, "LOW", "stable", { incomeFloor: 350, specialNote: "家事労働を年350万円の市場価値として換算" }),
+  occupation("unemployed", "lifestyle", "無職・ニート", 65, 65, 35, .010, 0, .100, .30, "EXTREME", "flat", { specialNote: "収入0円でも資産運用分は時価総額に反映" }),
 ] as const;
 
 export type EducationKey = typeof EDUCATIONS[number]["key"];
@@ -209,7 +251,9 @@ export function getAppearance(key: AppearanceKey): AppearanceParam {
 }
 
 export function getOccupation(key: OccupationKey): OccupationParam {
-  return OCCUPATIONS.find((item) => item.key === key) ?? OCCUPATIONS[14];
+  return OCCUPATIONS.find((item) => item.key === key)
+    ?? OCCUPATIONS.find((item) => item.key === "listedGeneral")
+    ?? OCCUPATIONS[0];
 }
 
 export function getOccupationsByCategory(category: OccupationCategoryKey): OccupationParam[] {
@@ -234,7 +278,8 @@ export function miniWageCurve(job: OccupationParam): number[] {
   let value = 100;
   const points: number[] = [];
   for (let year = 0; year < 28; year += 2) {
-    value *= Math.pow(1 + wageCurveRate(job, start, year) + .02, 2);
+    const specialGrowth = year < (job.specialGrowthYears ?? 0) ? (job.specialGrowthRate ?? 0) : 0;
+    value *= Math.pow(1 + wageCurveRate(job, start, year) + specialGrowth + .02, 2);
     points.push(Math.max(10, value));
   }
   return points;

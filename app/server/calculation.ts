@@ -27,7 +27,7 @@ export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationRe
   const effectiveReturn = job.baseReturn + financialAdjustment + appearanceReturnAdjustment;
   const initialAssets = Math.max(0, input.financialAssets) + Math.max(0, input.realEstateAssets) + Math.max(0, input.otherAssets);
   let balance = initialAssets;
-  let rawSalary = Math.max(0, input.annualIncome);
+  let rawSalary = Math.max(0, input.annualIncome, job.incomeFloor ?? 0);
   let salaryTotal = 0;
   let assetTotal = 0;
   let reinvested = 0;
@@ -47,7 +47,8 @@ export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationRe
     gains += gain;
     assetTotal += gain;
     balance += gain;
-    const curveRate = wageCurveRate(job, input.age, year);
+    const specialGrowth = year < (job.specialGrowthYears ?? 0) ? (job.specialGrowthRate ?? 0) : 0;
+    const curveRate = wageCurveRate(job, input.age, year) + specialGrowth;
     projections.push({ age, rawSalary, salary, survival, careerFactor, curveRate, initialAssets, reinvested, gains, balance });
     rawSalary = Math.max(0, rawSalary * (1 + curveRate + .02 + salaryNw + appearanceSalaryAdjustment));
   }

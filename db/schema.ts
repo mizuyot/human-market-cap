@@ -3,8 +3,16 @@ import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const scores = sqliteTable("hmc_scores", {
   uid: text("uid").primaryKey(),
   score: integer("score").notNull(),
+  occupation: text("occupation"),
+  age: integer("age"),
+  education: text("education"),
   updatedAt: integer("updated_at").notNull(),
-}, (table) => [index("hmc_scores_score_idx").on(table.score)]);
+}, (table) => [
+  index("hmc_scores_score_idx").on(table.score),
+  index("hmc_scores_occupation_score_idx").on(table.occupation, table.score),
+  index("hmc_scores_age_score_idx").on(table.age, table.score),
+  index("hmc_scores_education_score_idx").on(table.education, table.score),
+]);
 
 export const quizAttempts = sqliteTable("hmc_quiz_attempts", {
   id: text("id").primaryKey(),

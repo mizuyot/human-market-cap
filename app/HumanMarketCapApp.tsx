@@ -321,7 +321,63 @@ interface ShareCardPayload {
   tier: string;
   deviation: string;
   occupation: string;
+  quiz: string;
+  title: string;
+  marketSignal: string;
+  division: string;
+  variant: "premium" | "surge" | "standard" | "warning";
   url: string;
+}
+
+interface ResultFlavor {
+  title: string;
+  quizBadge: string;
+  marketSignal: string;
+  division: string;
+  variant: ShareCardPayload["variant"];
+  repeating: boolean;
+}
+
+function hasRepeatingValuation(value: number): boolean {
+  const digits = String(Math.round(Math.abs(value))).replace(/0+$/, "");
+  return digits.length >= 3 && /^(.)\1+$/.test(digits);
+}
+
+function getResultFlavor(display: DisplayResult, ranking: RankingSnapshot | null, tier: string): ResultFlavor {
+  const { inputs, quizCorrect, calculation } = display;
+  const hiddenTitle = inputs.education === "middleSchool" && inputs.occupation === "fund"
+    ? "下剋上"
+    : inputs.education === "tokyoKyotoDoctor" && inputs.occupation === "nonRegular"
+      ? "高学歴ワーキングプア"
+      : inputs.appearance === "top10" && inputs.occupation === "professionalGambler"
+        ? "宝の持ち腐れ"
+        : null;
+  const exactAverage = ranking?.deviation.toFixed(1) === "50.0";
+  const repeating = hasRepeatingValuation(calculation.marketCapMan);
+  const title = hiddenTitle
+    ?? (exactAverage ? "完全なる市場平均" : null)
+    ?? (repeating ? "ぞろ目プレミア" : null)
+    ?? (tier === "S" ? "市場の怪物" : tier === "D" ? "再建待ったなし" : "成長余地あり");
+  const quizBadge = quizCorrect === 5 ? "賢者・利回りMAX" : quizCorrect === 0 ? "カモ" : `金融判断 ${quizCorrect}/5`;
+  const marketSignal = tier === "S"
+    ? "ストップ高"
+    : tier === "D"
+      ? "上場廃止勧告・監理銘柄入り"
+      : ranking && ranking.deviation < 50
+        ? "TOPIXに負けています"
+        : "市場平均をアウトパフォーム";
+  const occupationSegment = ranking?.segments.find((segment) => segment.kind === "occupation");
+  const division = occupationSegment
+    ? `${occupationSegment.label} ${occupationSegment.rank}位 / ${occupationSegment.total}人`
+    : "部門ランキング集計中";
+  return {
+    title,
+    quizBadge,
+    marketSignal,
+    division,
+    variant: repeating ? "premium" : tier === "S" ? "surge" : tier === "D" ? "warning" : "standard",
+    repeating,
+  };
 }
 
 function fitCanvasText(context: CanvasRenderingContext2D, text: string, maxWidth: number, startingSize: number, minimumSize: number) {
@@ -341,61 +397,83 @@ function createShareCardCanvas(payload: ShareCardPayload): HTMLCanvasElement {
   const context = canvas.getContext("2d");
   if (!context) return canvas;
 
-  context.fillStyle = "#0a0a0a";
+  const accent = payload.variant === "warning" ? "#f87171" : payload.variant === "standard" ? "#d4a843" : "#f0d487";
+  context.fillStyle = payload.variant === "warning" ? "#100a0a" : "#0a0a0a";
   context.fillRect(0, 0, canvas.width, canvas.height);
   const glow = context.createRadialGradient(1060, 40, 0, 1060, 40, 600);
-  glow.addColorStop(0, "rgba(212,168,67,.24)");
+  glow.addColorStop(0, payload.variant === "warning" ? "rgba(248,113,113,.25)" : "rgba(212,168,67,.28)");
   glow.addColorStop(1, "rgba(212,168,67,0)");
   context.fillStyle = glow;
   context.fillRect(0, 0, canvas.width, canvas.height);
-  context.strokeStyle = "#6b5527";
+  context.strokeStyle = accent;
   context.lineWidth = 3;
   context.strokeRect(29, 29, 1142, 572);
-  context.fillStyle = "#d4a843";
+  context.fillStyle = accent;
   context.fillRect(29, 29, 10, 572);
+  if (payload.variant === "premium") {
+    context.lineWidth = 2;
+    context.strokeRect(43, 43, 1114, 544);
+  }
 
-  context.fillStyle = "#d4a843";
+  context.fillStyle = accent;
   context.font = "500 24px 'DM Mono', monospace";
   context.fillText("HMC / HUMAN MARKET CAPITAL", 78, 84);
+  context.textAlign = "right";
+  context.font = "700 23px 'Noto Serif JP', serif";
+  context.fillText(payload.marketSignal, 1120, 84);
+  context.textAlign = "left";
   context.fillStyle = "#8d8980";
   context.font = "500 25px 'Noto Serif JP', serif";
-  context.fillText("あなたの人間時価総額", 78, 154);
+  context.fillText("あなたの人間時価総額", 78, 143);
 
   context.fillStyle = "#f0d487";
-  const scoreSize = fitCanvasText(context, payload.score, 1035, 104, 64);
+  const scoreSize = fitCanvasText(context, payload.score, 1035, 98, 62);
   context.font = `700 ${scoreSize}px "Noto Serif JP", serif`;
-  context.fillText(payload.score, 72, 286);
+  context.fillText(payload.score, 72, 259);
 
-  context.fillStyle = "#d4a843";
-  context.fillRect(76, 337, 208, 76);
+  context.fillStyle = accent;
+  context.fillRect(76, 297, 208, 72);
   context.fillStyle = "#15110a";
-  context.font = "700 39px 'DM Mono', monospace";
-  context.fillText(`${payload.tier} TIER`, 102, 388);
+  context.font = "700 37px 'DM Mono', monospace";
+  context.fillText(`${payload.tier} TIER`, 102, 345);
   context.fillStyle = "#f2eee5";
-  context.font = "700 42px 'Noto Serif JP', serif";
-  context.fillText(`偏差値 ${payload.deviation}`, 326, 389);
+  context.font = "700 40px 'Noto Serif JP', serif";
+  context.fillText(`偏差値 ${payload.deviation}`, 326, 345);
+
+  context.fillStyle = accent;
+  const titleSize = fitCanvasText(context, `称号：${payload.title}`, 1040, 33, 24);
+  context.font = `700 ${titleSize}px "Noto Serif JP", serif`;
+  context.fillText(`称号：${payload.title}`, 78, 414);
+  context.fillStyle = "#f2eee5";
+  context.font = "600 25px 'Noto Serif JP', serif";
+  context.fillText(`金融リテラシー ${payload.quiz}`, 78, 458);
+  context.textAlign = "right";
+  const divisionSize = fitCanvasText(context, payload.division, 560, 24, 18);
+  context.font = `600 ${divisionSize}px "Noto Serif JP", serif`;
+  context.fillText(payload.division, 1120, 458);
+  context.textAlign = "left";
 
   context.fillStyle = "#aaa59c";
-  const occupationSize = fitCanvasText(context, payload.occupation, 1040, 30, 22);
+  const occupationSize = fitCanvasText(context, payload.occupation, 1040, 27, 20);
   context.font = `600 ${occupationSize}px "Noto Serif JP", serif`;
-  context.fillText(payload.occupation, 78, 464);
+  context.fillText(payload.occupation, 78, 503);
   context.strokeStyle = "#38342d";
   context.lineWidth = 2;
   context.beginPath();
-  context.moveTo(78, 496);
-  context.lineTo(1122, 496);
+  context.moveTo(78, 523);
+  context.lineTo(1122, 523);
   context.stroke();
 
   context.fillStyle = "#f2eee5";
-  context.font = "600 27px 'Noto Serif JP', serif";
-  context.fillText("あなたも算出してみる →", 78, 548);
+  context.font = "600 25px 'Noto Serif JP', serif";
+  context.fillText("あなたも算出してみる →", 78, 559);
   context.fillStyle = "#9c978e";
-  context.font = "500 19px 'DM Mono', monospace";
-  context.fillText(payload.url, 78, 581);
-  context.fillStyle = "#d4a843";
+  context.font = "500 17px 'DM Mono', monospace";
+  context.fillText(payload.url, 78, 586);
+  context.fillStyle = accent;
   context.textAlign = "right";
-  context.font = "500 22px 'Noto Serif JP', serif";
-  context.fillText("#人間時価総額", 1120, 578);
+  context.font = "500 20px 'Noto Serif JP', serif";
+  context.fillText("#人間時価総額", 1120, 582);
   context.textAlign = "left";
   return canvas;
 }
@@ -424,6 +502,7 @@ export default function HumanMarketCapApp() {
   const [shareImageUrl, setShareImageUrl] = useState("");
   const [sharingImage, setSharingImage] = useState(false);
   const [shareFeedback, setShareFeedback] = useState("");
+  const [challengeScoreYen, setChallengeScoreYen] = useState<number | null>(null);
   const resultRef = useRef<HTMLElement>(null);
 
   const education = useMemo(() => getEducation(inputs.education), [inputs.education]);
@@ -463,6 +542,11 @@ export default function HumanMarketCapApp() {
     }, 1000);
     return () => window.clearTimeout(timer);
   }, [advanceQuiz, quizPhase, timeLeft]);
+
+  useEffect(() => {
+    const candidate = Number(new URLSearchParams(window.location.search).get("challenge"));
+    setChallengeScoreYen(Number.isSafeInteger(candidate) && candidate > 0 ? candidate : null);
+  }, []);
 
   function number(field: keyof InputState, value: number) {
     setInputs((current) => ({ ...current, [field]: Number.isFinite(value) ? value : 0 }));
@@ -543,9 +627,19 @@ export default function HumanMarketCapApp() {
   const tier = result ? getTier(result.marketCapMan) : "D";
   const activeQuiz = questions[quizIndex];
   const activePart = activeQuiz && (quizPhase === "A" || quizPhase === "B") ? activeQuiz[quizPhase.toLowerCase() as "a" | "b"] : null;
+  const flavor = useMemo(
+    () => display && result ? getResultFlavor(display, ranking, tier) : null,
+    [display, ranking, result, tier],
+  );
+
+  function challengeUrl(scoreYen: number) {
+    const url = new URL(window.location.pathname, window.location.origin);
+    url.searchParams.set("challenge", String(scoreYen));
+    return url.toString();
+  }
 
   useEffect(() => {
-    if (!display || !result) {
+    if (!display || !result || !flavor) {
       setShareImageUrl("");
       return;
     }
@@ -558,13 +652,18 @@ export default function HumanMarketCapApp() {
         tier,
         deviation: ranking ? ranking.deviation.toFixed(1) : "—",
         occupation: result.occupation.label,
-        url: `${window.location.host}${window.location.pathname}`,
+        quiz: `${display.quizCorrect}/5｜${flavor.quizBadge}`,
+        title: flavor.title,
+        marketSignal: flavor.marketSignal,
+        division: flavor.division,
+        variant: flavor.variant,
+        url: challengeUrl(display.scoreYen).replace(/^https?:\/\//, ""),
       });
       setShareImageUrl(canvas.toDataURL("image/png"));
     };
     void render();
     return () => { active = false; };
-  }, [display, ranking, result, tier]);
+  }, [display, flavor, ranking, result, tier]);
 
   function shareText() {
     if (!display || !result) return;
@@ -576,16 +675,19 @@ export default function HumanMarketCapApp() {
       `査定額：${formatMan(result.marketCapMan)}`,
       `${tier} TIER｜${result.occupation.label}`,
       position,
-      `金融リテラシー ${display.quizCorrect}/5点`,
+      `称号：${flavor?.title ?? "査定済み"}`,
+      `金融リテラシー ${display.quizCorrect}/5点｜${flavor?.quizBadge ?? ""}`,
+      flavor?.division ?? "",
+      flavor?.marketSignal ?? "",
       "※もちろん、人間の価値はこの数字では決まりません。",
       "#人間時価総額 #HMC",
-      `${window.location.origin}${window.location.pathname}`,
-    ].join("\n");
+      challengeUrl(display.scoreYen),
+    ].filter(Boolean).join("\n");
     return summary;
   }
 
   async function shareResultImage() {
-    if (!display || !result) return;
+    if (!display || !result || !flavor) return;
     setSharingImage(true);
     setShareFeedback("");
     try {
@@ -594,7 +696,12 @@ export default function HumanMarketCapApp() {
         tier,
         deviation: ranking ? ranking.deviation.toFixed(1) : "—",
         occupation: result.occupation.label,
-        url: `${window.location.host}${window.location.pathname}`,
+        quiz: `${display.quizCorrect}/5｜${flavor.quizBadge}`,
+        title: flavor.title,
+        marketSignal: flavor.marketSignal,
+        division: flavor.division,
+        variant: flavor.variant,
+        url: challengeUrl(display.scoreYen).replace(/^https?:\/\//, ""),
       });
       const file = canvasToPngFile(canvas);
       const summary = shareText() ?? "#人間時価総額";
@@ -622,7 +729,7 @@ export default function HumanMarketCapApp() {
       <div className="app-shell">
         <header className="brand-bar">
           <a className="brand" href="#top"><span className="brand-mark">HMC</span><span>HUMAN CAPITAL<br />DESK</span></a>
-          <span className="model-tag">DCF MODEL / v16</span>
+          <span className="model-tag">DCF MODEL / v17</span>
         </header>
 
         <section className="intro" id="top">
@@ -633,7 +740,16 @@ export default function HumanMarketCapApp() {
           <div className="trust-row"><span>01 / 匿名</span><span>02 / 約3分</span><span>03 / 最新スコアのみ</span></div>
         </section>
 
-        <form className="calculator-form" onSubmit={submit} noValidate>
+        {challengeScoreYen !== null && (
+          <section className="challenge-banner">
+            <span>MARKET CHALLENGE</span>
+            <strong>{formatShareScore(challengeScoreYen / 10000)}に挑戦する</strong>
+            <p>シェアした人の査定額を超えられるか。条件を入力して勝負してください。</p>
+            <a href="#valuation-form">診断を始める →</a>
+          </section>
+        )}
+
+        <form className="calculator-form" id="valuation-form" onSubmit={submit} noValidate>
           <div className="form-heading"><div><span className="eyebrow">VALUATION SHEET</span><h2>査定情報</h2></div><span>9 QUESTIONS</span></div>
 
           <section className="question-card">
@@ -705,6 +821,7 @@ export default function HumanMarketCapApp() {
               </div>
               <div className="curve-preview"><span>WAGE CURVE PREVIEW</span><MiniCurve occupation={inputs.occupation} /></div>
               <div className="risk-line"><span>主職{job.primaryEnd}歳まで / 転職後{Math.round(job.transitionIncomeRate * 100)}% / 容姿×{job.appearanceMultiplier.toFixed(1)}</span><b className={`risk-badge risk-${job.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>{job.riskLabel}</b></div>
+              {job.specialNote && <div className={`job-special-note ${job.key === "aiEngineer" ? "ai-strongest" : ""}`}>{job.specialNote}</div>}
             </div>
           </section>
 
@@ -764,22 +881,33 @@ export default function HumanMarketCapApp() {
 
           {error && <p className="form-error" role="alert">{error}</p>}
           <button className="calculate-button" type="submit" disabled={questions.length !== 5 || quizPhase !== "done" || calculating}><span>{calculating ? "サーバーで査定中…" : "時価総額を算出する"}</span><b>→</b></button>
-          <p className="privacy-note">査定条件は保存せず、ランキングには匿名IDと最新スコアのみ保存します。クイズ回答と不正防止情報は短時間で失効します。この結果は金融助言ではなく、教育・娯楽目的の試算です。</p>
+          <p className="privacy-note">年収・資産・容姿・クイズ回答は保存しません。ランキングには匿名ID、最新スコア、職業・年齢・学歴の区分のみ保存します。この結果は金融助言ではなく、教育・娯楽目的の試算です。</p>
         </form>
 
         {display && result && (
           <section className="results" ref={resultRef}>
             <div className="result-divider"><span>VALUATION REPORT</span><b>査定完了</b></div>
-            <section className={`market-hero tier-${tier}`}>
+            <section className={`market-hero tier-${tier} flavor-${flavor?.variant ?? "standard"}`}>
               <div className="hero-badges"><span className="tier-badge">{tier} TIER</span><span className={`risk-badge risk-${result.occupation.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>{result.occupation.riskLabel} RISK</span></div>
               <p>あなたの人間時価総額</p><h2>{formatMan(result.marketCapMan)}</h2><span className="hero-en">ESTIMATED HUMAN MARKET CAPITAL</span>
+              {flavor && <div className="result-flavor"><span>{flavor.marketSignal}</span><strong>称号：{flavor.title}</strong><b>{flavor.quizBadge}</b>{flavor.repeating && <em>ぞろ目・金枠プレミア</em>}</div>}
               <Trace title="時価総額の計算トレース"><p>給与所得 {formatMan(result.salaryIncomeMan)} ＋ 資産所得 {formatMan(result.assetIncomeMan)}</p><p>残余{result.yearsRemaining}年の期待キャッシュフローを全補正で調整しています。</p></Trace>
             </section>
+
+            {result.occupation.specialNote && <p className={`result-job-note ${result.occupation.key === "aiEngineer" ? "ai-strongest" : ""}`}>{result.occupation.specialNote}</p>}
+
+            {challengeScoreYen !== null && (
+              <div className={`challenge-result ${display.scoreYen >= challengeScoreYen ? "win" : "lose"}`}>
+                <span>{display.scoreYen >= challengeScoreYen ? "CHALLENGE WON" : "CHALLENGE LOST"}</span>
+                <strong>{display.scoreYen >= challengeScoreYen ? "勝利・ストップ高" : "惜敗・追証発生"}</strong>
+                <p>挑戦者との差：{display.scoreYen >= challengeScoreYen ? "＋" : "−"}{formatMan(Math.abs(display.scoreYen - challengeScoreYen) / 10000)}</p>
+              </div>
+            )}
 
             <section className="result-card share-card">
               <div className="share-card-heading">
                 <span>SHARE CARD</span>
-                <strong>結果カードができました</strong>
+                <strong>{flavor?.variant === "premium" ? "金枠プレミアカード出現" : "結果カードができました"}</strong>
               </div>
               <div className="share-image-frame">
                 {shareImageUrl
@@ -792,12 +920,12 @@ export default function HumanMarketCapApp() {
             </section>
 
             {display.previousScoreYen !== null && (
-              <div className={`delta-banner ${display.scoreYen >= display.previousScoreYen ? "positive" : "negative"}`}><span>前回査定との差分</span><strong>{display.scoreYen >= display.previousScoreYen ? "＋" : "−"}{formatMan(Math.abs(display.scoreYen - display.previousScoreYen) / 10000)}</strong></div>
+              <div className={`delta-banner ${display.scoreYen >= display.previousScoreYen ? "positive" : "negative"}`}><span>{display.scoreYen >= display.previousScoreYen ? "前回比・急騰 ↑" : "前回比・暴落 ↓"}</span><strong>{display.scoreYen >= display.previousScoreYen ? "＋" : "−"}{formatMan(Math.abs(display.scoreYen - display.previousScoreYen) / 10000)}</strong></div>
             )}
 
             <section className="result-card ranking-card">
               <div className="section-title"><div><span className="eyebrow">MARKET POSITION</span><h3>市場ポジション</h3></div><span className={`connection ${ranking ? "online" : ""}`}>{ranking ? "LIVE" : "WAIT"}</span></div>
-              {ranking ? <><div className="ranking-kpis"><div><span>総合順位</span><strong><em>{ranking.rank}</em> / {ranking.total}</strong></div><div><span>偏差値</span><strong><em>{ranking.deviation.toFixed(1)}</em></strong></div><div><span>上位</span><strong><em>{ranking.topPercent.toFixed(1)}</em>%</strong></div></div><Histogram ranking={ranking} score={display.scoreYen} /></> : <div className="ranking-loading"><span />ランキングを照合しています…</div>}
+              {ranking ? <><div className="ranking-kpis"><div><span>総合順位</span><strong><em>{ranking.rank}</em> / {ranking.total}</strong></div><div><span>偏差値</span><strong><em>{ranking.deviation.toFixed(1)}</em></strong></div><div><span>上位</span><strong><em>{ranking.topPercent.toFixed(1)}</em>%</strong></div></div><Histogram ranking={ranking} score={display.scoreYen} /><div className="segment-rankings">{ranking.segments.map((segment) => <div key={segment.kind}><span>{segment.label}</span><strong><em>{segment.rank}</em>位 / {segment.total}人</strong></div>)}</div></> : <div className="ranking-loading"><span />ランキングを照合しています…</div>}
             </section>
 
             <section className="kpi-grid">
@@ -820,6 +948,8 @@ export default function HumanMarketCapApp() {
                 <div><span>容姿→給与</span><strong>{formatPercent(result.appearanceSalaryAdjustment, 2)} / 年</strong></div>
                 <div><span>容姿→利回り</span><strong>{formatPercent(result.appearanceReturnAdjustment, 1)}</strong></div>
                 <div><span>職業別基本利回り</span><strong>{formatPercent(result.occupation.baseReturn)}</strong></div>
+                {result.occupation.specialGrowthYears && <div className="highlight"><span>期間限定成長ブースト</span><strong>最初の{result.occupation.specialGrowthYears}年 ＋{Math.round((result.occupation.specialGrowthRate ?? 0) * 100)}% / 年</strong></div>}
+                {result.occupation.incomeFloor && <div><span>家事労働の換算額</span><strong>年{result.occupation.incomeFloor}万円</strong></div>}
                 <div><span>金融リテラシー</span><strong>{display.quizCorrect} / 5点・{formatPercent(result.financialAdjustment)}</strong></div>
                 <div className="highlight"><span>実効利回り</span><strong>{(result.effectiveReturn * 100).toFixed(2)}%（上限なし）</strong></div>
                 <div><span>キャリア変動リスク</span><strong>{(result.occupation.careerRisk * 100).toFixed(1)}% / 年</strong></div>
@@ -857,7 +987,7 @@ export default function HumanMarketCapApp() {
           </section>
         )}
 
-        <footer><span>HMC CALCULATOR / v16</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
+        <footer><span>HMC CALCULATOR / v17</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
       </div>
     </main>
   );
