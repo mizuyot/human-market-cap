@@ -323,40 +323,59 @@ interface ShareCardPayload {
   deviation: string;
   occupation: string;
   quiz: string;
-  title: string;
+  title: string | null;
+  avatar: string | null;
   marketSignal: string;
   variant: "premium" | "surge" | "standard" | "warning";
   url: string;
 }
 
 interface ResultFlavor {
-  title: string;
+  title: string | null;
+  avatar: string | null;
   quizBadge: string;
   marketSignal: string;
   variant: ShareCardPayload["variant"];
-  repeating: boolean;
 }
 
-function hasRepeatingValuation(value: number): boolean {
-  const digits = String(Math.round(Math.abs(value))).replace(/0+$/, "");
-  return digits.length >= 3 && /^(.)\1+$/.test(digits);
+interface HiddenTitle {
+  title: string;
+  avatar: string;
+}
+
+function getHiddenTitle(display: DisplayResult, ranking: RankingSnapshot | null, tier: string): HiddenTitle | null {
+  const { inputs, quizCorrect } = display;
+  const totalAssets = inputs.financialAssets + inputs.realEstateAssets + inputs.otherAssets;
+  if (inputs.education === "middleSchool" && inputs.occupation === "fund") {
+    return { title: "下剋上", avatar: "/title-avatars/gekokujo.jpg" };
+  }
+  if (inputs.education === "tokyoKyotoDoctor" && inputs.occupation === "nonRegular") {
+    return { title: "高学歴ワーキングプア", avatar: "/title-avatars/high-education-working-poor.jpg" };
+  }
+  if (inputs.appearance === "top10" && inputs.occupation === "professionalGambler") {
+    return { title: "宝の持ち腐れ", avatar: "/title-avatars/treasure-wasted.jpg" };
+  }
+  if (inputs.occupation === "unemployed" && totalAssets >= 10_000) {
+    return { title: "無職という名の資本家", avatar: "/title-avatars/unemployed-capitalist.jpg" };
+  }
+  if (inputs.occupation === "aiEngineer" && inputs.age <= 30 && tier === "S") {
+    return { title: "2026最有力銘柄候補", avatar: "/title-avatars/ai-2026-top-pick.jpg" };
+  }
+  if (["pokerLive", "pokerOnline"].includes(inputs.occupation) && quizCorrect === 5 && inputs.financialAssets < 100) {
+    return { title: "EVだけは億万長者", avatar: "/title-avatars/ev-millionaire.jpg" };
+  }
+  if (inputs.occupation === "public" && totalAssets >= 5_000 && inputs.reinvestmentRate >= .4) {
+    return { title: "静かなる資本家", avatar: "/title-avatars/quiet-capitalist.jpg" };
+  }
+  if (ranking?.deviation.toFixed(1) === "50.0") {
+    return { title: "完全なる市場平均", avatar: "/title-avatars/perfect-average.jpg" };
+  }
+  return null;
 }
 
 function getResultFlavor(display: DisplayResult, ranking: RankingSnapshot | null, tier: string): ResultFlavor {
-  const { inputs, quizCorrect, calculation } = display;
-  const hiddenTitle = inputs.education === "middleSchool" && inputs.occupation === "fund"
-    ? "下剋上"
-    : inputs.education === "tokyoKyotoDoctor" && inputs.occupation === "nonRegular"
-      ? "高学歴ワーキングプア"
-      : inputs.appearance === "top10" && inputs.occupation === "professionalGambler"
-        ? "宝の持ち腐れ"
-        : null;
-  const exactAverage = ranking?.deviation.toFixed(1) === "50.0";
-  const repeating = hasRepeatingValuation(calculation.marketCapMan);
-  const title = hiddenTitle
-    ?? (exactAverage ? "完全なる市場平均" : null)
-    ?? (repeating ? "ぞろ目プレミア" : null)
-    ?? (tier === "S" ? "市場の怪物" : tier === "D" ? "再建待ったなし" : "成長余地あり");
+  const { quizCorrect } = display;
+  const hiddenTitle = getHiddenTitle(display, ranking, tier);
   const quizBadge = quizCorrect === 5 ? "賢者・利回りMAX" : quizCorrect === 0 ? "カモ" : `金融判断 ${quizCorrect}/5`;
   const marketSignal = tier === "S"
     ? "ストップ高"
@@ -366,11 +385,11 @@ function getResultFlavor(display: DisplayResult, ranking: RankingSnapshot | null
         ? "TOPIXに負けています"
         : "市場平均をアウトパフォーム";
   return {
-    title,
+    title: hiddenTitle?.title ?? null,
+    avatar: hiddenTitle?.avatar ?? null,
     quizBadge,
     marketSignal,
-    variant: repeating ? "premium" : tier === "S" ? "surge" : tier === "D" ? "warning" : "standard",
-    repeating,
+    variant: hiddenTitle ? "premium" : tier === "S" ? "surge" : tier === "D" ? "warning" : "standard",
   };
 }
 
@@ -384,7 +403,16 @@ function fitCanvasText(context: CanvasRenderingContext2D, text: string, maxWidth
   return size;
 }
 
-function createShareCardCanvas(payload: ShareCardPayload): HTMLCanvasElement {
+function loadCanvasImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("称号アバターを読み込めませんでした。"));
+    image.src = src;
+  });
+}
+
+async function createShareCardCanvas(payload: ShareCardPayload): Promise<HTMLCanvasElement> {
   const canvas = document.createElement("canvas");
   canvas.width = 1200;
   canvas.height = 630;
@@ -434,18 +462,39 @@ function createShareCardCanvas(payload: ShareCardPayload): HTMLCanvasElement {
   context.font = "700 40px 'Noto Serif JP', serif";
   context.fillText(`偏差値 ${payload.deviation}`, 326, 345);
 
-  context.fillStyle = accent;
-  const titleSize = fitCanvasText(context, `称号：${payload.title}`, 1040, 33, 24);
-  context.font = `700 ${titleSize}px "Noto Serif JP", serif`;
-  context.fillText(`称号：${payload.title}`, 78, 414);
+  const contentWidth = payload.avatar ? 760 : 1040;
+  if (payload.title) {
+    context.fillStyle = accent;
+    const titleSize = fitCanvasText(context, `隠し称号：${payload.title}`, contentWidth, 33, 22);
+    context.font = `700 ${titleSize}px "Noto Serif JP", serif`;
+    context.fillText(`隠し称号：${payload.title}`, 78, 414);
+  }
   context.fillStyle = "#f2eee5";
   context.font = "600 25px 'Noto Serif JP', serif";
   context.fillText(`金融リテラシー ${payload.quiz}`, 78, 458);
 
   context.fillStyle = "#aaa59c";
-  const occupationSize = fitCanvasText(context, payload.occupation, 1040, 27, 20);
+  const occupationSize = fitCanvasText(context, payload.occupation, contentWidth, 27, 20);
   context.font = `600 ${occupationSize}px "Noto Serif JP", serif`;
   context.fillText(payload.occupation, 78, 503);
+  if (payload.avatar) {
+    try {
+      const avatar = await loadCanvasImage(payload.avatar);
+      context.save();
+      context.beginPath();
+      context.arc(1005, 405, 105, 0, Math.PI * 2);
+      context.clip();
+      context.drawImage(avatar, 900, 300, 210, 210);
+      context.restore();
+      context.strokeStyle = accent;
+      context.lineWidth = 4;
+      context.beginPath();
+      context.arc(1005, 405, 106, 0, Math.PI * 2);
+      context.stroke();
+    } catch {
+      // The text result remains shareable even if an avatar asset fails to load.
+    }
+  }
   context.strokeStyle = "#38342d";
   context.lineWidth = 2;
   context.beginPath();
@@ -636,13 +685,14 @@ export default function HumanMarketCapApp() {
     const render = async () => {
       await document.fonts?.ready;
       if (!active) return;
-      const canvas = createShareCardCanvas({
+      const canvas = await createShareCardCanvas({
         score: formatShareScore(result.marketCapMan),
         tier,
         deviation: ranking ? ranking.deviation.toFixed(1) : "—",
         occupation: result.occupation.label,
         quiz: `${display.quizCorrect}/5｜${flavor.quizBadge}`,
         title: flavor.title,
+        avatar: flavor.avatar,
         marketSignal: flavor.marketSignal,
         variant: flavor.variant,
         url: challengeUrl(display.scoreYen).replace(/^https?:\/\//, ""),
@@ -663,7 +713,7 @@ export default function HumanMarketCapApp() {
       `査定額：${formatMan(result.marketCapMan)}`,
       `${tier} TIER｜${result.occupation.label}`,
       position,
-      `称号：${flavor?.title ?? "査定済み"}`,
+      flavor?.title ? `隠し称号：${flavor.title}` : null,
       `金融リテラシー ${display.quizCorrect}/5点｜${flavor?.quizBadge ?? ""}`,
       flavor?.marketSignal ?? "",
       "※もちろん、人間の価値はこの数字では決まりません。",
@@ -678,13 +728,14 @@ export default function HumanMarketCapApp() {
     setSharingImage(true);
     setShareFeedback("");
     try {
-      const canvas = createShareCardCanvas({
+      const canvas = await createShareCardCanvas({
         score: formatShareScore(result.marketCapMan),
         tier,
         deviation: ranking ? ranking.deviation.toFixed(1) : "—",
         occupation: result.occupation.label,
         quiz: `${display.quizCorrect}/5｜${flavor.quizBadge}`,
         title: flavor.title,
+        avatar: flavor.avatar,
         marketSignal: flavor.marketSignal,
         variant: flavor.variant,
         url: challengeUrl(display.scoreYen).replace(/^https?:\/\//, ""),
@@ -715,7 +766,7 @@ export default function HumanMarketCapApp() {
       <div className="app-shell">
         <header className="brand-bar">
           <a className="brand" href="#top"><span className="brand-mark">HMC</span><span>HUMAN CAPITAL<br />DESK</span></a>
-          <span className="model-tag">DCF MODEL / v18</span>
+          <span className="model-tag">DCF MODEL / v19</span>
         </header>
 
         <section className="intro" id="top">
@@ -877,7 +928,14 @@ export default function HumanMarketCapApp() {
             <section className={`market-hero tier-${tier} flavor-${flavor?.variant ?? "standard"}`}>
               <div className="hero-badges"><span className="tier-badge">{tier} TIER</span><span className={`risk-badge risk-${result.occupation.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>{result.occupation.riskLabel} RISK</span></div>
               <p>あなたの人間時価総額</p><h2>{formatMan(result.marketCapMan)}</h2><span className="hero-en">ESTIMATED HUMAN MARKET CAPITAL</span>
-              {flavor && <div className="result-flavor"><span>{flavor.marketSignal}</span><strong>称号：{flavor.title}</strong><b>{flavor.quizBadge}</b>{flavor.repeating && <em>ぞろ目・金枠プレミア</em>}</div>}
+              {flavor && <div className={`result-flavor ${flavor.title ? "has-hidden-title" : ""}`}>
+                {flavor.avatar && <img className="hidden-title-avatar" src={flavor.avatar} alt={`${flavor.title}の称号アバター`} />}
+                <div className="result-flavor-copy">
+                  <span>{flavor.marketSignal}</span>
+                  {flavor.title && <><em>HIDDEN TITLE UNLOCKED</em><strong>隠し称号：{flavor.title}</strong></>}
+                  <b>{flavor.quizBadge}</b>
+                </div>
+              </div>}
               <Trace title="時価総額の計算トレース"><p>給与所得 {formatMan(result.salaryIncomeMan)} ＋ 資産所得 {formatMan(result.assetIncomeMan)}</p><p>残余{result.yearsRemaining}年の期待キャッシュフローを全補正で調整しています。</p></Trace>
             </section>
 
@@ -894,7 +952,7 @@ export default function HumanMarketCapApp() {
             <section className="result-card share-card">
               <div className="share-card-heading">
                 <span>SHARE CARD</span>
-                <strong>{flavor?.variant === "premium" ? "金枠プレミアカード出現" : "結果カードができました"}</strong>
+                <strong>{flavor?.title ? "隠し称号つき結果カードが出現" : "結果カードができました"}</strong>
               </div>
               <div className="share-image-frame">
                 {shareImageUrl
@@ -980,7 +1038,7 @@ export default function HumanMarketCapApp() {
           </section>
         )}
 
-        <footer><span>HMC CALCULATOR / v18</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
+        <footer><span>HMC CALCULATOR / v19</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
       </div>
     </main>
   );

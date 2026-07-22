@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 
 const sourceUrl = new URL("../app/HumanMarketCapApp.tsx", import.meta.url);
 
@@ -26,9 +26,28 @@ test("share cards include rarity, market metaphors, and quiz badges", async () =
   assert.match(source, /高学歴ワーキングプア/);
   assert.match(source, /宝の持ち腐れ/);
   assert.match(source, /完全なる市場平均/);
+  assert.match(source, /無職という名の資本家/);
+  assert.match(source, /2026最有力銘柄候補/);
+  assert.match(source, /EVだけは億万長者/);
+  assert.match(source, /静かなる資本家/);
+  assert.doesNotMatch(source, /市場の怪物|再建待ったなし|成長余地あり|ぞろ目プレミア/);
   assert.match(source, /賢者・利回りMAX/);
   assert.match(source, /カモ/);
   assert.match(source, /ストップ高/);
   assert.match(source, /上場廃止勧告・監理銘柄入り/);
   assert.match(source, /TOPIXに負けています/);
+});
+
+test("all hidden titles have optimized avatar assets", async () => {
+  const avatars = [
+    "gekokujo.jpg",
+    "high-education-working-poor.jpg",
+    "treasure-wasted.jpg",
+    "perfect-average.jpg",
+    "unemployed-capitalist.jpg",
+    "ai-2026-top-pick.jpg",
+    "ev-millionaire.jpg",
+    "quiet-capitalist.jpg",
+  ];
+  await Promise.all(avatars.map((name) => access(new URL(`../public/title-avatars/${name}`, import.meta.url))));
 });

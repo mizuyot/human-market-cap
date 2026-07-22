@@ -16,6 +16,6 @@ test("client bundle excludes quiz answers and valuation engine", async () => {
   assert.doesNotMatch(source, /稼ぐのも、使うのも、生きるための手段です/);
   assert.doesNotMatch(source, /この査定額より、今日をどう使うかのほうが大事です/);
   assert.doesNotMatch(source, /あの世へ持ち越せるポイント/);
-  assert.match(source, /あの世へ持ち込めないのだから/);
+  assert.match(source, /あの世に持ち込めないのだから/);
   assert.match(source, /Xで結果カードをシェア/);
 });
