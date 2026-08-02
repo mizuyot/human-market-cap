@@ -7,6 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 binding = "DB"
 database_name = "human-market-cap"
 database_id = "08431a90-97e9-4b8b-bc43-d7c7ebc524b5"
+migrations_dir = "drizzle"
 
 [images]
 binding = "IMAGES"

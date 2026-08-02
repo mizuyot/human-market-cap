@@ -3,7 +3,7 @@
 更新日: 2026-08-02  
 現行バージョン: v19  
 基準コミット: `321c5ae` (`Add hidden title avatars`)  
-公開URL: https://human-market-cap.<account>.workers.dev/
+公開URL: https://human-market-cap.mizuyot.workers.dev/
 
 ## 1. Cursorで開くフォルダ
 
@@ -314,8 +314,8 @@ npm run db:generate   # DBスキーマ変更時だけ
 
 ## 18. 公開・デプロイの注意
 
-- 本番はSitesから公開する。このMacをサーバーとして外部公開しない
-- `.openai/hosting.json` はSitesのプロジェクとD1バインディングを指す。削除・別プロジェクトでの上書きをしない
+- 本番は Cloudflare Workers（workers.dev）で公開する。このMacをサーバーとして外部公開しない
+- `wrangler.toml` と Wrangler シークレット（`ADMIN_TOKEN`）が本番の正本。`.openai/hosting.json` はSites向けメタデータ
 - D1スキーマ変更はデータ移行を伴う。`db/schema.ts` だけを変えず、Drizzleマイグレーションも作る
 - 本番DBの管理鍵やIDをブラウザ側コードや公開環境変数に書かない
 - デプロイ前に必ず `npm test` を実行する

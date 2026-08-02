@@ -2,7 +2,7 @@
 
 属性・資産・金融リテラシーから、人間時価総額をDCF風に算出するモバイル向けWebアプリです。
 
-公開URL: https://human-market-cap.<account>.workers.dev/ （Cloudflare Workers。Sitesではありません）  
+公開URL: https://human-market-cap.mizuyot.workers.dev/ （Cloudflare Workers。Sitesではありません）  
 ソース: https://github.com/mizuyot/human-market-cap
 
 ## 現在の構成（v19）

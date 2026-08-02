@@ -44,3 +44,4 @@ next-env.d.ts
 /work/
 /design-assets/
 .admin-token.local
+.dev.vars
