@@ -29,6 +29,9 @@ interface ScoreRow {
   score: number;
 }
 
+/** Append-only history cap. Latest row per uid is never pruned. */
+const HISTORY_MAX_ROWS = 20_000;
+
 const isKey = <T extends readonly { key: string }[]>(items: T, key: unknown) =>
   typeof key === "string" && items.some((item) => item.key === key);
 
@@ -155,6 +158,47 @@ export async function POST(request: Request) {
         score = excluded.score,
         updated_at = excluded.updated_at
     `).bind(uid, scoreYen, now).run();
+    await db.prepare(`
+      INSERT INTO hmc_score_history (
+        id, uid, score, quiz_correct,
+        age, annual_income, education, appearance, occupation,
+        financial_assets, real_estate_assets, other_assets, reinvestment_rate, created_at
+      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)
+    `).bind(
+      crypto.randomUUID(),
+      uid,
+      scoreYen,
+      quizCorrect,
+      Math.round(inputs.age),
+      Math.round(inputs.annualIncome),
+      inputs.education,
+      inputs.appearance,
+      inputs.occupation,
+      Math.round(inputs.financialAssets),
+      Math.round(inputs.realEstateAssets),
+      Math.round(inputs.otherAssets),
+      inputs.reinvestmentRate,
+      now,
+    ).run();
+    const historyCount = await db.prepare(`SELECT COUNT(*) AS c FROM hmc_score_history`).first<{ c: number }>();
+    const excess = Math.max(0, Number(historyCount?.c ?? 0) - HISTORY_MAX_ROWS);
+    if (excess > 0) {
+      await db.prepare(`
+        DELETE FROM hmc_score_history
+        WHERE id IN (
+          SELECT h.id
+          FROM hmc_score_history h
+          WHERE h.id NOT IN (
+            SELECT id FROM hmc_score_history
+            WHERE (uid, created_at) IN (
+              SELECT uid, MAX(created_at) FROM hmc_score_history GROUP BY uid
+            )
+          )
+          ORDER BY h.created_at ASC
+          LIMIT ?1
+        )
+      `).bind(excess).run();
+    }
     await db.prepare(`
       DELETE FROM hmc_scores
       WHERE uid IN (
