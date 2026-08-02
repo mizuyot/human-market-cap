@@ -1,3 +1,11 @@
+import {
+  FLOOR_POST_PEAK_DECAY,
+  FLOOR_POST_PEAK_MIN,
+  FLOOR_PRE_PEAK_DECAY,
+  FLOOR_PRE_PEAK_MIN,
+  INFLATION_RATE,
+} from "./calculation-policy.ts";
+
 export interface EducationParam {
   key: string;
   label: string;
@@ -219,8 +227,8 @@ export function occupationIncomeFloor(job: OccupationParam, age: number): number
   if (job.key === "homemaker" || base === 0) return base;
   const distance = age - job.peak;
   const ageFactor = distance < 0
-    ? Math.max(.65, 1 - Math.abs(distance) * .02)
-    : Math.max(.55, 1 - distance * .025);
+    ? Math.max(FLOOR_PRE_PEAK_MIN, 1 - Math.abs(distance) * FLOOR_PRE_PEAK_DECAY)
+    : Math.max(FLOOR_POST_PEAK_MIN, 1 - distance * FLOOR_POST_PEAK_DECAY);
   return Math.round(base * ageFactor);
 }
 
@@ -310,7 +318,7 @@ export function miniWageCurve(job: OccupationParam): number[] {
   const points: number[] = [];
   for (let year = 0; year < 28; year += 2) {
     const specialGrowth = year < (job.specialGrowthYears ?? 0) ? (job.specialGrowthRate ?? 0) : 0;
-    value *= Math.pow(1 + wageCurveRate(job, start, year) + specialGrowth + .02, 2);
+    value *= Math.pow(1 + wageCurveRate(job, start, year) + specialGrowth + INFLATION_RATE, 2);
     points.push(Math.max(10, value));
   }
   return points;

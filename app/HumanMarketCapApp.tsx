@@ -773,7 +773,7 @@ export default function HumanMarketCapApp() {
           <p className="eyebrow">PRICE YOUR POTENTIAL</p>
           <h1>あなたの価値を、<br /><em>数字にする。</em></h1>
           <p className="intro-copy">属性・資産・金融知識から、残りのキャリアが生み出す価値をDCF的に査定します。</p>
-          <div className="formula-strip"><span>給与所得総額</span><b>＋</b><span>資産所得総額</span><b>＝</b><strong>時価総額</strong></div>
+          <div className="formula-strip"><span>給与所得総額</span><b>＋</b><span>資産所得総額</span><b>＋</b><span>初期資産</span><b>＝</b><strong>時価総額</strong></div>
           <div className="trust-row"><span>01 / 匿名</span><span>02 / 約3分</span><span>03 / 最新スコアのみ</span></div>
         </section>
 
@@ -936,7 +936,7 @@ export default function HumanMarketCapApp() {
                   <b>{flavor.quizBadge}</b>
                 </div>
               </div>}
-              <Trace title="時価総額の計算トレース"><p>給与所得 {formatMan(result.salaryIncomeMan)} ＋ 資産所得 {formatMan(result.assetIncomeMan)}</p><p>残余{result.yearsRemaining}年の期待キャッシュフローを全補正で調整しています。</p></Trace>
+              <Trace title="時価総額の計算トレース"><p>給与所得 {formatMan(result.salaryIncomeMan)} ＋ 資産所得 {formatMan(result.assetIncomeMan)} ＋ 初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)}</p><p>残余{result.yearsRemaining}年の期待キャッシュフローを全補正で調整しています。資産所得は運用益のみで、初期資産の元本は別枠で加算します。</p></Trace>
             </section>
 
             {result.occupation.specialNote && <p className={`result-job-note ${result.occupation.key === "aiEngineer" ? "ai-strongest" : ""}`}>{result.occupation.specialNote}</p>}
@@ -975,7 +975,7 @@ export default function HumanMarketCapApp() {
 
             <section className="kpi-grid">
               <article className="result-card kpi-card"><span className="kpi-icon blue">01</span><p>給与所得総額</p><h3>{formatMan(result.salaryIncomeMan)}</h3><Trace title="給与所得の計算トレース"><p>年収起点へ職業カーブ・インフレ2%・NW力・容姿を毎年適用。</p><p>離職時は所得ゼロではなく、職業別の転職後所得率へ移行する期待値モデルです。</p></Trace></article>
-              <article className="result-card kpi-card"><span className="kpi-icon gold">02</span><p>資産所得総額</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の計算トレース"><p>初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)} に年収の{Math.round(display.inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用。</p></Trace></article>
+              <article className="result-card kpi-card"><span className="kpi-icon gold">02</span><p>資産所得総額</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の計算トレース"><p>初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)} に年収の{Math.round(display.inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用した運用益。元本自体は時価総額へ別加算。</p></Trace></article>
             </section>
 
             <section className="result-card charts-card"><div className="section-title"><div><span className="eyebrow">LIFETIME PROJECTION</span><h3>生涯キャッシュフロー</h3></div><span className="scroll-hint">代表年齢を表示</span></div><Charts result={result} /></section>

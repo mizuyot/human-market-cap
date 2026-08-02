@@ -1,7 +1,20 @@
 import {
+  CALCULATION_BEHAVIOR,
+  INFLATION_RATE,
+  TRANSITION_INCOME_GROWTH,
+  careerSurvival,
+  clipTransitionIncomeRate,
+  commonTransitionIncome,
+  financialLiteracyAdjustment,
+  occupationAllowsTransitionIncome,
+  projectionYearCount,
+  recoverTowardOccupationFloor,
+} from "../calculation-policy.ts";
+import {
   type AnnualProjection,
   type CalculationResult,
   type ScoredCalculatorInputs,
+  OCCUPATION_BASE_INCOME,
   getAppearance,
   getEducation,
   getOccupation,
@@ -11,38 +24,22 @@ import {
   wageCurveRate,
 } from "../model.ts";
 
-const financialLiteracyAdjustment = (correct: number) =>
-  (Math.min(5, Math.max(0, correct)) / 5 - .5) * .1;
-
-function commonTransitionIncome(age: number): number {
-  if (age < 30) return 300;
-  if (age < 40) return 350;
-  if (age < 50) return 380;
-  if (age < 60) return 340;
-  if (age < 70) return 250;
-  return 180;
-}
-
-function recoverTowardOccupationFloor(current: number, projected: number, floor: number): number {
-  if (floor <= 0) return Math.max(0, projected);
-  if (current < floor * .25) return floor;
-  if (projected < floor) return projected + (floor - projected) * .35;
-  return projected;
-}
-
 export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationResult {
   const education = getEducation(input.education);
   const appearance = getAppearance(input.appearance);
   const job = getOccupation(input.occupation);
-  const yearsRemaining = Math.max(0, job.retirement - input.age);
+  const yearsRemaining = projectionYearCount(input.age, job.retirement);
   const financialAdjustment = financialLiteracyAdjustment(input.correctAnswers);
   const salaryNw = nwSalaryAdjustment(education.nw);
   const transitionNw = nwTransitionAdjustment(education.nw);
-  const transitionIncomeRate = Math.min(.9, Math.max(.2, job.transitionIncomeRate + transitionNw));
-  const transitionBaseIncome = Math.max(
-    Math.max(0, input.annualIncome) * transitionIncomeRate,
-    commonTransitionIncome(input.age),
-  );
+  const transitionIncomeRate = clipTransitionIncomeRate(job.transitionIncomeRate + transitionNw);
+  const allowsTransition = occupationAllowsTransitionIncome(job, OCCUPATION_BASE_INCOME[job.key] ?? 0);
+  const transitionBaseIncome = allowsTransition
+    ? Math.max(
+      Math.max(0, input.annualIncome) * transitionIncomeRate,
+      commonTransitionIncome(input.age),
+    )
+    : 0;
   const initialOccupationIncomeFloor = occupationIncomeFloor(job, input.age);
   const appearanceSalaryAdjustment = appearance.salaryBase * job.appearanceMultiplier;
   const appearanceReturnAdjustment = appearance.returnAdjustment;
@@ -55,12 +52,18 @@ export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationRe
   let reinvested = 0;
   let gains = 0;
   const projections: AnnualProjection[] = [];
+  const retiredAtStart = input.age >= job.retirement;
 
   for (let year = 0; year < yearsRemaining; year += 1) {
     const age = input.age + year;
-    const survival = year === 0 ? 1 : age >= job.primaryEnd ? 0 : Math.pow(1 - job.careerRisk, year);
-    const transitionSalary = transitionBaseIncome * Math.pow(1.02, year);
-    const salary = rawSalary * survival + transitionSalary * (1 - survival);
+    const pastRetirement = age >= job.retirement;
+    const survival = pastRetirement || retiredAtStart ? 0 : careerSurvival(job, age, year);
+    const transitionSalary = allowsTransition
+      ? transitionBaseIncome * Math.pow(1 + TRANSITION_INCOME_GROWTH, year)
+      : 0;
+    const salary = pastRetirement
+      ? 0
+      : rawSalary * survival + transitionSalary * (1 - survival);
     const careerFactor = rawSalary > 0 ? salary / rawSalary : survival;
     salaryTotal += salary;
     const add = salary * Math.min(1, Math.max(0, input.reinvestmentRate));
@@ -71,19 +74,23 @@ export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationRe
     assetTotal += gain;
     balance += gain;
     const specialGrowth = year < (job.specialGrowthYears ?? 0) ? (job.specialGrowthRate ?? 0) : 0;
-    const curveRate = wageCurveRate(job, input.age, year) + specialGrowth;
+    const curveRate = pastRetirement ? 0 : wageCurveRate(job, input.age, year) + specialGrowth;
     projections.push({ age, rawSalary, salary, survival, careerFactor, curveRate, initialAssets, reinvested, gains, balance });
-    const projectedSalary = Math.max(0, rawSalary * (1 + curveRate + .02 + salaryNw + appearanceSalaryAdjustment));
-    rawSalary = recoverTowardOccupationFloor(
-      rawSalary,
-      projectedSalary,
-      occupationIncomeFloor(job, age + 1),
-    );
+
+    if (!pastRetirement) {
+      const projectedSalary = Math.max(0, rawSalary * (1 + curveRate + INFLATION_RATE + salaryNw + appearanceSalaryAdjustment));
+      rawSalary = recoverTowardOccupationFloor(
+        rawSalary,
+        projectedSalary,
+        occupationIncomeFloor(job, age + 1),
+      );
+    }
   }
 
   const salaryIncomeMan = salaryTotal * education.multiplier;
+  const principalMan = CALCULATION_BEHAVIOR.includeInitialAssetsInMarketCap ? initialAssets : 0;
   return {
-    marketCapMan: salaryIncomeMan + assetTotal,
+    marketCapMan: salaryIncomeMan + assetTotal + principalMan,
     salaryIncomeMan,
     assetIncomeMan: assetTotal,
     effectiveReturn,
