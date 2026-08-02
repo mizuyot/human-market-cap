@@ -2,7 +2,7 @@
 
 属性・資産・金融リテラシーから、人間時価総額をDCF風に算出するモバイル向けWebアプリです。
 
-公開URL: https://human-market-cap-calculator.yota-mzn.chatgpt.site/  
+公開URL: https://human-market-cap.<account>.workers.dev/ （Cloudflare Workers。Sitesではありません）  
 ソース: https://github.com/mizuyot/human-market-cap
 
 ## 現在の構成（v19）
@@ -21,6 +21,19 @@
 
 ランキング用テーブルには端末生成の匿名ID、最新スコア、更新日時だけを保存します。  
 別の履歴テーブルへ、査定のたびに入力条件（年齢・年収・学歴・容姿・職業・資産・再投資率）とスコア・クイズ正答数を追記します。クイズの設問文と回答本文は保存しません。履歴は上限を超えたら古い行から間引きますが、各UIDの最新1件は残します。クイズ試行情報は短時間で失効します。
+
+
+
+## 本番デプロイ（Cloudflare Workers）
+
+```bash
+npm install
+npm run db:migrate:remote   # リモートD1へマイグレーション
+npm run deploy              # build + wrangler deploy
+```
+
+管理画面（査定履歴）: `/admin?token=<ADMIN_TOKEN>`  
+`ADMIN_TOKEN` は Wrangler のシークレット。ローカル参照用に `.admin-token.local`（gitignore）へ保存します。
 
 ## ローカル開発
 

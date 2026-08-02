@@ -3,7 +3,7 @@
 更新日: 2026-08-02  
 現行バージョン: v19  
 基準コミット: `321c5ae` (`Add hidden title avatars`)  
-公開URL: https://human-market-cap-calculator.yota-mzn.chatgpt.site/
+公開URL: https://human-market-cap.<account>.workers.dev/
 
 ## 1. Cursorで開くフォルダ
 
@@ -31,12 +31,21 @@ Cursorに最初に伝える指示:
 
 ## 3. 現在の技術構成
 
+### 本番運用メモ（Workers独立デプロイ）
+
+- デプロイ: `npm run deploy`（`dist/server/wrangler.json` を使用）
+- リモートD1: `npm run db:migrate:remote`
+- 管理履歴UI: `/admin?token=...`（API: `/api/admin/history`、Wrangler secret `ADMIN_TOKEN`）
+- トークン平文はリポジトリに含めない（`.admin-token.local` / `.dev.vars` は gitignore）
+
+
+
 - Next.js App Router + React 19 + TypeScript
 - vinext / ViteでCloudflare Workers向けにビルド
 - Cloudflare D1 + Drizzle ORM
 - CSSは `app/globals.css`。コンポーネントライブラリなし
 - チャートとシェアカードはCanvas/DOMで自前描画
-- 本番ホスティングはSites管理。`.openai/hosting.json` にD1の論理バインディング `DB` がある
+- 本番ホスティングは **Cloudflare Workers（workers.dev）**。`wrangler.toml` で D1 `DB` と Images `IMAGES` をバインド。`.openai/hosting.json` はSites向けメタデータ（独立デプロイでは参照用）
 - Supabaseは採用していない。古い仕様書にSupabaseの記述があっても現行実装ではD1が正しい
 - MacやNASを公開サーバーとして使わない
 

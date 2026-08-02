@@ -76,3 +76,19 @@ export function errorResponse(error: unknown): Response {
   console.error("HMC API error", error);
   return json({ error: "査定サーバーで問題が発生しました。少し待ってからもう一度お試しください。" }, 500);
 }
+
+export async function requireAdminToken(request: Request): Promise<void> {
+  const { env } = await import("cloudflare:workers");
+  const expected = env.ADMIN_TOKEN;
+  if (typeof expected !== "string" || !expected) {
+    throw new ApiError(503, "管理機能は現在利用できません。");
+  }
+  const url = new URL(request.url);
+  const auth = request.headers.get("Authorization");
+  const bearer = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
+  const token = bearer
+    ?? url.searchParams.get("token")
+    ?? request.headers.get("X-Admin-Token")
+    ?? "";
+  if (token !== expected) throw new ApiError(401, "認証に失敗しました。");
+}
