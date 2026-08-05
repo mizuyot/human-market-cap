@@ -1,3 +1,4 @@
+import { buildLogHistogramBins } from "../../ranking-display";
 import type {
   QuizAnswers,
   RankingSnapshot,
@@ -25,11 +26,12 @@ interface AttemptRow {
 }
 
 interface ScoreRow {
+  id: string;
   uid: string;
   score: number;
 }
 
-/** Append-only history cap. Latest row per uid is never pruned. */
+/** Append-only history cap. */
 const HISTORY_MAX_ROWS = 20_000;
 
 const isKey = <T extends readonly { key: string }[]>(items: T, key: unknown) =>
@@ -79,11 +81,7 @@ function rankingFromScores(scores: number[], ownScore: number): RankingSnapshot 
   const sd = Math.sqrt(sorted.reduce((sum, score) => sum + (score - mean) ** 2, 0) / Math.max(1, sorted.length));
   const minScore = Math.min(...sorted, ownScore);
   const maxScore = Math.max(...sorted, ownScore);
-  const span = Math.max(1, maxScore - minScore);
-  const bins = Array.from({ length: 12 }, () => 0);
-  sorted.forEach((score) => {
-    bins[Math.min(11, Math.floor((score - minScore) / span * 12))] += 1;
-  });
+  const bins = buildLogHistogramBins(sorted, minScore, maxScore);
   return {
     rank,
     total: sorted.length,
@@ -151,13 +149,11 @@ export async function POST(request: Request) {
     const calculation = calculateMarketCap({ ...inputs, correctAnswers: quizCorrect });
     const scoreYen = Math.round(calculation.marketCapMan * 10_000);
     if (!Number.isSafeInteger(scoreYen)) throw new ApiError(400, "入力値が大きすぎて査定できませんでした。");
+    const scoreId = crypto.randomUUID();
     await db.prepare(`
-      INSERT INTO hmc_scores (uid, score, updated_at)
-      VALUES (?1, ?2, ?3)
-      ON CONFLICT(uid) DO UPDATE SET
-        score = excluded.score,
-        updated_at = excluded.updated_at
-    `).bind(uid, scoreYen, now).run();
+      INSERT INTO hmc_scores (id, uid, score, updated_at)
+      VALUES (?1, ?2, ?3, ?4)
+    `).bind(scoreId, uid, scoreYen, now).run();
     await db.prepare(`
       INSERT INTO hmc_score_history (
         id, uid, score, quiz_correct,
@@ -181,37 +177,36 @@ export async function POST(request: Request) {
       now,
     ).run();
     const historyCount = await db.prepare(`SELECT COUNT(*) AS c FROM hmc_score_history`).first<{ c: number }>();
-    const excess = Math.max(0, Number(historyCount?.c ?? 0) - HISTORY_MAX_ROWS);
-    if (excess > 0) {
+    const historyExcess = Math.max(0, Number(historyCount?.c ?? 0) - HISTORY_MAX_ROWS);
+    if (historyExcess > 0) {
       await db.prepare(`
         DELETE FROM hmc_score_history
         WHERE id IN (
-          SELECT h.id
-          FROM hmc_score_history h
-          WHERE h.id NOT IN (
-            SELECT id FROM hmc_score_history
-            WHERE (uid, created_at) IN (
-              SELECT uid, MAX(created_at) FROM hmc_score_history GROUP BY uid
-            )
-          )
-          ORDER BY h.created_at ASC
+          SELECT id FROM hmc_score_history
+          ORDER BY created_at ASC
           LIMIT ?1
         )
-      `).bind(excess).run();
+      `).bind(historyExcess).run();
     }
-    await db.prepare(`
-      DELETE FROM hmc_scores
-      WHERE uid IN (
-        SELECT uid FROM hmc_scores ORDER BY score DESC, updated_at DESC LIMIT -1 OFFSET 1000
-      )
-    `).run();
+    const rankingCount = await db.prepare(`SELECT COUNT(*) AS c FROM hmc_scores`).first<{ c: number }>();
+    const rankingExcess = Math.max(0, Number(rankingCount?.c ?? 0) - 1000);
+    if (rankingExcess > 0) {
+      await db.prepare(`
+        DELETE FROM hmc_scores
+        WHERE id IN (
+          SELECT id FROM hmc_scores
+          ORDER BY score ASC, updated_at ASC
+          LIMIT ?1
+        )
+      `).bind(rankingExcess).run();
+    }
     const rows = await db.prepare(`
-      SELECT uid, score
+      SELECT id, uid, score
       FROM hmc_scores ORDER BY score DESC LIMIT 1000
     `).all<ScoreRow>();
-    const rankingRows = rows.results.some((row) => row.uid === uid)
+    const rankingRows = rows.results.some((row) => row.id === scoreId)
       ? rows.results
-      : [...rows.results, { uid, score: scoreYen }];
+      : [...rows.results, { id: scoreId, uid, score: scoreYen }];
     const scores = rankingRows.map((row) => Number(row.score)).filter(Number.isFinite);
     const globalRanking = rankingFromScores(scores, scoreYen);
     const response: ValuationResponse = {

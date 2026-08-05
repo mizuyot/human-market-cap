@@ -1,0 +1,16 @@
+human-market-cap — Cloudflare independent deploy status
+Generated: 2026-08-02 (JST)
+
+URL: https://human-market-cap.mizuyot.workers.dev
+
+Test result: PASS (npm test — 21 tests, 0 failures)
+
+Deploy result: SUCCESS
+  wrangler deploy -c dist/server/wrangler.json
+  Version ID: 4752379c-2641-4f60-80c0-9160e30befb5
+  Bindings: DB (human-market-cap D1), IMAGES
+  ADMIN_TOKEN: set via wrangler secret (not stored in this file)
+
+Commit: 5521923 (main, pushed to origin)
+
+Admin UI: /admin?token=<ADMIN_TOKEN> (token in .admin-token.local only)

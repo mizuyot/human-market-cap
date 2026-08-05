@@ -44,8 +44,7 @@ function remoteTablesInclude(name) {
 function migrationFiles() {
   return readdirSync(drizzleDir)
     .filter((file) => /^\d{4}_.*\.sql$/.test(file))
-    .sort()
-    .slice(0, 4);
+    .sort();
 }
 
 function statementsFromSql(sql) {
@@ -75,7 +74,7 @@ function runStatement(statement) {
 }
 
 if (remoteTablesInclude("hmc_score_history")) {
-  console.log("Core tables present; re-applying 0000–0003 with idempotent skips.");
+  console.log("Core tables present; re-applying migrations with idempotent skips.");
 }
 
 for (const file of migrationFiles()) {

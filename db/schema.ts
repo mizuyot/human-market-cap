@@ -1,14 +1,17 @@
 import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+/** Append-only ranking entries. Each valuation adds a new row, even for the same uid. */
 export const scores = sqliteTable("hmc_scores", {
-  uid: text("uid").primaryKey(),
+  id: text("id").primaryKey(),
+  uid: text("uid").notNull(),
   score: integer("score").notNull(),
   updatedAt: integer("updated_at").notNull(),
 }, (table) => [
   index("hmc_scores_score_idx").on(table.score),
+  index("hmc_scores_uid_idx").on(table.uid),
 ]);
 
-/** Append-only valuation history with input snapshot. Ranking still uses hmc_scores. */
+/** Append-only valuation history with input snapshot. */
 export const scoreHistory = sqliteTable("hmc_score_history", {
   id: text("id").primaryKey(),
   uid: text("uid").notNull(),

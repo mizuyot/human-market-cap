@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-test("ranking stores only anonymous id, latest score, and update time", async () => {
+test("ranking appends a new score row on every valuation", async () => {
   const [route, schema, types, client] = await Promise.all([
     readFile(new URL("../app/api/valuation/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
@@ -14,9 +14,11 @@ test("ranking stores only anonymous id, latest score, and update time", async ()
     schema.indexOf('export const scores = sqliteTable("hmc_scores"'),
     schema.indexOf("export const scoreHistory"),
   );
-  assert.match(route, /INSERT INTO hmc_scores \(uid, score, updated_at\)/);
+  assert.match(route, /INSERT INTO hmc_scores \(id, uid, score, updated_at\)/);
+  assert.doesNotMatch(route, /ON CONFLICT\(uid\)/);
   assert.doesNotMatch(route, /segmentRank|kind: "occupation"|SELECT uid, score, occupation/);
-  assert.match(rankingTable, /uid: text\("uid"\)\.primaryKey\(\)/);
+  assert.match(rankingTable, /id: text\("id"\)\.primaryKey\(\)/);
+  assert.match(rankingTable, /uid: text\("uid"\)\.notNull\(\)/);
   assert.doesNotMatch(rankingTable, /occupation:|age:|education:/);
   assert.doesNotMatch(types, /SegmentRanking|segments:/);
   assert.doesNotMatch(client, /segment-rankings|ranking\.segments|flavor\.division/);
@@ -35,5 +37,4 @@ test("valuation history appends input snapshot separately from ranking", async (
   assert.match(migration, /CREATE TABLE `hmc_score_history`/);
   assert.match(route, /INSERT INTO hmc_score_history/);
   assert.match(route, /HISTORY_MAX_ROWS/);
-  assert.match(route, /GROUP BY uid/);
 });

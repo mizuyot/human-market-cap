@@ -40,6 +40,9 @@ import type {
   RankingSnapshot,
   ValuationResponse,
 } from "./api-types";
+import { formatAxisMan, logHistogramMarkerPercent } from "./ranking-display";
+
+const QUIZ_SECONDS = 20;
 
 type InputState = CalculatorInputs;
 type QuizPhase = "idle" | "A" | "B" | "done";
@@ -234,14 +237,25 @@ function Charts({ result }: { result: CalculationResult }) {
 }
 
 function Histogram({ ranking, score }: { ranking: RankingSnapshot; score: number }) {
-  const span = Math.max(1, ranking.maxScore - ranking.minScore);
   const peak = Math.max(...ranking.bins, 1);
-  const marker = Math.min(97, Math.max(3, (score - ranking.minScore) / span * 100));
+  const marker = logHistogramMarkerPercent(score, ranking.minScore, ranking.maxScore);
   return (
     <div className="histogram-wrap">
       <div className="you-marker" style={{ left: `${marker}%` }}><span>YOU</span></div>
-      <div className="histogram">{ranking.bins.map((item, index) => <span key={index} style={{ height: `${Math.max(5, item / peak * 100)}%` }} />)}</div>
-      <div className="histogram-axis"><span>LOW</span><span>MARKET VALUE</span><span>HIGH</span></div>
+      <div className="histogram">
+        {ranking.bins.map((item, index) => (
+          <span
+            key={index}
+            style={{ height: `${Math.max(5, Math.sqrt(item / peak) * 100)}%` }}
+            title={`${item}人`}
+          />
+        ))}
+      </div>
+      <div className="histogram-axis">
+        <span>{formatAxisMan(ranking.minScore)}</span>
+        <span>LOG SCALE</span>
+        <span>{formatAxisMan(ranking.maxScore)}</span>
+      </div>
     </div>
   );
 }
@@ -531,7 +545,7 @@ export default function HumanMarketCapApp() {
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers>({});
   const [quizIndex, setQuizIndex] = useState(0);
   const [quizPhase, setQuizPhase] = useState<QuizPhase>("idle");
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(QUIZ_SECONDS);
   const [error, setError] = useState("");
   const [quizLoading, setQuizLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
@@ -559,7 +573,7 @@ export default function HumanMarketCapApp() {
     }));
     if (quizPhase === "A") {
       setQuizPhase("B");
-      setTimeLeft(10);
+      setTimeLeft(QUIZ_SECONDS);
       return;
     }
     if (quizIndex >= questions.length - 1) {
@@ -569,7 +583,7 @@ export default function HumanMarketCapApp() {
     }
     setQuizIndex((current) => current + 1);
     setQuizPhase("A");
-    setTimeLeft(10);
+    setTimeLeft(QUIZ_SECONDS);
   }, [questions, quizIndex, quizPhase]);
 
   useEffect(() => {
@@ -604,7 +618,7 @@ export default function HumanMarketCapApp() {
       setQuestions(payload.sets);
       setAttemptId(payload.attemptId);
       setQuizPhase("A");
-      setTimeLeft(10);
+      setTimeLeft(QUIZ_SECONDS);
       setQuizIndex(0);
       setQuizAnswers({});
     } catch (startError) {
@@ -886,7 +900,7 @@ export default function HumanMarketCapApp() {
           </section>
 
           <section className="question-card quiz-card" id="question-9">
-            <div className="quiz-title"><span className="question-number">09</span><div><span>金融リテラシー瞬発クイズ</span><small>5 / 15 RANDOM SETS · A/B 各10秒</small></div></div>
+            <div className="quiz-title"><span className="question-number">09</span><div><span>金融リテラシー瞬発クイズ</span><small>5 / 15 RANDOM SETS · A/B 各20秒</small></div></div>
             {quizPhase === "idle" && (
               <div className="quiz-start-panel">
                 <p>15セットから選ばれた5セットに挑戦します。Aに答えるとBが表示され、Aの回答は変更できません。A・Bの両方を満たした場合のみ1点です。</p>
@@ -895,7 +909,7 @@ export default function HumanMarketCapApp() {
             )}
             {activeQuiz && activePart && (quizPhase === "A" || quizPhase === "B") && (
               <div className="quiz-stage">
-                <div className="quiz-progress-row"><span>SET {quizIndex + 1} / 5</span><div><i style={{ width: `${(quizIndex + (quizPhase === "B" ? .5 : 0)) / 5 * 100}%` }} /></div><b className={timeLeft <= 3 ? "urgent" : ""}>{timeLeft}<small>SEC</small></b></div>
+                <div className="quiz-progress-row"><span>SET {quizIndex + 1} / 5</span><div><i style={{ width: `${(quizIndex + (quizPhase === "B" ? .5 : 0)) / 5 * 100}%` }} /></div><b className={timeLeft <= 5 ? "urgent" : ""}>{timeLeft}<small>SEC</small></b></div>
                 <div className="quiz-set-heading"><span>{activeQuiz.id.toUpperCase()}</span><strong>{activeQuiz.title}</strong></div>
                 {activeQuiz.lead && <p className="quiz-lead">{activeQuiz.lead}</p>}
                 <fieldset className="quiz-question active">
@@ -919,7 +933,7 @@ export default function HumanMarketCapApp() {
 
           {error && <p className="form-error" role="alert">{error}</p>}
           <button className="calculate-button" type="submit" disabled={questions.length !== 5 || quizPhase !== "done" || calculating}><span>{calculating ? "サーバーで査定中…" : "時価総額を算出する"}</span><b>→</b></button>
-          <p className="privacy-note">年収・資産・容姿・職業・年齢・学歴・クイズ回答は保存しません。ランキングには匿名IDと最新スコアのみ保存します。この結果は金融助言ではなく、教育・娯楽目的の試算です。</p>
+          <p className="privacy-note">年収・資産・容姿・職業・年齢・学歴・クイズ回答の本文は保存しません。ランキングには匿名IDとスコアを査定のたびに追記します。この結果は金融助言ではなく、教育・娯楽目的の試算です。</p>
         </form>
 
         {display && result && (

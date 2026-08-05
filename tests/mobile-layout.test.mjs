@@ -27,6 +27,19 @@ test("small screens keep controls readable and responsive", async () => {
   assert.match(css, /\.asset-column\s*\{[^}]*flex:\s*1 1 0/);
 });
 
+test("body copy and captions stay at least 11px", async () => {
+  const css = await readFile(new URL("app/globals.css", appRoot), "utf8");
+  const sizes = [...css.matchAll(/font-size:\s*([0-9.]+)px/g)].map((match) => Number(match[1]));
+  assert.ok(sizes.length > 0);
+  assert.ok(sizes.every((size) => size >= 11), `found sub-11px sizes: ${sizes.filter((size) => size < 11).join(", ")}`);
+});
+
+test("quiz questions allow twenty seconds each", async () => {
+  const source = await readFile(new URL("app/HumanMarketCapApp.tsx", appRoot), "utf8");
+  assert.match(source, /const QUIZ_SECONDS = 20/);
+  assert.match(source, /A\/B 各20秒/);
+});
+
 test("lifetime charts use a compact set of representative ages", async () => {
   const source = await readFile(new URL("app/HumanMarketCapApp.tsx", appRoot), "utf8");
 
