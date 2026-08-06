@@ -33,10 +33,22 @@ Cursorに最初に伝える指示:
 
 ### 本番運用メモ（Workers独立デプロイ）
 
-- デプロイ: `npm run deploy`（`dist/server/wrangler.json` を使用）
-- リモートD1: `npm run db:migrate:remote`
-- 管理履歴UI: `/admin`（パスワード入力。API: `/api/admin/history`、Wrangler secret `ADMIN_TOKEN`）
+- 環境は3つ: ローカル（`npm run dev`）／ステージング（別Worker + 別D1）／本番
+- ステージング: `npm run db:migrate:staging` → `npm run deploy:staging`  
+  URL: https://human-market-cap-staging.mizuyot.workers.dev/
+- 本番: `npm run db:migrate:remote` → `npm run deploy:production`（`npm run deploy` も本番）  
+  URL: https://human-market-cap.mizuyot.workers.dev/
+- デプロイ本体: `scripts/deploy.mjs` が build 後に `dist/server/wrangler.json` の Worker名と D1 を環境ごとに差し替え
+- 管理UI: `/admin`（パスワード入力。API: `/api/admin/history`・`/api/admin/stats`・`/api/admin/delete-dummies`）
+- Wrangler secret `ADMIN_TOKEN` はステージングと本番それぞれに設定する
+- 管理APIは `Authorization: Bearer` のみ（URLトークンは不可）。ログイン試行はレート制限あり
+- 法務ページ: `/privacy` `/terms` `/contact`
+- 同一クイズ試行での再査定は拒否（ランキング水増し防止）。再計算は新しいクイズ開始が必要
+- ダミー投入は原則ステージング: `npm run db:seed:staging`（uid は `dummy-jp-%`）
 - トークン平文はリポジトリに含めない（`.admin-token.local` / `.dev.vars` は gitignore）
+- 監視: Workers Observability（logs）有効。API 500 は `errorId` 付き構造化ログ。外形監視は `/api/health` と `node scripts/check-health.mjs`
+- 管理画面は `robots: noindex`。Cloudflare Access で `/admin*` `/api/admin*` を追加保護する手順は README 参照
+- 市場ポジションは履歴全体ベース（ダミー除く）。掲示板順位のみ上位約1000件
 
 
 
@@ -248,7 +260,7 @@ NW→転職後 = CLIP((NW-50)×0.1%, -2.5%, +4.5%)
 6. 夜職には容姿補正を極端に強くかける
 7. 専業主婦・主夫で配偶者の収入や与信を聞かない
 8. クイズは15セットからランダム5セット。シャッフルボタンを付けない
-9. ランキングも履歴も査定のたびに追記（同じ端末・同じUIDでも新しい行）。`hmc_scores` は上位1000件維持
+9. ランキングも履歴も査定のたびに追記（同じ端末・同じUIDでも新しい行）。`hmc_scores` は上位1000件維持。偏差値・分布・全体順位は履歴全体（ダミー除く）で算出
 10. 部門別ランキング、年齢別ランキング、学歴別ランキングは実装しない
 11. 通常称号は表示しない。8種の隠し称号だけ
 12. Supabaseに戻さない。現行のCloudflare D1構成を基準にする
@@ -326,6 +338,7 @@ npm run db:generate   # DBスキーマ変更時だけ
 - シェア画像はクライアント生成。XのWeb Intentは画像を自動添付できないため、Web Share API未対応環境では画像保存が必要
 - 対戦URLのスコアは改ざん可能。ただし、ユーザー方針により現状は対策不要
 - ランキングはグローバル1種類のみ。部門ランキングは意図的に廃案
+- ダミー削除は管理画面から可能だが、本番でも押せる。試すときはステージングを先に使う
 - 次に大きな仕様変更をするなら、まずExcelで新旧値を比較し、ユーザー承認後に実装する
 
 ## 20. 作業ルール

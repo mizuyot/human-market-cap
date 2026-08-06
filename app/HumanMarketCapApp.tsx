@@ -41,6 +41,7 @@ import type {
   ValuationResponse,
 } from "./api-types";
 import { formatAxisMan, logHistogramMarkerPercent } from "./ranking-display";
+import { trackEvent } from "./analytics";
 
 const QUIZ_SECONDS = 20;
 
@@ -596,8 +597,14 @@ export default function HumanMarketCapApp() {
   }, [advanceQuiz, quizPhase, timeLeft]);
 
   useEffect(() => {
-    const candidate = Number(new URLSearchParams(window.location.search).get("challenge"));
-    setChallengeScoreYen(Number.isSafeInteger(candidate) && candidate > 0 ? candidate : null);
+    const params = new URLSearchParams(window.location.search);
+    const candidate = Number(params.get("challenge"));
+    const challenge = Number.isSafeInteger(candidate) && candidate > 0 ? candidate : null;
+    setChallengeScoreYen(challenge);
+    trackEvent(challenge ? "challenge_visit" : "page_view", {
+      uid: uid(),
+      props: challenge ? { challengeScoreYen: challenge } : undefined,
+    });
   }, []);
 
   function number(field: keyof InputState, value: number) {
@@ -621,7 +628,9 @@ export default function HumanMarketCapApp() {
       setTimeLeft(QUIZ_SECONDS);
       setQuizIndex(0);
       setQuizAnswers({});
+      trackEvent("quiz_start", { uid: uid(), props: { attemptId: payload.attemptId } });
     } catch (startError) {
+      trackEvent("api_error", { uid: uid(), props: { action: "quiz_start" } });
       setError(startError instanceof Error ? startError.message : "クイズを開始できませんでした。");
     } finally {
       setQuizLoading(false);
@@ -667,8 +676,17 @@ export default function HumanMarketCapApp() {
         inputs: { ...inputs },
       });
       setRanking(payload.ranking);
+      trackEvent("valuation_complete", {
+        uid: uid(),
+        props: {
+          scoreYen: payload.scoreYen,
+          quizCorrect: payload.quizCorrect,
+          fromChallenge: challengeScoreYen !== null,
+        },
+      });
       window.setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth" }), 80);
     } catch (submitError) {
+      trackEvent("api_error", { uid: uid(), props: { action: "valuation" } });
       setError(submitError instanceof Error ? submitError.message : "査定できませんでした。");
     } finally {
       setCalculating(false);
@@ -720,7 +738,7 @@ export default function HumanMarketCapApp() {
   function shareText() {
     if (!display || !result) return;
     const position = ranking
-      ? `順位 ${ranking.rank}/${ranking.total}｜偏差値 ${ranking.deviation.toFixed(1)}｜上位${ranking.topPercent.toFixed(1)}%`
+      ? `全体順位 ${ranking.rank}/${ranking.total}｜偏差値 ${ranking.deviation.toFixed(1)}｜上位${ranking.topPercent.toFixed(1)}%｜掲示板 ${ranking.leaderboardRank}/${ranking.leaderboardTotal}`
       : "市場ポジションを査定中";
     const summary = [
       "【人間時価総額 CALCULATOR】",
@@ -741,6 +759,7 @@ export default function HumanMarketCapApp() {
     if (!display || !result || !flavor) return;
     setSharingImage(true);
     setShareFeedback("");
+    trackEvent("share_click", { uid: uid(), props: { scoreYen: display.scoreYen } });
     try {
       const canvas = await createShareCardCanvas({
         score: formatShareScore(result.marketCapMan),
@@ -758,6 +777,7 @@ export default function HumanMarketCapApp() {
       const summary = shareText() ?? "#人間時価総額";
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], text: summary });
+        trackEvent("share_success", { uid: uid(), props: { method: "share_api" } });
         setShareFeedback("結果カードを共有しました。");
         return;
       }
@@ -766,9 +786,11 @@ export default function HumanMarketCapApp() {
       download.download = file.name;
       download.click();
       window.open(`https://x.com/intent/post?text=${encodeURIComponent(summary)}`, "_blank", "noopener,noreferrer");
+      trackEvent("share_success", { uid: uid(), props: { method: "download_x" } });
       setShareFeedback("結果カードを保存しました。開いたXの投稿画面へ画像を添付してください。");
     } catch (shareError) {
       if (shareError instanceof DOMException && shareError.name === "AbortError") return;
+      trackEvent("api_error", { uid: uid(), props: { action: "share" } });
       setShareFeedback("共有を開始できませんでした。もう一度お試しください。");
     } finally {
       setSharingImage(false);
@@ -788,7 +810,7 @@ export default function HumanMarketCapApp() {
           <h1>あなたの価値を、<br /><em>数字にする。</em></h1>
           <p className="intro-copy">属性・資産・金融知識から、残りのキャリアが生み出す価値をDCF的に査定します。</p>
           <div className="formula-strip"><span>給与所得総額</span><b>＋</b><span>資産所得総額</span><b>＋</b><span>初期資産</span><b>＝</b><strong>時価総額</strong></div>
-          <div className="trust-row"><span>01 / 匿名</span><span>02 / 約3分</span><span>03 / 最新スコアのみ</span></div>
+          <div className="trust-row"><span>01 / 匿名ID</span><span>02 / 約3分</span><span>03 / 査定ごとに記録</span></div>
         </section>
 
         {challengeScoreYen !== null && (
@@ -933,7 +955,11 @@ export default function HumanMarketCapApp() {
 
           {error && <p className="form-error" role="alert">{error}</p>}
           <button className="calculate-button" type="submit" disabled={questions.length !== 5 || quizPhase !== "done" || calculating}><span>{calculating ? "サーバーで査定中…" : "時価総額を算出する"}</span><b>→</b></button>
-          <p className="privacy-note">年収・資産・容姿・職業・年齢・学歴・クイズ回答の本文は保存しません。ランキングには匿名IDとスコアを査定のたびに追記します。この結果は金融助言ではなく、教育・娯楽目的の試算です。</p>
+          <p className="privacy-note">
+            査定のたびに、匿名ID・スコア・年齢・年収・学歴・容姿・職業・資産・再投資率・クイズ正答数を保存します（設問文や回答の本文は残しません）。ランキングにも匿名IDとスコアを追記します。詳細は
+            <a href="/privacy">プライバシーポリシー</a>
+            をご覧ください。この結果は金融助言ではなく、教育・娯楽目的の試算です。
+          </p>
         </form>
 
         {display && result && (
@@ -984,7 +1010,7 @@ export default function HumanMarketCapApp() {
 
             <section className="result-card ranking-card">
               <div className="section-title"><div><span className="eyebrow">MARKET POSITION</span><h3>市場ポジション</h3></div><span className={`connection ${ranking ? "online" : ""}`}>{ranking ? "LIVE" : "WAIT"}</span></div>
-              {ranking ? <><div className="ranking-kpis"><div><span>総合順位</span><strong><em>{ranking.rank}</em> / {ranking.total}</strong></div><div><span>偏差値</span><strong><em>{ranking.deviation.toFixed(1)}</em></strong></div><div><span>上位</span><strong><em>{ranking.topPercent.toFixed(1)}</em>%</strong></div></div><Histogram ranking={ranking} score={display.scoreYen} /></> : <div className="ranking-loading"><span />ランキングを照合しています…</div>}
+              {ranking ? <><div className="ranking-kpis"><div><span>全体順位</span><strong><em>{ranking.rank}</em> / {ranking.total}</strong></div><div><span>偏差値</span><strong><em>{ranking.deviation.toFixed(1)}</em></strong></div><div><span>上位</span><strong><em>{ranking.topPercent.toFixed(1)}</em>%</strong></div><div><span>掲示板</span><strong><em>{ranking.leaderboardRank}</em> / {ranking.leaderboardTotal}</strong></div></div><Histogram ranking={ranking} score={display.scoreYen} /><p className="demo-note">全体順位・偏差値・分布は査定履歴全体との比較です（ダミーデータ除く）。掲示板は表示用の上位約1,000件です。</p></> : <div className="ranking-loading"><span />ランキングを照合しています…</div>}
             </section>
 
             <section className="kpi-grid">
@@ -1052,7 +1078,15 @@ export default function HumanMarketCapApp() {
           </section>
         )}
 
-        <footer><span>HMC CALCULATOR / v19</span><p>ENTERTAINMENT × FINANCIAL EDUCATION</p></footer>
+        <footer>
+          <span>HMC CALCULATOR / v19</span>
+          <p>ENTERTAINMENT × FINANCIAL EDUCATION</p>
+          <nav className="legal-links" aria-label="法務・問い合わせ">
+            <a href="/privacy">プライバシー</a>
+            <a href="/terms">利用規約</a>
+            <a href="/contact">お問い合わせ</a>
+          </nav>
+        </footer>
       </div>
     </main>
   );

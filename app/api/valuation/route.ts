@@ -33,6 +33,8 @@ interface ScoreRow {
 
 /** Append-only history cap. */
 const HISTORY_MAX_ROWS = 20_000;
+const LEADERBOARD_MAX_ROWS = 1000;
+const DUMMY_UID_PREFIX = "dummy-jp-%";
 
 const isKey = <T extends readonly { key: string }[]>(items: T, key: unknown) =>
   typeof key === "string" && items.some((item) => item.key === key);
@@ -73,10 +75,14 @@ function validateUid(value: unknown): string {
   return value;
 }
 
-function rankingFromScores(scores: number[], ownScore: number): RankingSnapshot {
+/** Population stats from full history (not the capped leaderboard). */
+function populationFromScores(
+  scores: number[],
+  ownScore: number,
+): Omit<RankingSnapshot, "leaderboardRank" | "leaderboardTotal" | "mode"> {
   const sorted = [...scores].sort((a, b) => b - a);
-  const index = sorted.findIndex((score) => score <= ownScore);
-  const rank = (index < 0 ? sorted.length - 1 : index) + 1;
+  const higher = sorted.filter((score) => score > ownScore).length;
+  const rank = higher + 1;
   const mean = sorted.reduce((sum, score) => sum + score, 0) / Math.max(1, sorted.length);
   const sd = Math.sqrt(sorted.reduce((sum, score) => sum + (score - mean) ** 2, 0) / Math.max(1, sorted.length));
   const minScore = Math.min(...sorted, ownScore);
@@ -90,7 +96,6 @@ function rankingFromScores(scores: number[], ownScore: number): RankingSnapshot 
     bins,
     minScore,
     maxScore,
-    mode: "global",
   };
 }
 
@@ -105,7 +110,7 @@ export async function POST(request: Request) {
     const inputs = validateInputs(payload.inputs);
     const db = await getD1();
     const now = Date.now();
-    let attempt = await db.prepare(`
+    const attempt = await db.prepare(`
       SELECT question_ids, answers_json, correct_count, uid, expires_at, completed_at
       FROM hmc_quiz_attempts WHERE id = ?1
     `).bind(attemptId).first<AttemptRow>();
@@ -116,34 +121,20 @@ export async function POST(request: Request) {
     const sets = Array.isArray(questionIds) ? getQuizSetsByIds(questionIds) : [];
     if (sets.length !== 5) throw new ApiError(400, "クイズをもう一度開始してください。");
 
-    let answers: QuizAnswers;
-    let quizCorrect: number;
+    // One valuation per quiz attempt. Completed attempts must start a new quiz.
     if (attempt.completed_at !== null) {
-      if (attempt.uid !== uid || !attempt.answers_json || attempt.correct_count === null) {
-        throw new ApiError(409, "このクイズはすでに使用されています。もう一度受けてください。");
-      }
-      answers = JSON.parse(attempt.answers_json) as QuizAnswers;
-      quizCorrect = Number(attempt.correct_count);
-    } else {
-      answers = normalizeAnswers(sets, payload.answers ?? {});
-      quizCorrect = scoreQuiz(sets, answers);
-      const updated = await db.prepare(`
-        UPDATE hmc_quiz_attempts
-        SET answers_json = ?1, correct_count = ?2, uid = ?3, completed_at = ?4
-        WHERE id = ?5 AND completed_at IS NULL
-        RETURNING id
-      `).bind(JSON.stringify(answers), quizCorrect, uid, now, attemptId).first<{ id: string }>();
-      if (!updated) {
-        attempt = await db.prepare(`
-          SELECT question_ids, answers_json, correct_count, uid, expires_at, completed_at
-          FROM hmc_quiz_attempts WHERE id = ?1
-        `).bind(attemptId).first<AttemptRow>();
-        if (!attempt || attempt.uid !== uid || !attempt.answers_json || attempt.correct_count === null) {
-          throw new ApiError(409, "このクイズはすでに使用されています。もう一度受けてください。");
-        }
-        answers = JSON.parse(attempt.answers_json) as QuizAnswers;
-        quizCorrect = Number(attempt.correct_count);
-      }
+      throw new ApiError(409, "このクイズはすでに査定済みです。もう一度受けてください。");
+    }
+    const answers = normalizeAnswers(sets, payload.answers ?? {});
+    const quizCorrect = scoreQuiz(sets, answers);
+    const updated = await db.prepare(`
+      UPDATE hmc_quiz_attempts
+      SET answers_json = ?1, correct_count = ?2, uid = ?3, completed_at = ?4
+      WHERE id = ?5 AND completed_at IS NULL
+      RETURNING id
+    `).bind(JSON.stringify(answers), quizCorrect, uid, now, attemptId).first<{ id: string }>();
+    if (!updated) {
+      throw new ApiError(409, "このクイズはすでに査定済みです。もう一度受けてください。");
     }
 
     const calculation = calculateMarketCap({ ...inputs, correctAnswers: quizCorrect });
@@ -189,7 +180,7 @@ export async function POST(request: Request) {
       `).bind(historyExcess).run();
     }
     const rankingCount = await db.prepare(`SELECT COUNT(*) AS c FROM hmc_scores`).first<{ c: number }>();
-    const rankingExcess = Math.max(0, Number(rankingCount?.c ?? 0) - 1000);
+    const rankingExcess = Math.max(0, Number(rankingCount?.c ?? 0) - LEADERBOARD_MAX_ROWS);
     if (rankingExcess > 0) {
       await db.prepare(`
         DELETE FROM hmc_scores
@@ -200,21 +191,40 @@ export async function POST(request: Request) {
         )
       `).bind(rankingExcess).run();
     }
-    const rows = await db.prepare(`
+
+    // Population stats: full history (exclude seeded dummies). Leaderboard stays capped separately.
+    const historyRows = await db.prepare(`
+      SELECT score FROM hmc_score_history
+      WHERE uid NOT LIKE ?1
+    `).bind(DUMMY_UID_PREFIX).all<{ score: number }>();
+    let populationScores = (historyRows.results ?? [])
+      .map((row) => Number(row.score))
+      .filter(Number.isFinite);
+    if (!populationScores.includes(scoreYen)) populationScores = [...populationScores, scoreYen];
+    const population = populationFromScores(populationScores, scoreYen);
+
+    const leaderboardRows = await db.prepare(`
       SELECT id, uid, score
-      FROM hmc_scores ORDER BY score DESC LIMIT 1000
-    `).all<ScoreRow>();
-    const rankingRows = rows.results.some((row) => row.id === scoreId)
-      ? rows.results
-      : [...rows.results, { id: scoreId, uid, score: scoreYen }];
-    const scores = rankingRows.map((row) => Number(row.score)).filter(Number.isFinite);
-    const globalRanking = rankingFromScores(scores, scoreYen);
+      FROM hmc_scores ORDER BY score DESC LIMIT ?1
+    `).bind(LEADERBOARD_MAX_ROWS).all<ScoreRow>();
+    const board = leaderboardRows.results.some((row) => row.id === scoreId)
+      ? leaderboardRows.results
+      : [...leaderboardRows.results, { id: scoreId, uid, score: scoreYen }];
+    const boardScores = board.map((row) => Number(row.score)).filter(Number.isFinite).sort((a, b) => b - a);
+    const leaderboardHigher = boardScores.filter((score) => score > scoreYen).length;
+    const ranking: RankingSnapshot = {
+      ...population,
+      mode: "population",
+      leaderboardRank: leaderboardHigher + 1,
+      leaderboardTotal: boardScores.length,
+    };
+
     const response: ValuationResponse = {
       calculation,
       scoreYen,
       quizCorrect,
       reviews: buildQuizReviews(sets, answers),
-      ranking: globalRanking,
+      ranking,
     };
     return json(response);
   } catch (error) {
