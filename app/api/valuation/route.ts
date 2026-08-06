@@ -1,6 +1,5 @@
 import { buildLogHistogramBins } from "../../ranking-display";
 import type {
-  QuizAnswers,
   RankingSnapshot,
   ValuationRequest,
   ValuationResponse,

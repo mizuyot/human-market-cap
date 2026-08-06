@@ -17,6 +17,8 @@
     "deploy:staging": "node scripts/deploy.mjs --env staging",
     "db:migrate:remote": "node scripts/migrate-remote.mjs --db human-market-cap",
     "db:migrate:staging": "node scripts/migrate-remote.mjs --db human-market-cap-staging",
+    "db:backup:production": "node scripts/backup-d1.mjs --db human-market-cap",
+    "db:backup:staging": "node scripts/backup-d1.mjs --db human-market-cap-staging",
     "db:seed:staging": "node --experimental-strip-types scripts/seed-dummy-jp.mjs --db human-market-cap-staging",
     "health:check": "node scripts/check-health.mjs"
   },

@@ -600,6 +600,7 @@ export default function HumanMarketCapApp() {
     const params = new URLSearchParams(window.location.search);
     const candidate = Number(params.get("challenge"));
     const challenge = Number.isSafeInteger(candidate) && candidate > 0 ? candidate : null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read challenge query on mount
     setChallengeScoreYen(challenge);
     trackEvent(challenge ? "challenge_visit" : "page_view", {
       uid: uid(),
@@ -710,6 +711,7 @@ export default function HumanMarketCapApp() {
 
   useEffect(() => {
     if (!display || !result || !flavor) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale share card when result resets
       setShareImageUrl("");
       return;
     }

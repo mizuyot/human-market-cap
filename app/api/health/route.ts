@@ -1,7 +1,7 @@
 import { getD1 } from "../../../db";
 import { errorResponse, json } from "../../server/http";
 
-export async function GET(_request: Request) {
+export async function GET() {
   try {
     const started = Date.now();
     const db = await getD1();

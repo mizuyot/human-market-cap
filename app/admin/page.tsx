@@ -99,6 +99,7 @@ export default function AdminHistoryPage() {
 
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY) ?? "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restore admin session from sessionStorage
     setPassword(saved);
     setReady(true);
   }, []);
@@ -135,6 +136,8 @@ export default function AdminHistoryPage() {
 
   useEffect(() => {
     if (!ready || !password) return;
+    // Restore session and refresh admin data once after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional session restore
     void load(password);
   }, [ready, password, load]);
 

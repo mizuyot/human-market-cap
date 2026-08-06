@@ -2,7 +2,7 @@
 
 属性・資産・金融リテラシーから、人間時価総額をDCF風に算出するモバイル向けWebアプリです。
 
-公開URL: https://human-market-cap.mizuyot.workers.dev/ （Cloudflare Workers。Sitesではありません）  
+公開URL: https://humanmarketcap.com （予備: https://human-market-cap.mizuyot.workers.dev/）  
 ソース: https://github.com/mizuyot/human-market-cap
 
 ## 現在の構成（v19）
@@ -16,6 +16,7 @@
 - 年収・資産チャート、前回差分、対戦URL、X共有用の結果カード
 - 条件の組み合わせで発動する隠し称号8種と専用アバター
 - APIの入力値検証、同一オリジン確認、短時間レート制限
+- セキュリティヘッダー（CSP / frame 拒否 / Permissions-Policy）と同一オリジン配信フォント
 
 ## データの扱い
 
@@ -32,12 +33,14 @@
 | ステージング | 本番前の試しURL | 本番とは別のD1 | `npm run db:migrate:staging` → `npm run deploy:staging` |
 | 本番 | 公開サイト | 本番D1 | `npm run db:migrate:remote` → `npm run deploy:production` |
 
-- 本番: https://human-market-cap.mizuyot.workers.dev/
+- 本番: https://humanmarketcap.com / https://human-market-cap.mizuyot.workers.dev/
 - ステージング: https://human-market-cap-staging.mizuyot.workers.dev/
-- 管理画面: 各環境の `/admin`（集計・履歴・ダミー削除）
+- 管理画面: 各環境の `/admin`（集計・履歴・ダミー削除）。先に Cloudflare Access、次に管理パスワード
 - パスワードは Wrangler シークレット `ADMIN_TOKEN`（ローカル控えは `.admin-token.local`）。URLにトークンは付けません
 - ダミー投入は原則ステージングのみ: `npm run db:seed:staging`（本番へ入れる場合は明示フラグが必要）
-- 外形監視: `node scripts/check-health.mjs`（`/api/health`）。Workers Logs は `wrangler.toml` の observability で有効
+- 外形監視: `npm run health:check`（複数URLの `/api/health`）
+- D1バックアップ: `npm run db:backup:production`（`backups/` にSQLを保存。git管理外）
+- Workers Logs は `wrangler.toml` の observability で有効。ダッシュボードの Notifications でエラー率・CPUアラートを推奨
 - Cloudflare Access（管理画面の二重保護）設定手順は下表のあと「管理画面の追加保護」を参照
 
 ```bash
@@ -45,6 +48,7 @@ npm install
 npm run db:migrate:staging
 npm run deploy:staging
 # 確認後
+npm run db:backup:production
 npm run db:migrate:remote
 npm run deploy:production
 ```
@@ -53,13 +57,18 @@ npm run deploy:production
 
 パスワードだけでは弱いので、Cloudflare Zero Trust の Access で `/admin*` を保護することを推奨します。
 
-1. [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) → Access → Applications → Add an application → Self-hosted
-2. Application domain に本番（またはステージング）の `workers.dev` ホストを指定
-3. Path に `/admin*` と `/api/admin*` を追加（またはアプリを管理パス専用にする）
-4. Policy で自分のメールだけ Allow
-5. 保存後、管理画面はメール認証のあと、従来どおり管理パスワードでも入る
+1. [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) → Access → Applications → Add an application → Self-hosted（Public DNS）
+2. Domain に `humanmarketcap.com`、Path に `/admin` と `/api/admin` を指定（Worker全体は選ばない）
+3. Policy で自分のメールだけ Allow。ログイン方法に One-time PIN を有効化
+4. 保存後、管理画面はメール認証のあと、従来どおり管理パスワードでも入る
 
 Workers ダッシュボードの Notifications で、エラー率・CPU時間の閾値アラートも設定できます。
+
+### DBマイグレーション
+
+`scripts/migrate-remote.mjs` は `hmc_schema_migrations` に適用済みファイルを記録します。  
+既存DBで履歴が空のときは、現在のマイグレーションファイルを「適用済み」として一度だけブートストラップします（再実行しません）。  
+スキーマ変更後はステージングで `db:migrate:staging` → 確認 → 本番前に `db:backup:production` → `db:migrate:remote` の順を推奨します。
 
 ## ローカル開発
 
