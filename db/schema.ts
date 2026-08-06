@@ -48,3 +48,19 @@ export const rateLimits = sqliteTable("hmc_rate_limits", {
   count: integer("count").notNull().default(1),
   expiresAt: integer("expires_at").notNull(),
 }, (table) => [index("hmc_rate_limits_expires_idx").on(table.expiresAt)]);
+
+/** Lightweight product analytics events for funnel measurement. */
+export const analyticsEvents = sqliteTable("hmc_analytics_events", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  sessionId: text("session_id").notNull(),
+  uid: text("uid"),
+  path: text("path").notNull(),
+  referrer: text("referrer").notNull(),
+  propsJson: text("props_json").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [
+  index("hmc_analytics_events_name_created_idx").on(table.name, table.createdAt),
+  index("hmc_analytics_events_created_idx").on(table.createdAt),
+  index("hmc_analytics_events_session_idx").on(table.sessionId),
+]);

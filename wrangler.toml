@@ -2,6 +2,8 @@ name = "human-market-cap"
 main = "./worker/index.ts"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = true
 
 [[d1_databases]]
 binding = "DB"
@@ -11,3 +13,35 @@ migrations_dir = "drizzle"
 
 [images]
 binding = "IMAGES"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+# Production custom domains (Cloudflare Registrar: humanmarketcap.com)
+[[routes]]
+pattern = "humanmarketcap.com"
+custom_domain = true
+
+[[routes]]
+pattern = "www.humanmarketcap.com"
+custom_domain = true
+
+# Staging: separate Worker + D1 so trial data never touches production.
+[env.staging]
+name = "human-market-cap-staging"
+workers_dev = true
+preview_urls = true
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "human-market-cap-staging"
+database_id = "61ff36a6-fd9d-4b61-a47c-37b6bb7ee061"
+migrations_dir = "drizzle"
+
+[env.staging.images]
+binding = "IMAGES"
+
+[env.staging.observability]
+enabled = true
+head_sampling_rate = 1

@@ -144,7 +144,7 @@ main { min-height: 100vh; min-height: 100dvh; overflow: hidden; }
   font: 600 15px/1.5 var(--serif);
   margin-bottom: 14px;
 }
-.question-number { font: 500 10px/1 var(--mono); color: var(--gold); border: 1px solid var(--border-gold); width: 31px; height: 28px; display: inline-grid; place-items: center; flex: 0 0 auto; }
+.question-number { font: 500 11px/1 var(--mono); color: var(--gold); border: 1px solid var(--border-gold); width: 31px; height: 28px; display: inline-grid; place-items: center; flex: 0 0 auto; }
 .number-input {
   height: 60px;
   display: grid;
@@ -169,7 +169,7 @@ main { min-height: 100vh; min-height: 100dvh; overflow: hidden; }
 .field-note { margin: 10px 1px 0; color: var(--dim); font-size: 11px; line-height: 1.7; }
 .sub-asset-field { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 .sub-asset-field > label { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 9px; color: var(--text); font: 600 12px var(--serif); }
-.sub-asset-field > label small { color: var(--dim); font: 400 7px var(--mono); }
+.sub-asset-field > label small { color: var(--dim); font: 400 11px var(--mono); }
 select {
   appearance: none;
   width: 100%;
@@ -232,7 +232,7 @@ fieldset legend { padding: 0; }
 .risk-line { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 11px 12px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; }
 .risk-line > span { line-height: 1.55; }
 .risk-line .risk-badge { flex: 0 0 auto; }
-.job-income-floor { padding: 9px 12px; border-top: 1px solid var(--border); color: var(--muted); font: 500 10px/1.5 var(--mono); }
+.job-income-floor { padding: 9px 12px; border-top: 1px solid var(--border); color: var(--muted); font: 500 11px/1.5 var(--mono); }
 .job-income-floor strong { color: var(--text); }
 .job-special-note { padding: 11px 12px; border-top: 1px solid var(--border-gold); background: rgba(212,168,67,.07); color: var(--gold-light); font: 600 11px/1.6 var(--serif); }
 .job-special-note.ai-strongest, .result-job-note.ai-strongest { border-color: var(--blue); background: rgba(74,158,255,.1); color: #cfe3ff; box-shadow: inset 3px 0 0 var(--blue); }
@@ -253,11 +253,11 @@ fieldset legend { padding: 0; }
 .range-scale { display: flex; justify-content: space-between; color: var(--dim); font-size: 11px; }
 
 .quiz-card { padding-inline: 14px; }
-.quiz-title small { display: block; margin-top: 4px; color: var(--dim); font: 400 9px var(--mono); letter-spacing: .08em; }
+.quiz-title small { display: block; margin-top: 4px; color: var(--dim); font: 400 11px var(--mono); letter-spacing: .08em; }
 .quiz-loading { color: var(--muted); font-size: 11px; }
 .quiz-question { border-top: 1px solid var(--border); padding: 18px 0 4px; }
 .quiz-question legend { display: block; width: 100%; font: 500 14px/1.7 var(--serif); margin: 0 0 11px; }
-.quiz-question legend span { color: var(--gold); font: 500 9px var(--mono); margin-right: 8px; }
+.quiz-question legend span { color: var(--gold); font: 500 11px var(--mono); margin-right: 8px; }
 .quiz-options { display: grid; gap: 6px; }
 .quiz-options label, .quiz-options button { width: 100%; justify-content: flex-start; text-align: left; padding: 11px 12px; min-height: 52px; }
 .quiz-options button { font-family: var(--mono); }
@@ -273,7 +273,7 @@ fieldset legend { padding: 0; }
 .quiz-progress-row > div { height: 3px; background: var(--border); overflow: hidden; }
 .quiz-progress-row > div i { display: block; height: 100%; background: var(--gold); transition: width .25s ease; }
 .quiz-progress-row > b { width: 44px; height: 36px; display: grid; grid-template-columns: 1fr auto; align-items: baseline; justify-content: center; padding: 8px 6px; border: 1px solid var(--border-gold); color: var(--gold-light); font: 700 16px var(--serif); }
-.quiz-progress-row > b small { color: var(--dim); font: 500 5px var(--mono); margin-left: 2px; }
+.quiz-progress-row > b small { color: var(--dim); font: 500 11px var(--mono); margin-left: 2px; }
 .quiz-progress-row > b.urgent { color: var(--red); border-color: var(--red); animation: pulse .55s infinite alternate; }
 .quiz-set-heading { display: flex; align-items: center; gap: 9px; margin-top: 16px; }
 .quiz-set-heading span { color: var(--gold); font-size: 11px; letter-spacing: .1em; }
@@ -304,6 +304,7 @@ fieldset legend { padding: 0; }
 .calculate-button:disabled { opacity: .45; cursor: wait; }
 .calculate-button b { font: 400 23px var(--mono); }
 .privacy-note { text-align: center; color: var(--dim); font-size: 11px; line-height: 1.7; margin: 13px 10px 0; }
+.privacy-note a { color: var(--gold-light); text-decoration: underline; text-underline-offset: 2px; }
 
 .results { padding: 0 14px 60px; scroll-margin-top: 12px; }
 .result-divider { border-block: 1px solid var(--border); height: 55px; display: flex; justify-content: space-between; align-items: center; color: var(--dim); font-size: 11px; letter-spacing: .1em; margin-inline: -14px; padding: 0 20px; }
@@ -393,10 +394,10 @@ fieldset legend { padding: 0; }
 .connection::before { content: ""; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--dim); margin-right: 5px; }
 .connection.online { color: var(--green); border-color: rgba(62,207,142,.35); }
 .connection.online::before { background: var(--green); box-shadow: 0 0 7px var(--green); }
-.ranking-kpis { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.ranking-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
 .ranking-kpis div { background: #10100f; padding: 12px 8px; }
 .ranking-kpis span { display: block; color: var(--dim); font-size: 11px; margin-bottom: 6px; }
-.ranking-kpis strong { color: var(--muted); font: 500 10px var(--mono); white-space: nowrap; }
+.ranking-kpis strong { color: var(--muted); font: 500 11px var(--mono); white-space: nowrap; }
 .ranking-kpis em { color: var(--gold-light); font: 700 22px var(--serif); font-style: normal; }
 .histogram-wrap { margin-top: 39px; position: relative; }
 .histogram { height: 98px; display: flex; align-items: flex-end; gap: 4px; border-bottom: 1px solid #454139; background: repeating-linear-gradient(to top, transparent 0 31px, rgba(255,255,255,.035) 31px 32px); }
@@ -458,7 +459,7 @@ fieldset legend { padding: 0; }
 .assumption-list .highlight span, .assumption-list .highlight strong { color: var(--gold-light); }
 .model-notes { display: grid; gap: 8px; margin-top: 14px; }
 .model-notes p { margin: 0; padding: 10px 11px; border-left: 2px solid var(--border-gold); background: rgba(212,168,67,.04); color: var(--muted); font-size: 11px; line-height: 1.75; }
-.model-notes b { margin-right: 6px; color: var(--gold-light); font: 600 9px var(--mono); }
+.model-notes b { margin-right: 6px; color: var(--gold-light); font: 600 11px var(--mono); }
 .factor-row { margin-bottom: 17px; }
 .factor-row:last-child { margin-bottom: 0; }
 .factor-head { display: flex; justify-content: space-between; margin-bottom: 7px; }
@@ -506,6 +507,19 @@ fieldset legend { padding: 0; }
 footer { border-top: 1px solid var(--border); padding: 28px 20px max(34px, calc(18px + env(safe-area-inset-bottom))); text-align: center; color: var(--dim); }
 footer span { font-size: 11px; letter-spacing: .12em; }
 footer p { margin: 7px 0 0; font-size: 11px; letter-spacing: .1em; }
+.legal-links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 14px;
+}
+.legal-links a {
+  color: var(--muted);
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 @media (max-width: 420px) {
   .app-shell { border-inline: 0; }
@@ -551,7 +565,7 @@ footer p { margin: 7px 0 0; font-size: 11px; letter-spacing: .1em; }
   .quiz-progress-row { gap: 6px; }
   .quiz-progress-row > b { width: 40px; }
   .ranking-kpis { grid-template-columns: repeat(2, 1fr); }
-  .ranking-kpis div:first-child { grid-column: 1 / -1; }
+  .ranking-kpis div:first-child { grid-column: auto; }
   .ranking-kpis em { font-size: 20px; }
   .result-flavor.has-hidden-title { grid-template-columns: 76px minmax(0, 1fr); gap: 9px; }
   .hidden-title-avatar { width: 76px; }

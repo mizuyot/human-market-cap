@@ -1,3 +1,8 @@
+/**
+ * Apply Drizzle SQL migrations to a remote D1 database.
+ * Usage: node scripts/migrate-remote.mjs
+ *        node scripts/migrate-remote.mjs --db human-market-cap-staging
+ */
 import { readFileSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -5,7 +10,17 @@ import { spawnSync } from "node:child_process";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const drizzleDir = join(root, "drizzle");
-const DB_NAME = "human-market-cap";
+
+const args = process.argv.slice(2);
+const dbFlagIndex = args.indexOf("--db");
+const DB_NAME = dbFlagIndex >= 0
+  ? args[dbFlagIndex + 1]
+  : (process.env.HMC_D1_NAME || "human-market-cap");
+
+if (!DB_NAME) {
+  console.error("Missing database name. Pass --db <name>.");
+  process.exit(1);
+}
 
 const IGNORABLE = [
   "already exists",
@@ -16,8 +31,8 @@ const IGNORABLE = [
   "no such table",
 ];
 
-function wrangler(args) {
-  return spawnSync("npx", ["wrangler", ...args], {
+function wrangler(wranglerArgs) {
+  return spawnSync("npx", ["wrangler", ...wranglerArgs], {
     cwd: root,
     encoding: "utf-8",
     env: process.env,
@@ -73,6 +88,8 @@ function runStatement(statement) {
   process.exit(result.status ?? 1);
 }
 
+console.log(`Migrating remote D1: ${DB_NAME}`);
+
 if (remoteTablesInclude("hmc_score_history")) {
   console.log("Core tables present; re-applying migrations with idempotent skips.");
 }
@@ -85,4 +102,4 @@ for (const file of migrationFiles()) {
   }
 }
 
-console.log("Remote D1 migrations finished.");
+console.log(`Remote D1 migrations finished for ${DB_NAME}.`);

@@ -1,7 +1,7 @@
 /**
  * Seed ~50 ranking (+ history) rows with Japan-weighted demographics.
- * Usage: node --experimental-strip-types scripts/seed-dummy-jp.mjs
- *        (then wrangler applies the generated SQL)
+ * Usage: node --experimental-strip-types scripts/seed-dummy-jp.mjs --db human-market-cap-staging
+ *        Defaults to staging DB to avoid accidentally seeding production.
  */
 import { writeFileSync, unlinkSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -13,6 +13,21 @@ import { getTier } from "../app/model.ts";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const sqlPath = join(root, "scripts", ".seed-dummy-jp.sql");
+const argv = process.argv.slice(2);
+const dbFlagIndex = argv.indexOf("--db");
+const DB_NAME = dbFlagIndex >= 0
+  ? argv[dbFlagIndex + 1]
+  : (process.env.HMC_D1_NAME || "human-market-cap-staging");
+
+if (!DB_NAME) {
+  console.error("Missing database name. Pass --db <name>.");
+  process.exit(1);
+}
+if (DB_NAME === "human-market-cap" && !argv.includes("--allow-production")) {
+  console.error("Refusing to seed production without --allow-production.");
+  process.exit(1);
+}
+console.log(`Seeding remote D1: ${DB_NAME}`);
 
 /** @type {Array<Omit<import('../app/model.ts').ScoredCalculatorInputs, never>>} */
 const profiles = [
@@ -114,7 +129,7 @@ console.log("Tier mix:", tierCounts);
 
 const apply = spawnSync(
   "npx",
-  ["wrangler", "d1", "execute", "human-market-cap", "--remote", `--file=${sqlPath}`],
+  ["wrangler", "d1", "execute", DB_NAME, "--remote", `--file=${sqlPath}`],
   { cwd: root, encoding: "utf8", env: process.env },
 );
 process.stdout.write(apply.stdout ?? "");
@@ -128,7 +143,7 @@ if (apply.status !== 0) process.exit(apply.status ?? 1);
 
 const check = spawnSync(
   "npx",
-  ["wrangler", "d1", "execute", "human-market-cap", "--remote", "--command",
+  ["wrangler", "d1", "execute", DB_NAME, "--remote", "--command",
     "SELECT COUNT(*) AS scores FROM hmc_scores; SELECT COUNT(*) AS history FROM hmc_score_history; SELECT COUNT(*) AS dummies FROM hmc_scores WHERE uid LIKE 'dummy-jp-%';"],
   { cwd: root, encoding: "utf8", env: process.env },
 );

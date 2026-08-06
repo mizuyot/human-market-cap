@@ -38,3 +38,43 @@ test("valuation history appends input snapshot separately from ranking", async (
   assert.match(route, /INSERT INTO hmc_score_history/);
   assert.match(route, /HISTORY_MAX_ROWS/);
 });
+
+test("completed quiz attempts cannot be reused to inflate ranking", async () => {
+  const route = await readFile(new URL("../app/api/valuation/route.ts", import.meta.url), "utf8");
+  assert.match(route, /すでに査定済みです/);
+  assert.match(route, /completed_at !== null/);
+  assert.doesNotMatch(route, /このクイズはすでに使用されています/);
+});
+
+test("privacy copy discloses saved valuation fields", async () => {
+  const client = await readFile(new URL("../app/HumanMarketCapApp.tsx", import.meta.url), "utf8");
+  assert.match(client, /査定ごとに記録/);
+  assert.match(client, /匿名ID・スコア・年齢・年収・学歴・容姿・職業・資産/);
+  assert.match(client, /href="\/privacy"/);
+  assert.doesNotMatch(client, /年収・資産・容姿・職業・年齢・学歴・クイズ回答の本文は保存しません/);
+  assert.doesNotMatch(client, /最新スコアのみ/);
+});
+
+test("admin API accepts Bearer auth only", async () => {
+  const http = await readFile(new URL("../app/server/http.ts", import.meta.url), "utf8");
+  assert.match(http, /Authorization/);
+  assert.match(http, /enforceRateLimit\(request, "admin"/);
+  assert.doesNotMatch(http, /searchParams\.get\("token"\)/);
+  assert.doesNotMatch(http, /X-Admin-Token/);
+});
+
+test("population stats use history while leaderboard stays capped", async () => {
+  const [route, types, client] = await Promise.all([
+    readFile(new URL("../app/api/valuation/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api-types.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/HumanMarketCapApp.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(route, /populationFromScores/);
+  assert.match(route, /hmc_score_history[\s\S]*NOT LIKE/);
+  assert.match(route, /LEADERBOARD_MAX_ROWS/);
+  assert.match(route, /leaderboardRank/);
+  assert.match(types, /mode: "population"/);
+  assert.match(types, /leaderboardRank/);
+  assert.match(client, /査定履歴全体との比較/);
+  assert.match(client, /掲示板/);
+});

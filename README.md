@@ -24,16 +24,42 @@
 
 
 
-## 本番デプロイ（Cloudflare Workers）
+## 環境の分け方
+
+| 環境 | 用途 | データ | 出し方 |
+|---|---|---|---|
+| ローカル | 自分のPCで試す | パソコン内の一時DB | `npm run dev` |
+| ステージング | 本番前の試しURL | 本番とは別のD1 | `npm run db:migrate:staging` → `npm run deploy:staging` |
+| 本番 | 公開サイト | 本番D1 | `npm run db:migrate:remote` → `npm run deploy:production` |
+
+- 本番: https://human-market-cap.mizuyot.workers.dev/
+- ステージング: https://human-market-cap-staging.mizuyot.workers.dev/
+- 管理画面: 各環境の `/admin`（集計・履歴・ダミー削除）
+- パスワードは Wrangler シークレット `ADMIN_TOKEN`（ローカル控えは `.admin-token.local`）。URLにトークンは付けません
+- ダミー投入は原則ステージングのみ: `npm run db:seed:staging`（本番へ入れる場合は明示フラグが必要）
+- 外形監視: `node scripts/check-health.mjs`（`/api/health`）。Workers Logs は `wrangler.toml` の observability で有効
+- Cloudflare Access（管理画面の二重保護）設定手順は下表のあと「管理画面の追加保護」を参照
 
 ```bash
 npm install
-npm run db:migrate:remote   # リモートD1へマイグレーション
-npm run deploy              # build + wrangler deploy
+npm run db:migrate:staging
+npm run deploy:staging
+# 確認後
+npm run db:migrate:remote
+npm run deploy:production
 ```
 
-管理画面（査定履歴）: https://human-market-cap.mizuyot.workers.dev/admin  
-パスワードは Wrangler シークレット `ADMIN_TOKEN`（ローカル控えは `.admin-token.local`）。URLにトークンは付けません。
+### 管理画面の追加保護（Cloudflare Access）
+
+パスワードだけでは弱いので、Cloudflare Zero Trust の Access で `/admin*` を保護することを推奨します。
+
+1. [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) → Access → Applications → Add an application → Self-hosted
+2. Application domain に本番（またはステージング）の `workers.dev` ホストを指定
+3. Path に `/admin*` と `/api/admin*` を追加（またはアプリを管理パス専用にする）
+4. Policy で自分のメールだけ Allow
+5. 保存後、管理画面はメール認証のあと、従来どおり管理パスワードでも入る
+
+Workers ダッシュボードの Notifications で、エラー率・CPU時間の閾値アラートも設定できます。
 
 ## ローカル開発
 

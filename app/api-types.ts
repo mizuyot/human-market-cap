@@ -28,6 +28,7 @@ export interface QuizReviewItem extends PublicQuizSet {
 }
 
 export interface RankingSnapshot {
+  /** Rank among population stats (valuation history, dummies excluded). */
   rank: number;
   total: number;
   deviation: number;
@@ -35,7 +36,10 @@ export interface RankingSnapshot {
   bins: number[];
   minScore: number;
   maxScore: number;
-  mode: "global";
+  mode: "population";
+  /** Rank among the capped leaderboard table (top ~1000). */
+  leaderboardRank: number;
+  leaderboardTotal: number;
 }
 
 export interface QuizStartResponse {

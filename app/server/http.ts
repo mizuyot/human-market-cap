@@ -53,7 +53,7 @@ async function requestFingerprint(request: Request): Promise<string> {
   return Array.from(new Uint8Array(digest).slice(0, 12), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-export async function enforceRateLimit(request: Request, action: "start" | "value", max: number): Promise<void> {
+export async function enforceRateLimit(request: Request, action: "start" | "value" | "admin" | "analytics", max: number): Promise<void> {
   const db = await getD1();
   const now = Date.now();
   const windowStart = Math.floor(now / 3_600_000) * 3_600_000;
@@ -73,22 +73,31 @@ export async function enforceRateLimit(request: Request, action: "start" | "valu
 
 export function errorResponse(error: unknown): Response {
   if (error instanceof ApiError) return json({ error: error.message }, error.status);
-  console.error("HMC API error", error);
-  return json({ error: "査定サーバーで問題が発生しました。少し待ってからもう一度お試しください。" }, 500);
+  const errorId = crypto.randomUUID().slice(0, 8);
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(JSON.stringify({
+    level: "error",
+    service: "hmc",
+    errorId,
+    message,
+    stack: error instanceof Error ? error.stack?.slice(0, 2000) : undefined,
+  }));
+  return json({
+    error: "査定サーバーで問題が発生しました。少し待ってからもう一度お試しください。",
+    errorId,
+  }, 500);
 }
 
 export async function requireAdminToken(request: Request): Promise<void> {
+  await enforceRateLimit(request, "admin", 30);
   const { env } = await import("cloudflare:workers");
   const expected = env.ADMIN_TOKEN;
   if (typeof expected !== "string" || !expected) {
     throw new ApiError(503, "管理機能は現在利用できません。");
   }
-  const url = new URL(request.url);
   const auth = request.headers.get("Authorization");
-  const bearer = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
-  const token = bearer
-    ?? url.searchParams.get("token")
-    ?? request.headers.get("X-Admin-Token")
-    ?? "";
-  if (token !== expected) throw new ApiError(401, "認証に失敗しました。");
+  const bearer = auth?.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+  if (!bearer || bearer !== expected) {
+    throw new ApiError(401, "認証に失敗しました。");
+  }
 }

@@ -32,6 +32,13 @@ test("body copy and captions stay at least 11px", async () => {
   const sizes = [...css.matchAll(/font-size:\s*([0-9.]+)px/g)].map((match) => Number(match[1]));
   assert.ok(sizes.length > 0);
   assert.ok(sizes.every((size) => size >= 11), `found sub-11px sizes: ${sizes.filter((size) => size < 11).join(", ")}`);
+
+  const shorthand = [...css.matchAll(/font:\s*(?:(?:inherit|italic|normal|[0-9]{3})\s+)*([0-9.]+)px/g)]
+    .map((match) => Number(match[1]));
+  assert.ok(
+    shorthand.every((size) => size >= 11),
+    `found sub-11px font shorthand sizes: ${shorthand.filter((size) => size < 11).join(", ")}`,
+  );
 });
 
 test("quiz questions allow twenty seconds each", async () => {
