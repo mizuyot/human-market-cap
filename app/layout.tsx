@@ -1,20 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { DM_Mono, Noto_Serif_JP } from "next/font/google";
+import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
-const notoSerif = Noto_Serif_JP({
-  weight: ["500", "600", "700", "800"],
+const notoSans = Noto_Sans_JP({
+  variable: "--font-noto-sans",
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-  preload: true,
-});
-
-const dmMono = DM_Mono({
-  weight: ["300", "400", "500"],
-  subsets: ["latin"],
-  variable: "--font-mono",
   display: "swap",
   preload: true,
 });
@@ -64,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ja" className={`${notoSerif.variable} ${dmMono.variable}`}>
+    <html lang="ja" className={notoSans.variable}>
       <body>{children}</body>
     </html>
   );

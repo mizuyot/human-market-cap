@@ -47,12 +47,25 @@ test("completed quiz attempts cannot be reused to inflate ranking", async () => 
 });
 
 test("privacy copy discloses saved valuation fields", async () => {
-  const client = await readFile(new URL("../app/HumanMarketCapApp.tsx", import.meta.url), "utf8");
+  const [client, privacyUi] = await Promise.all([
+    readFile(new URL("../app/HumanMarketCapApp.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/hmc/ui.tsx", import.meta.url), "utf8"),
+  ]);
   assert.match(client, /査定ごとに記録/);
-  assert.match(client, /匿名ID・スコア・年齢・年収・学歴・容姿・職業・資産/);
-  assert.match(client, /href="\/privacy"/);
+  assert.match(privacyUi, /匿名ID・スコア・年齢・年収・学歴・容姿・職業・資産/);
+  assert.match(privacyUi, /href="\/privacy"/);
   assert.doesNotMatch(client, /年収・資産・容姿・職業・年齢・学歴・クイズ回答の本文は保存しません/);
   assert.doesNotMatch(client, /最新スコアのみ/);
+});
+
+test("wizard splits valuation form into four steps", async () => {
+  const client = await readFile(new URL("../app/HumanMarketCapApp.tsx", import.meta.url), "utf8");
+  assert.match(client, /wizardStep/);
+  assert.match(client, /想定就労年齢/);
+  assert.match(client, /ネットワーク指数/);
+  assert.match(client, /PrivacySummary/);
+  assert.doesNotMatch(client, />WORK END</);
+  assert.doesNotMatch(client, />NW力</);
 });
 
 test("admin API accepts Bearer auth only", async () => {

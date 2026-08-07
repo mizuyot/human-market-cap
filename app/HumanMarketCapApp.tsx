@@ -42,6 +42,19 @@ import type {
 } from "./api-types";
 import { formatAxisMan, logHistogramMarkerPercent } from "./ranking-display";
 import { trackEvent } from "./analytics";
+import {
+  FieldError,
+  FieldHelp,
+  InfoTooltip,
+  NumberInputWithUnit,
+  PrimaryButton,
+  PrivacySummary,
+  QuestionHeader,
+  SecondaryButton,
+  SelectField,
+  WizardProgress,
+  type WizardStepId,
+} from "./hmc/ui";
 
 const QUIZ_SECONDS = 20;
 
@@ -156,7 +169,7 @@ function SalaryCanvas({ data }: { data: AnnualProjection[] }) {
     const axisMin = Math.max(0, dataMin - spread * .18);
     const axisMax = dataMax + spread * .12;
     const axisRange = Math.max(1, axisMax - axisMin);
-    context.font = "10px 'DM Mono', monospace";
+    context.font = "10px 'Noto Sans JP', sans-serif";
     context.textAlign = "right";
     for (let tick = 0; tick <= 4; tick += 1) {
       const y = top + chartHeight - chartHeight * tick / 4;
@@ -190,7 +203,7 @@ function SalaryCanvas({ data }: { data: AnnualProjection[] }) {
       context.fill();
       context.stroke();
       context.fillStyle = "#b8d6ff";
-      context.font = "10px 'DM Mono', monospace";
+      context.font = "10px 'Noto Sans JP', sans-serif";
       context.textAlign = "center";
       context.fillText(compactMoney(item.salary), x, Math.max(12, y - 10 - (index % 2) * 11));
     });
@@ -411,7 +424,7 @@ function getResultFlavor(display: DisplayResult, ranking: RankingSnapshot | null
 function fitCanvasText(context: CanvasRenderingContext2D, text: string, maxWidth: number, startingSize: number, minimumSize: number) {
   let size = startingSize;
   while (size > minimumSize) {
-    context.font = `700 ${size}px "Noto Serif JP", serif`;
+    context.font = `700 ${size}px "Noto Sans JP", sans-serif`;
     if (context.measureText(text).width <= maxWidth) break;
     size -= 2;
   }
@@ -453,44 +466,44 @@ async function createShareCardCanvas(payload: ShareCardPayload): Promise<HTMLCan
   }
 
   context.fillStyle = accent;
-  context.font = "500 24px 'DM Mono', monospace";
+  context.font = "500 24px 'Noto Sans JP', sans-serif";
   context.fillText("HMC / HUMAN MARKET CAPITAL", 78, 84);
   context.textAlign = "right";
-  context.font = "700 23px 'Noto Serif JP', serif";
+  context.font = "700 23px 'Noto Sans JP', sans-serif";
   context.fillText(payload.marketSignal, 1120, 84);
   context.textAlign = "left";
   context.fillStyle = "#8d8980";
-  context.font = "500 25px 'Noto Serif JP', serif";
+  context.font = "500 25px 'Noto Sans JP', sans-serif";
   context.fillText("あなたの人間時価総額", 78, 143);
 
   context.fillStyle = "#f0d487";
   const scoreSize = fitCanvasText(context, payload.score, 1035, 98, 62);
-  context.font = `700 ${scoreSize}px "Noto Serif JP", serif`;
+  context.font = `700 ${scoreSize}px "Noto Sans JP", sans-serif`;
   context.fillText(payload.score, 72, 259);
 
   context.fillStyle = accent;
   context.fillRect(76, 297, 208, 72);
   context.fillStyle = "#15110a";
-  context.font = "700 37px 'DM Mono', monospace";
+  context.font = "700 37px 'Noto Sans JP', sans-serif";
   context.fillText(`${payload.tier} TIER`, 102, 345);
   context.fillStyle = "#f2eee5";
-  context.font = "700 40px 'Noto Serif JP', serif";
+  context.font = "700 40px 'Noto Sans JP', sans-serif";
   context.fillText(`偏差値 ${payload.deviation}`, 326, 345);
 
   const contentWidth = payload.avatar ? 760 : 1040;
   if (payload.title) {
     context.fillStyle = accent;
     const titleSize = fitCanvasText(context, `隠し称号：${payload.title}`, contentWidth, 33, 22);
-    context.font = `700 ${titleSize}px "Noto Serif JP", serif`;
+    context.font = `700 ${titleSize}px "Noto Sans JP", sans-serif`;
     context.fillText(`隠し称号：${payload.title}`, 78, 414);
   }
   context.fillStyle = "#f2eee5";
-  context.font = "600 25px 'Noto Serif JP', serif";
+  context.font = "600 25px 'Noto Sans JP', sans-serif";
   context.fillText(`金融リテラシー ${payload.quiz}`, 78, 458);
 
   context.fillStyle = "#aaa59c";
   const occupationSize = fitCanvasText(context, payload.occupation, contentWidth, 27, 20);
-  context.font = `600 ${occupationSize}px "Noto Serif JP", serif`;
+  context.font = `600 ${occupationSize}px "Noto Sans JP", sans-serif`;
   context.fillText(payload.occupation, 78, 503);
   if (payload.avatar) {
     try {
@@ -518,14 +531,14 @@ async function createShareCardCanvas(payload: ShareCardPayload): Promise<HTMLCan
   context.stroke();
 
   context.fillStyle = "#f2eee5";
-  context.font = "600 25px 'Noto Serif JP', serif";
+  context.font = "600 25px 'Noto Sans JP', sans-serif";
   context.fillText("あなたも算出してみる →", 78, 559);
   context.fillStyle = "#9c978e";
-  context.font = "500 17px 'DM Mono', monospace";
+  context.font = "500 17px 'Noto Sans JP', sans-serif";
   context.fillText(payload.url, 78, 586);
   context.fillStyle = accent;
   context.textAlign = "right";
-  context.font = "500 20px 'Noto Serif JP', serif";
+  context.font = "500 20px 'Noto Sans JP', sans-serif";
   context.fillText("#人間時価総額", 1120, 582);
   context.textAlign = "left";
   return canvas;
@@ -556,7 +569,13 @@ export default function HumanMarketCapApp() {
   const [sharingImage, setSharingImage] = useState(false);
   const [shareFeedback, setShareFeedback] = useState("");
   const [challengeScoreYen, setChallengeScoreYen] = useState<number | null>(null);
+  const [wizardStep, setWizardStep] = useState<WizardStepId>(1);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({});
+  const [stepNavError, setStepNavError] = useState("");
   const resultRef = useRef<HTMLElement>(null);
+  const ageRef = useRef<HTMLInputElement>(null);
+  const incomeRef = useRef<HTMLInputElement>(null);
+  const educationRef = useRef<HTMLSelectElement>(null);
 
   const education = useMemo(() => getEducation(inputs.education), [inputs.education]);
   const appearance = useMemo(() => getAppearance(inputs.appearance), [inputs.appearance]);
@@ -611,6 +630,88 @@ export default function HumanMarketCapApp() {
   function number(field: keyof InputState, value: number) {
     setInputs((current) => ({ ...current, [field]: Number.isFinite(value) ? value : 0 }));
   }
+
+  function validateStep(step: WizardStepId): { ok: boolean; firstId?: string; errors: Partial<Record<string, string>> } {
+    const errors: Partial<Record<string, string>> = {};
+    if (step === 1) {
+      if (inputs.age < 18 || inputs.age > 80) errors.age = "年齢は18〜80歳で入力してください。";
+      if (!(inputs.annualIncome >= 0)) errors.annualIncome = "年収を入力してください。";
+      if (!inputs.education) errors.education = "最終学歴を選択してください。";
+    }
+    if (step === 2) {
+      if (!inputs.appearance) errors.appearance = "容姿を選択してください。";
+      if (!inputs.occupation) errors.occupation = "職業を選択してください。";
+    }
+    if (step === 3) {
+      if (!(inputs.financialAssets >= 0)) errors.financialAssets = "金融資産を入力してください。";
+      if (!(inputs.realEstateAssets >= 0)) errors.realEstateAssets = "不動産資産を入力してください。";
+      if (!(inputs.otherAssets >= 0)) errors.otherAssets = "その他資産を入力してください。";
+    }
+    const firstId = Object.keys(errors)[0];
+    return { ok: !firstId, firstId, errors };
+  }
+
+  function stepStatus(step: WizardStepId): "current" | "complete" | "incomplete" | "error" {
+    if (step === wizardStep) return fieldErrors && Object.keys(fieldErrors).length && step === wizardStep ? (validateStep(step).ok ? "current" : "error") : "current";
+    if (step < wizardStep) return validateStep(step).ok ? "complete" : "error";
+    return "incomplete";
+  }
+
+  function focusFirstError(firstId?: string) {
+    const map: Record<string, HTMLElement | null | undefined> = {
+      age: ageRef.current,
+      annualIncome: incomeRef.current,
+      education: educationRef.current,
+      appearance: document.getElementById("appearance-group"),
+      occupation: document.getElementById("occupation"),
+      financialAssets: document.getElementById("financial"),
+      realEstateAssets: document.getElementById("realestate"),
+      otherAssets: document.getElementById("other-assets"),
+    };
+    const el = firstId ? map[firstId] : null;
+    if (!el) return;
+    el.focus?.();
+    const top = el.getBoundingClientRect().top + window.scrollY - 16;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }
+
+  function goNext() {
+    setStepNavError("");
+    const result = validateStep(wizardStep);
+    setFieldErrors(result.errors);
+    if (!result.ok) {
+      focusFirstError(result.firstId);
+      return;
+    }
+    if (wizardStep < 4) setWizardStep((current) => (current + 1) as WizardStepId);
+  }
+
+  function goBack() {
+    setStepNavError("");
+    setFieldErrors({});
+    if (wizardStep > 1) setWizardStep((current) => (current - 1) as WizardStepId);
+  }
+
+  function selectWizardStep(next: WizardStepId) {
+    setStepNavError("");
+    if (next === wizardStep) return;
+    if (next > wizardStep) {
+      for (let step = 1; step < next; step += 1) {
+        const check = validateStep(step as WizardStepId);
+        if (!check.ok) {
+          setWizardStep(step as WizardStepId);
+          setFieldErrors(check.errors);
+          setStepNavError("未完了のステップがあります。先に入力を完了してください。");
+          focusFirstError(check.firstId);
+          return;
+        }
+      }
+    }
+    setFieldErrors({});
+    setWizardStep(next);
+  }
+
+  const quizSetsLeft = quizPhase === "done" ? 0 : quizPhase === "idle" ? 5 : 5 - quizIndex;
 
   async function startQuiz() {
     setQuizLoading(true);
@@ -800,18 +901,24 @@ export default function HumanMarketCapApp() {
   }
 
   return (
-    <main>
+    <main className="hmc-app">
       <div className="app-shell">
         <header className="brand-bar">
-          <a className="brand" href="#top"><span className="brand-mark">HMC</span><span>HUMAN CAPITAL<br />DESK</span></a>
-          <span className="model-tag">DCF MODEL / v19</span>
+          <a className="brand" href="#top"><span className="brand-mark">HMC</span><span className="brand-name">HUMAN CAPITAL<br />DESK</span></a>
+          <span className="model-tag model-version">DCF MODEL / v19</span>
         </header>
 
         <section className="intro" id="top">
           <p className="eyebrow">PRICE YOUR POTENTIAL</p>
-          <h1>あなたの価値を、<br /><em>数字にする。</em></h1>
+          <h1 className="hero-title">
+            <span className="hero-title-line">あなたの価値を、</span>
+            <span className="hero-title-line hero-title-accent">数字にする。</span>
+          </h1>
           <p className="intro-copy">属性・資産・金融知識から、残りのキャリアが生み出す価値をDCF的に査定します。</p>
-          <div className="formula-strip"><span>給与所得総額</span><b>＋</b><span>資産所得総額</span><b>＋</b><span>初期資産</span><b>＝</b><strong>時価総額</strong></div>
+          <div className="formula-strip" aria-label="査定の計算式">
+            <span>給与所得 ＋ 資産所得 ＋ 初期資産</span>
+            <span className="formula-eq">＝ 時価総額</span>
+          </div>
           <div className="trust-row"><span>01 / 匿名ID</span><span>02 / 約3分</span><span>03 / 査定ごとに記録</span></div>
         </section>
 
@@ -825,143 +932,371 @@ export default function HumanMarketCapApp() {
         )}
 
         <form className="calculator-form" id="valuation-form" onSubmit={submit} noValidate>
-          <div className="form-heading"><div><span className="eyebrow">VALUATION SHEET</span><h2>査定情報</h2></div><span>9 QUESTIONS</span></div>
+          <div className="form-heading"><div><span className="eyebrow">VALUATION SHEET</span><h2>査定情報</h2></div></div>
 
-          <section className="question-card">
-            <label htmlFor="age"><span className="question-number">01</span><span>現在の年齢</span></label>
-            <div className="number-input"><input id="age" type="number" inputMode="numeric" min="18" max="80" value={inputs.age} onChange={(event) => number("age", Number(event.target.value))} /><span>歳</span></div>
-            <p className="field-note">職業別の就労終了年齢までを残余就労期間として計算</p>
-          </section>
+          <div className="valuation-layout">
+            <aside className="wizard-sidebar" aria-label="ステップ一覧">
+              <WizardProgress
+                step={wizardStep}
+                statuses={{
+                  1: stepStatus(1),
+                  2: stepStatus(2),
+                  3: stepStatus(3),
+                  4: stepStatus(4),
+                }}
+                onSelect={selectWizardStep}
+                variant="sidebar"
+              />
+            </aside>
 
-          <section className="question-card">
-            <label htmlFor="income"><span className="question-number">02</span><span>現在の年収</span></label>
-            <div className="number-input"><input id="income" type="number" inputMode="decimal" min="0" value={inputs.annualIncome} onChange={(event) => number("annualIncome", Number(event.target.value))} /><span>万円</span></div>
-            <p className="field-note">額面年収。将来の賃金カーブの起点になります</p>
-          </section>
+            <div className="valuation-main">
+              <WizardProgress
+                step={wizardStep}
+                statuses={{
+                  1: stepStatus(1),
+                  2: stepStatus(2),
+                  3: stepStatus(3),
+                  4: stepStatus(4),
+                }}
+                onSelect={selectWizardStep}
+                variant="compact"
+              />
 
-          <section className="question-card">
-            <label htmlFor="education"><span className="question-number">03</span><span>最終学歴</span></label>
-            <select id="education" value={inputs.education} onChange={(event) => setInputs((current) => ({ ...current, education: event.target.value as EducationKey }))}>
-              {EDUCATIONS.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
-            </select>
-            <div className="parameter-card">
-              <div><span>キャリア乗数</span><strong>×{education.multiplier.toFixed(3)}</strong></div>
-              <div><span>NW力</span><strong>{education.nw}</strong></div>
-              <div><span>NW→給与</span><strong>{formatPercent(nwSalaryAdjustment(education.nw), 2)}</strong></div>
-              <div><span>NW→転職後</span><strong>{formatPercent(nwTransitionAdjustment(education.nw), 1)}</strong></div>
-            </div>
-          </section>
+              {stepNavError && <p className="form-error" role="alert">{stepNavError}</p>}
 
-          <section className="question-card">
-            <fieldset>
-              <legend><span className="question-number">04</span><span>容姿（自己評価）</span></legend>
-              <div className="choice-grid five">
-                {APPEARANCES.map((item) => (
-                  <label key={item.key} className={inputs.appearance === item.key ? "selected" : ""}>
-                    <input type="radio" name="appearance" checked={inputs.appearance === item.key} onChange={() => setInputs((current) => ({ ...current, appearance: item.key as AppearanceKey }))} />
-                    <span>{item.label}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-            <div className="parameter-card two">
-              <div><span>給与成長（職業補正後）</span><strong>{formatPercent(appearance.salaryBase * job.appearanceMultiplier, 2)}</strong></div>
-              <div><span>資産利回り</span><strong>{formatPercent(appearance.returnAdjustment, 1)}</strong></div>
-            </div>
-          </section>
+              {wizardStep === 1 && (
+                <>
+                  <div className="basic-grid">
+                    <section className="question-card">
+                      <QuestionHeader number="01" title="現在の年齢" htmlFor="age" />
+                      <NumberInputWithUnit
+                        ref={ageRef}
+                        id="age"
+                        unit="歳"
+                        type="number"
+                        inputMode="numeric"
+                        min={18}
+                        max={80}
+                        value={inputs.age}
+                        invalid={Boolean(fieldErrors.age)}
+                        describedBy={[fieldErrors.age ? "age-error" : "", "age-help"].filter(Boolean).join(" ") || undefined}
+                        onChange={(event) => number("age", Number(event.target.value))}
+                      />
+                      <FieldHelp id="age-help">職業別の就労終了年齢までを残余就労期間として計算します。</FieldHelp>
+                      <FieldError id="age-error" message={fieldErrors.age} />
+                    </section>
 
-          <section className="question-card">
-            <div className="question-label"><span className="question-number">05</span><span>現在の職業</span></div>
-            <div className="occupation-selects">
-              <label htmlFor="occupation-category"><span>職種</span>
-                <select id="occupation-category" value={category} onChange={(event) => {
-                  const next = getOccupationsByCategory(event.target.value as OccupationCategoryKey)[0];
-                  if (next) setInputs((current) => ({ ...current, occupation: next.key as OccupationKey }));
-                }}>
-                  {OCCUPATION_CATEGORIES.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
-                </select>
-              </label>
-              <label htmlFor="occupation"><span>職業</span>
-                <select id="occupation" value={inputs.occupation} onChange={(event) => setInputs((current) => ({ ...current, occupation: event.target.value as OccupationKey }))}>
-                  {categoryJobs.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
-                </select>
-              </label>
-            </div>
-            <div className="occupation-card">
-              <div className="occupation-stats">
-                <div><span>WORK END</span><strong>{job.retirement}</strong></div>
-                <div><span>PEAK</span><strong>{job.peak}</strong></div>
-                <div><span>RETURN</span><strong>{(job.baseReturn * 100).toFixed(1)}%</strong></div>
-                <div><span>RISK</span><strong>{(job.careerRisk * 100).toFixed(1)}%</strong></div>
-              </div>
-              <div className="curve-preview"><span>WAGE CURVE PREVIEW</span><MiniCurve occupation={inputs.occupation} /></div>
-              <div className="risk-line"><span>主職{job.primaryEnd}歳まで / 転職後{Math.round(job.transitionIncomeRate * 100)}% / 容姿×{job.appearanceMultiplier.toFixed(1)}</span><b className={`risk-badge risk-${job.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>{job.riskLabel}</b></div>
-              <div className="job-income-floor">現在年齢の職業別基準年収：<strong>{occupationIncomeFloor(job, inputs.age).toLocaleString("ja-JP")}万円</strong></div>
-              {job.specialNote && <div className={`job-special-note ${job.key === "aiEngineer" ? "ai-strongest" : ""}`}>{job.specialNote}</div>}
-            </div>
-          </section>
-
-          <section className="question-card">
-            <label htmlFor="financial"><span className="question-number">06</span><span>現金・金融資産</span></label>
-            <div className="number-input"><input id="financial" type="number" inputMode="decimal" min="0" value={inputs.financialAssets} onChange={(event) => number("financialAssets", Number(event.target.value))} /><span>万円</span></div>
-          </section>
-
-          <section className="question-card">
-            <label htmlFor="realestate"><span className="question-number">07</span><span>不動産資産</span></label>
-            <div className="number-input"><input id="realestate" type="number" inputMode="decimal" min="0" value={inputs.realEstateAssets} onChange={(event) => number("realEstateAssets", Number(event.target.value))} /><span>万円</span></div>
-            <div className="sub-asset-field">
-              <label htmlFor="other-assets">その他資産 <small>債券・金・時計など</small></label>
-              <div className="number-input"><input id="other-assets" type="number" inputMode="decimal" min="0" value={inputs.otherAssets} onChange={(event) => number("otherAssets", Number(event.target.value))} /><span>万円</span></div>
-            </div>
-            <p className="field-note">現金・金融資産・不動産・その他資産を合算して初期資産に計上</p>
-          </section>
-
-          <section className="question-card">
-            <label htmlFor="reinvestment"><span className="question-number">08</span><span>給与からの再投資率</span></label>
-            <div className="range-head"><strong>{Math.round(inputs.reinvestmentRate * 100)}%</strong><span>推奨 20%以上</span></div>
-            <input id="reinvestment" className="range-input" type="range" min="0" max="80" value={Math.round(inputs.reinvestmentRate * 100)} onChange={(event) => number("reinvestmentRate", Number(event.target.value) / 100)} />
-            <div className="range-scale"><span>0%</span><span>40%</span><span>80%</span></div>
-          </section>
-
-          <section className="question-card quiz-card" id="question-9">
-            <div className="quiz-title"><span className="question-number">09</span><div><span>金融リテラシー瞬発クイズ</span><small>5 / 15 RANDOM SETS · A/B 各20秒</small></div></div>
-            {quizPhase === "idle" && (
-              <div className="quiz-start-panel">
-                <p>15セットから選ばれた5セットに挑戦します。Aに答えるとBが表示され、Aの回答は変更できません。A・Bの両方を満たした場合のみ1点です。</p>
-                <button type="button" onClick={startQuiz} disabled={quizLoading}>{quizLoading ? "クイズを準備中…" : "5問を開始する"}</button>
-              </div>
-            )}
-            {activeQuiz && activePart && (quizPhase === "A" || quizPhase === "B") && (
-              <div className="quiz-stage">
-                <div className="quiz-progress-row"><span>SET {quizIndex + 1} / 5</span><div><i style={{ width: `${(quizIndex + (quizPhase === "B" ? .5 : 0)) / 5 * 100}%` }} /></div><b className={timeLeft <= 5 ? "urgent" : ""}>{timeLeft}<small>SEC</small></b></div>
-                <div className="quiz-set-heading"><span>{activeQuiz.id.toUpperCase()}</span><strong>{activeQuiz.title}</strong></div>
-                {activeQuiz.lead && <p className="quiz-lead">{activeQuiz.lead}</p>}
-                <fieldset className="quiz-question active">
-                  <legend><span>{quizPhase}</span>{activePart.prompt}</legend>
-                  <div className="quiz-options">
-                    {activePart.options.map((option, index) => (
-                      <button type="button" key={option} onClick={() => advanceQuiz(index)}>
-                        <i>{index + 1}</i><span>{option}</span>
-                      </button>
-                    ))}
+                    <section className="question-card">
+                      <QuestionHeader number="02" title="現在の年収" htmlFor="income" />
+                      <NumberInputWithUnit
+                        ref={incomeRef}
+                        id="income"
+                        unit="万円"
+                        type="number"
+                        inputMode="decimal"
+                        min={0}
+                        value={inputs.annualIncome}
+                        invalid={Boolean(fieldErrors.annualIncome)}
+                        describedBy={[fieldErrors.annualIncome ? "income-error" : "", "income-help"].filter(Boolean).join(" ") || undefined}
+                        onChange={(event) => number("annualIncome", Number(event.target.value))}
+                      />
+                      <FieldHelp id="income-help">額面年収です。将来の賃金カーブの起点になります。</FieldHelp>
+                      <FieldError id="income-error" message={fieldErrors.annualIncome} />
+                    </section>
                   </div>
-                </fieldset>
-                {quizPhase === "B" && <p className="locked-answer">Aの回答はロックされています</p>}
-              </div>
-            )}
-            {quizPhase === "done" && (
-              <div className="quiz-complete"><span>05 / 05</span><strong>回答完了</strong><p>採点結果と解説は査定レポートで確認できます。</p></div>
-            )}
-            <p className="quiz-impact">5セットの得点に応じて、実効利回りが −5% 〜 ＋5%補正されます。</p>
-          </section>
 
-          {error && <p className="form-error" role="alert">{error}</p>}
-          <button className="calculate-button" type="submit" disabled={questions.length !== 5 || quizPhase !== "done" || calculating}><span>{calculating ? "サーバーで査定中…" : "時価総額を算出する"}</span><b>→</b></button>
-          <p className="privacy-note">
-            査定のたびに、匿名ID・スコア・年齢・年収・学歴・容姿・職業・資産・再投資率・クイズ正答数を保存します（設問文や回答の本文は残しません）。ランキングにも匿名IDとスコアを追記します。詳細は
-            <a href="/privacy">プライバシーポリシー</a>
-            をご覧ください。この結果は金融助言ではなく、教育・娯楽目的の試算です。
-          </p>
+                  <section className="question-card">
+                    <QuestionHeader number="03" title="最終学歴" htmlFor="education" />
+                    <SelectField
+                      ref={educationRef}
+                      id="education"
+                      value={inputs.education}
+                      invalid={Boolean(fieldErrors.education)}
+                      describedBy={fieldErrors.education ? "education-error" : undefined}
+                      onChange={(event) => setInputs((current) => ({ ...current, education: event.target.value as EducationKey }))}
+                    >
+                      {EDUCATIONS.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
+                    </SelectField>
+                    <div className="parameter-card">
+                      <div>
+                        <span className="parameter-label">キャリア補正 <InfoTooltip label="キャリア補正">学歴によるキャリア全体の補正係数です。</InfoTooltip></span>
+                        <strong>×{education.multiplier.toFixed(3)}</strong>
+                      </div>
+                      <div>
+                        <span className="parameter-label">ネットワーク指数 <InfoTooltip label="ネットワーク指数">学歴に紐づく人的ネットワークの指数です。</InfoTooltip></span>
+                        <strong>{education.nw}</strong>
+                      </div>
+                      <div>
+                        <span className="parameter-label">年収補正 <InfoTooltip label="年収補正">ネットワーク指数が毎年の給与成長へ与える補正です。</InfoTooltip></span>
+                        <strong>{formatPercent(nwSalaryAdjustment(education.nw), 2)}</strong>
+                      </div>
+                      <div>
+                        <span className="parameter-label">転職補正 <InfoTooltip label="転職補正">ネットワーク指数が転職後所得へ与える補正です。</InfoTooltip></span>
+                        <strong>{formatPercent(nwTransitionAdjustment(education.nw), 1)}</strong>
+                      </div>
+                    </div>
+                    <FieldError id="education-error" message={fieldErrors.education} />
+                  </section>
+                </>
+              )}
+
+              {wizardStep === 2 && (
+                <>
+                  <section className="question-card">
+                    <fieldset id="appearance-group">
+                      <legend className="question-header">
+                        <span className="question-number" aria-hidden="true">04</span>
+                        <span className="question-title-text">容姿（自己評価）</span>
+                      </legend>
+                      <FieldHelp>自己評価に基づく項目です。給与成長率などの補正に使用します。</FieldHelp>
+                      <div className="choice-grid five" role="radiogroup" aria-label="容姿（自己評価）">
+                        {APPEARANCES.map((item) => (
+                          <label key={item.key} className={inputs.appearance === item.key ? "selected" : ""}>
+                            <input
+                              type="radio"
+                              name="appearance"
+                              checked={inputs.appearance === item.key}
+                              onChange={() => setInputs((current) => ({ ...current, appearance: item.key as AppearanceKey }))}
+                            />
+                            <span>{item.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                    <div className="parameter-card two">
+                      <div><span>給与成長（職業補正後）</span><strong>{formatPercent(appearance.salaryBase * job.appearanceMultiplier, 2)}</strong></div>
+                      <div><span>資産利回り</span><strong>{formatPercent(appearance.returnAdjustment, 1)}</strong></div>
+                    </div>
+                    <FieldError id="appearance-error" message={fieldErrors.appearance} />
+                  </section>
+
+                  <section className="question-card">
+                    <QuestionHeader number="05" title="現在の職業" />
+                    <div className="occupation-selects">
+                      <label htmlFor="occupation-category"><span>職種</span>
+                        <SelectField
+                          id="occupation-category"
+                          value={category}
+                          onChange={(event) => {
+                            const next = getOccupationsByCategory(event.target.value as OccupationCategoryKey)[0];
+                            if (next) setInputs((current) => ({ ...current, occupation: next.key as OccupationKey }));
+                          }}
+                        >
+                          {OCCUPATION_CATEGORIES.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
+                        </SelectField>
+                      </label>
+                      <label htmlFor="occupation"><span>職業</span>
+                        <SelectField
+                          id="occupation"
+                          value={inputs.occupation}
+                          invalid={Boolean(fieldErrors.occupation)}
+                          describedBy={fieldErrors.occupation ? "occupation-error" : undefined}
+                          onChange={(event) => setInputs((current) => ({ ...current, occupation: event.target.value as OccupationKey }))}
+                        >
+                          {categoryJobs.map((item) => <option key={item.key} value={item.key}>{item.label}</option>)}
+                        </SelectField>
+                      </label>
+                    </div>
+                    <div className="occupation-card">
+                      <div className="occupation-stats">
+                        <div><span>想定就労年齢</span><strong>{job.retirement}</strong></div>
+                        <div><span>年収ピーク年齢</span><strong>{job.peak}</strong></div>
+                        <div><span>想定運用利回り</span><strong>{(job.baseReturn * 100).toFixed(1)}%</strong></div>
+                        <div><span>キャリアリスク</span><strong>{(job.careerRisk * 100).toFixed(1)}%</strong></div>
+                      </div>
+                      <div className="curve-preview"><span>賃金カーブ</span><MiniCurve occupation={inputs.occupation} /></div>
+                      <div className="risk-line"><span>主職{job.primaryEnd}歳まで / 転職後{Math.round(job.transitionIncomeRate * 100)}% / 容姿×{job.appearanceMultiplier.toFixed(1)}</span><b className={`risk-badge risk-${job.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>基準年収水準: {job.riskLabel}</b></div>
+                      <div className="job-income-floor">現在年齢の職業別基準年収：<strong>{occupationIncomeFloor(job, inputs.age).toLocaleString("ja-JP")}万円</strong></div>
+                      {job.specialNote && <div className={`job-special-note ${job.key === "aiEngineer" ? "ai-strongest" : ""}`}>{job.specialNote}</div>}
+                    </div>
+                    <FieldError id="occupation-error" message={fieldErrors.occupation} />
+                  </section>
+                </>
+              )}
+
+              {wizardStep === 3 && (
+                <>
+                  <section className="question-card">
+                    <QuestionHeader number="06" title="現金・金融資産" htmlFor="financial" />
+                    <NumberInputWithUnit
+                      id="financial"
+                      unit="万円"
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      value={inputs.financialAssets}
+                      invalid={Boolean(fieldErrors.financialAssets)}
+                      describedBy={fieldErrors.financialAssets ? "financial-error" : undefined}
+                      onChange={(event) => number("financialAssets", Number(event.target.value))}
+                    />
+                    <FieldError id="financial-error" message={fieldErrors.financialAssets} />
+                  </section>
+
+                  <section className="question-card">
+                    <QuestionHeader number="07" title="不動産・その他資産" />
+                    <div className="assets-grid assets-grid-2">
+                      <div>
+                        <label htmlFor="realestate" className="sr-only">不動産資産</label>
+                        <NumberInputWithUnit
+                          id="realestate"
+                          unit="万円"
+                          type="number"
+                          inputMode="decimal"
+                          min={0}
+                          value={inputs.realEstateAssets}
+                          invalid={Boolean(fieldErrors.realEstateAssets)}
+                          describedBy={fieldErrors.realEstateAssets ? "realestate-error" : "realestate-help"}
+                          onChange={(event) => number("realEstateAssets", Number(event.target.value))}
+                        />
+                        <FieldHelp id="realestate-help">不動産資産</FieldHelp>
+                        <FieldError id="realestate-error" message={fieldErrors.realEstateAssets} />
+                      </div>
+                      <div>
+                        <label htmlFor="other-assets" className="sr-only">その他資産</label>
+                        <NumberInputWithUnit
+                          id="other-assets"
+                          unit="万円"
+                          type="number"
+                          inputMode="decimal"
+                          min={0}
+                          value={inputs.otherAssets}
+                          invalid={Boolean(fieldErrors.otherAssets)}
+                          describedBy={fieldErrors.otherAssets ? "other-error" : "other-help"}
+                          onChange={(event) => number("otherAssets", Number(event.target.value))}
+                        />
+                        <FieldHelp id="other-help">その他資産（債券・金・時計など）</FieldHelp>
+                        <FieldError id="other-error" message={fieldErrors.otherAssets} />
+                      </div>
+                    </div>
+                    <FieldHelp>現金・金融資産・不動産・その他資産を合算して初期資産に計上します。</FieldHelp>
+                  </section>
+
+                  <section className="question-card">
+                    <QuestionHeader number="08" title="給与からの再投資率" htmlFor="reinvestment" />
+                    <div className="range-head">
+                      <strong className="hmc-number" aria-live="polite">{Math.round(inputs.reinvestmentRate * 100)}%</strong>
+                      <span className="range-pill">推奨 20%以上</span>
+                    </div>
+                    <input
+                      id="reinvestment"
+                      className="range-input"
+                      type="range"
+                      min={0}
+                      max={80}
+                      value={Math.round(inputs.reinvestmentRate * 100)}
+                      aria-valuemin={0}
+                      aria-valuemax={80}
+                      aria-valuenow={Math.round(inputs.reinvestmentRate * 100)}
+                      aria-valuetext={`${Math.round(inputs.reinvestmentRate * 100)}パーセント`}
+                      onChange={(event) => number("reinvestmentRate", Number(event.target.value) / 100)}
+                    />
+                    <div className="range-scale"><span>0%</span><span>40%</span><span>80%</span></div>
+                  </section>
+                </>
+              )}
+
+              {wizardStep === 4 && (
+                <>
+                  <section className="question-card quiz-card" id="question-9">
+                    <div className="quiz-title">
+                      <span className="question-number" aria-hidden="true">09</span>
+                      <div>
+                        <span>金融リテラシー瞬発クイズ</span>
+                        <small>ランダム5セット · A/B 各20秒</small>
+                      </div>
+                    </div>
+                    <div className="quiz-meta-row" aria-label="クイズ概要">
+                      <span>必須</span>
+                      <span>全5セット</span>
+                      <span>A/B 各20秒</span>
+                      <span>所要時間 約2分</span>
+                    </div>
+                    {quizPhase === "idle" && (
+                      <div className="quiz-start-panel">
+                        <p>15セットから選ばれた5セットに挑戦します。Aに答えるとBが表示され、Aの回答は変更できません。A・Bの両方を満たした場合のみ1点です。</p>
+                        <button type="button" onClick={startQuiz} disabled={quizLoading}>
+                          {quizLoading ? <><span className="quiz-spinner" aria-hidden="true" />クイズを準備中…</> : "5問を開始する"}
+                        </button>
+                      </div>
+                    )}
+                    {activeQuiz && activePart && (quizPhase === "A" || quizPhase === "B") && (
+                      <div className="quiz-stage">
+                        <div className="quiz-progress-row">
+                          <span>SET {quizIndex + 1} / 5</span>
+                          <div><i style={{ width: `${(quizIndex + (quizPhase === "B" ? .5 : 0)) / 5 * 100}%` }} /></div>
+                          <b className={`quiz-timer${timeLeft <= 5 ? " urgent" : ""}`}>{timeLeft}<small>SEC</small></b>
+                        </div>
+                        <div className="quiz-set-heading"><span>{activeQuiz.id.toUpperCase()}</span><strong>{activeQuiz.title}</strong></div>
+                        {activeQuiz.lead && <p className="quiz-lead">{activeQuiz.lead}</p>}
+                        <fieldset className="quiz-question active">
+                          <legend><span>{quizPhase}</span>{activePart.prompt}</legend>
+                          <div className="quiz-options">
+                            {activePart.options.map((option, index) => (
+                              <button type="button" key={option} onClick={() => advanceQuiz(index)}>
+                                <i aria-hidden="true">{index + 1}</i><span>{option}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </fieldset>
+                        {quizPhase === "B" && <p className="locked-answer">Aの回答はロックされています</p>}
+                      </div>
+                    )}
+                    {quizPhase === "done" && (
+                      <div className="quiz-complete"><span>05 / 05</span><strong>回答完了</strong><p>採点結果と解説は査定レポートで確認できます。</p></div>
+                    )}
+                    <p className="quiz-impact">5セットの得点に応じて、実効利回りが −5% 〜 ＋5%補正されます。</p>
+                  </section>
+
+                  {error && <p className="form-error" role="alert">{error}</p>}
+                  <button
+                    className="calculate-button"
+                    type="submit"
+                    disabled={questions.length !== 5 || quizPhase !== "done" || calculating}
+                  >
+                    <span>{calculating ? <><span className="quiz-spinner" aria-hidden="true" />算出中…</> : "時価総額を算出する"}</span>
+                    <b aria-hidden="true">→</b>
+                  </button>
+                  {quizPhase !== "done" && (
+                    <p className="calculate-hint">クイズ完了後に算出できます（残り{quizSetsLeft}セット）</p>
+                  )}
+                  <PrivacySummary />
+                </>
+              )}
+
+              <div className="wizard-actions-desktop">
+                <SecondaryButton type="button" onClick={goBack} disabled={wizardStep === 1}>戻る</SecondaryButton>
+                {wizardStep < 4 ? (
+                  <PrimaryButton type="button" onClick={goNext}>次へ <span aria-hidden="true">→</span></PrimaryButton>
+                ) : (
+                  <PrimaryButton type="button" onClick={() => document.getElementById("question-9")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                    クイズへ <span aria-hidden="true">↓</span>
+                  </PrimaryButton>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="wizard-actions-mobile">
+            <SecondaryButton type="button" onClick={goBack} disabled={wizardStep === 1}>戻る</SecondaryButton>
+            {wizardStep < 4 ? (
+              <PrimaryButton type="button" onClick={goNext}>次へ <span aria-hidden="true">→</span></PrimaryButton>
+            ) : (
+              <PrimaryButton
+                type="button"
+                onClick={() => {
+                  if (quizPhase === "done") {
+                    const form = document.getElementById("valuation-form") as HTMLFormElement | null;
+                    form?.requestSubmit();
+                  } else {
+                    document.getElementById("question-9")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }
+                }}
+                disabled={calculating}
+              >
+                {quizPhase === "done" ? "算出する" : "クイズへ"} <span aria-hidden="true">→</span>
+              </PrimaryButton>
+            )}
+          </div>
         </form>
 
         {display && result && (
@@ -1016,7 +1351,7 @@ export default function HumanMarketCapApp() {
             </section>
 
             <section className="kpi-grid">
-              <article className="result-card kpi-card"><span className="kpi-icon blue">01</span><p>給与所得総額</p><h3>{formatMan(result.salaryIncomeMan)}</h3><Trace title="給与所得の計算トレース"><p>年収起点へ職業カーブ・インフレ2%・NW力・容姿を毎年適用。</p><p>離職時は所得ゼロではなく、職業別の転職後所得率へ移行する期待値モデルです。</p></Trace></article>
+              <article className="result-card kpi-card"><span className="kpi-icon blue">01</span><p>給与所得総額</p><h3>{formatMan(result.salaryIncomeMan)}</h3><Trace title="給与所得の計算トレース"><p>年収起点へ職業カーブ・インフレ2%・ネットワーク指数・容姿を毎年適用。</p><p>離職時は所得ゼロではなく、職業別の転職後所得率へ移行する期待値モデルです。</p></Trace></article>
               <article className="result-card kpi-card"><span className="kpi-icon gold">02</span><p>資産所得総額</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の計算トレース"><p>初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)} に年収の{Math.round(display.inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用した運用益。元本自体は時価総額へ別加算。</p></Trace></article>
             </section>
 
@@ -1027,10 +1362,10 @@ export default function HumanMarketCapApp() {
               <div className="assumption-list">
                 <div><span>残余就労年数</span><strong>{result.yearsRemaining}年（{display.inputs.age}→{result.occupation.retirement}歳）</strong></div>
                 <div><span>主職終了年齢</span><strong>{result.occupation.primaryEnd}歳</strong></div>
-                <div><span>キャリア乗数</span><strong>×{result.education.multiplier.toFixed(3)}</strong></div>
-                <div><span>NW力</span><strong>{result.education.nw}</strong></div>
-                <div><span>NW→給与</span><strong>{formatPercent(result.nwSalaryAdjustment, 2)} / 年</strong></div>
-                <div><span>NW→転職後所得</span><strong>{formatPercent(result.nwTransitionAdjustment, 1)}</strong></div>
+                <div><span>キャリア補正</span><strong>×{result.education.multiplier.toFixed(3)}</strong></div>
+                <div><span>ネットワーク指数</span><strong>{result.education.nw}</strong></div>
+                <div><span>年収補正</span><strong>{formatPercent(result.nwSalaryAdjustment, 2)} / 年</strong></div>
+                <div><span>転職補正</span><strong>{formatPercent(result.nwTransitionAdjustment, 1)}</strong></div>
                 <div><span>転職後所得率</span><strong>{(result.transitionIncomeRate * 100).toFixed(1)}%</strong></div>
                 <div><span>転職後の初期基準年収</span><strong>{Math.round(result.transitionBaseIncome).toLocaleString("ja-JP")}万円</strong></div>
                 <div><span>職業別基準年収</span><strong>{result.occupationIncomeFloor.toLocaleString("ja-JP")}万円</strong></div>
@@ -1054,7 +1389,7 @@ export default function HumanMarketCapApp() {
               <div className="section-title"><div><span className="eyebrow">VALUATION FACTORS</span><h3>評価ファクター</h3></div></div>
               <Factor label="金融リテラシー" value={display.quizCorrect / 5 * 100} caption={`${display.quizCorrect}/5`} />
               <Factor label="実効利回り" value={(result.effectiveReturn + .06) / .16 * 100} caption={`${(result.effectiveReturn * 100).toFixed(2)}%`} />
-              <Factor label="NW力" value={result.education.nw} caption={`${result.education.nw}`} />
+              <Factor label="ネットワーク指数" value={result.education.nw} caption={`${result.education.nw}`} />
               <Factor label="容姿補正" value={50 + result.appearanceSalaryAdjustment * 2000} caption={formatPercent(result.appearanceSalaryAdjustment, 2)} />
               <Factor label="キャリア持続性" value={100 - result.occupation.careerRisk * 800} caption={`${((1 - result.occupation.careerRisk) * 100).toFixed(1)}%`} />
               <Factor label="残余就労年数" value={result.yearsRemaining / 50 * 100} caption={`${result.yearsRemaining}年`} />
@@ -1081,8 +1416,8 @@ export default function HumanMarketCapApp() {
         )}
 
         <footer>
-          <span>HMC CALCULATOR / v19</span>
-          <p>ENTERTAINMENT × FINANCIAL EDUCATION</p>
+          <span className="footer-meta">HMC CALCULATOR / v19</span>
+          <p className="footer-meta">ENTERTAINMENT × FINANCIAL EDUCATION</p>
           <nav className="legal-links" aria-label="法務・問い合わせ">
             <a href="/privacy">プライバシー</a>
             <a href="/terms">利用規約</a>

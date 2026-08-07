@@ -19,12 +19,14 @@ test("mobile viewport and safe-area support are configured", async () => {
 test("small screens keep controls readable and responsive", async () => {
   const css = await readFile(new URL("app/globals.css", appRoot), "utf8");
 
-  assert.match(css, /select\s*\{[\s\S]*?font-size:\s*16px/);
-  assert.match(css, /\.choice-grid label,[\s\S]*?min-height:\s*54px/);
+  assert.match(css, /select\s*\{[\s\S]*?font-size:\s*16px|\.select-wrap select, select \{[\s\S]*?font-size:\s*16px/);
+  assert.match(css, /\.choice-grid label \{[\s\S]*?min-height:\s*54px/);
   assert.match(css, /@media \(max-width:\s*420px\)/);
   assert.match(css, /@media \(max-width:\s*340px\)/);
   assert.match(css, /\.chart-scroll\s*\{[^}]*overflow:\s*hidden/);
   assert.match(css, /\.asset-column\s*\{[^}]*flex:\s*1 1 0/);
+  assert.match(css, /valuation-layout/);
+  assert.match(css, /wizard-actions-mobile/);
 });
 
 test("body copy and captions stay at least 11px", async () => {
