@@ -1,0 +1,194 @@
+[
+  {
+    "id": "01-deposit-hoarder",
+    "label": "貯金800万・全額普通預金・投資経験なし",
+    "comment": "貯蓄を高額で維持している点は、堅実な資産管理の姿勢を示す。大学卒の知識基盤は、今後の投資学習の土台となる強みだ。ただし、日本銀行券にオールインしている状態。一見堅く見えて、実は一点集中のリスクを取っている。インフレリスクを考慮し、少額から分散投資を検討すべき。まずは防衛資金を確保した上で、リスク許容度に応じた配分を試すことで、複利効果を活かす余地がある。",
+    "seconds": 3.07,
+    "model": "qwen3:30b-a3b",
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントに金額・時価総額の数値が含まれていない。金融商品名・銘柄・利回りの約束がない。正答率帯が中だが、学習意欲の明示がないため美化ではない。日本語は自然で文法破綻がない。学歴・現状・知識を見下す表現がない。ユーモアが人格攻撃になっていない。真剣類型への humor レーン混入がない。文体はだ・である調で統一されている。"
+  },
+  {
+    "id": "02-revolving-debt",
+    "label": "貯金10万・リボ払い残債あり",
+    "comment": "褒めポイント：27歳の安定した収入を基盤に貯金を維持する習慣が見られる。小額ながらも現金資産を有する姿勢は金融リテラシーの土台を形成している。\n\n伸びしろ：リボ払いは確実に負けるマイナスEVのゲームである。このテーブルから降りることが、あらゆる投資に優先する。債務整理後は、現金以外の資産配分を学び、複利効果を活用するステップを検討すべき。\n\n総評：債務削減を優先し、資産構造を再構築することで、20代後半の成長フェーズへとシフトできる。",
+    "seconds": 5.09,
+    "model": "qwen3:30b-a3b",
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントには金額や時価総額の数値が含まれていない。金融商品名や利回りの約束はなく、一般概念の説明である。正答率帯が低で学習意欲の明示がないにもかかわらず、コメントは「学習意欲が高い」という表現を含んでいない。日本語は自然で文法破綻はない。学歴や現状を見下す表現はない。ユーモアが人格攻撃になっておらず、真剣な内容である。真剣類型への humor レーンが混入していない。だ・である調が統一されている。"
+  },
+  {
+    "id": "03-neglected-funds",
+    "label": "投信を10年放置",
+    "comment": "大学卒の知識基盤と10年間の投資信託保有は、長期的な財務意識の土台を確立している。安定した収入基盤を維持する能力は、資産形成の土台として優秀だ。\n\n「バリューハンドをいつまでも待てる、ポーカーマシーン」状態を脱却し、ポートフォリオを再点検すべき。10年放置の投資信託は市場変動やライフステージに適合していない可能性があるため、適切な見直しを。\n\n長期保有の習慣は良いが、見直しを怠ると機会損失が発生する。今こそポートフォリオの見直しで資産を活用すべき時だ。",
+    "seconds": 2.98,
+    "model": "qwen3:30b-a3b",
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントには金額・時価総額の数値が含まれていない。金融商品名・銘柄・利回りの約束はなく、一般概念の説明。属性の美化はなく、正答率帯が中で学習意欲の明示がないにもかかわらず「学習意欲が高い」という表現がない。日本語は自然で文法破綻なし。学歴・現状・知識を見下す表現なし。ユーモアが人格攻撃になっておらず、真剣類型への humor レーン混入なし。文体はだ・である調に統一されている。"
+  },
+  {
+    "id": "04-young-starter",
+    "label": "22歳・貯金ほぼゼロ・高卒",
+    "comment": "褒めポイント：22歳の若さによる複利期間の長さ。生活費のやりくりで実践的な財務管理を継続中。  \n伸びしろの提案：まだ資本市場というゲームに参加したばかり。無限の可能性を秘めており、現時点での査定は当てにならない。月1万円の積立で貯蓄習慣を確立し、基礎的な金融知識を習得すべき。  \n総評：若さの強みを活かし、小さな積み重ねが長期で大きな資産形成を実現する。今が最適なスタートタイミングである。",
+    "seconds": 2.8,
+    "model": "qwen3:30b-a3b",
+    "regen_attempt": 2,
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントには金額・時価総額の数値が含まれていない。金融商品名・銘柄・利回りの約束はなく、一般概念の説明のみ。正答率帯が低だが、学習意欲の明示はなく、コメントは事実を述べている。日本語は自然で文法破綻なし。学歴・現状・知識を見下す表現はない。ユーモアや人格攻撃はなく、真剣なアドバイスのみ。真剣類型への humor レーン混入なし。だ・である調が統一されている。"
+  },
+  {
+    "id": "05-active-investor",
+    "label": "35歳・積立投資を継続中",
+    "comment": "積立投資の継続と生活防衛資金の別口座管理により、資産形成の土台を確実に構築している。ファイナンスクイズ90％正答率から金融知識の高さが実証されており、長期運用の判断基盤が整っている。  \n現在の資産配分を多様化し、リスク・リターンのバランスを最適化する。基礎は完成している。次はステークスを上げる——リスク許容度の範囲で、より積極的な配分を検討するフェーズにある。  \n35歳の現時点で堅実な基盤を築き、今後の成長が期待される。",
+    "seconds": 2.58,
+    "model": "qwen3:30b-a3b",
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントには金額・時価総額の数値が含まれず、金融商品名・銘柄の約束も含まれない。属性の美化はなく、正答率90%（高）の帯で知識を評価しているためC3はfalse。日本語は自然で文法破綻なし。学歴・現状を見下す表現や人格攻撃・嘲笑はない。真剣な内容で humor が混入していない。文体はだ・である調に統一されている。"
+  },
+  {
+    "id": "06-high-earner-overseas",
+    "label": "40歳・海外大卒・年収高め・預金一点集中",
+    "comment": "褒めポイント: 高収入の基盤と海外教育によるグローバル視点が最大の強みだ。金融クイズ正答率60%から着実な知識習得が進んでいる。  \n伸びしろ: 日本銀行券にオールインしている状態だ。一見堅く見えて、実は一点集中のリスクを取っている。海外経験を活かし、リスク許容度に応じた資産分散を検討すべきである。  \n総評: 高収入とグローバル視点を活用し、資産運用の第一歩を踏み出せば、長期的な資産形成が実現可能だ。",
+    "seconds": 2.69,
+    "model": "qwen3:30b-a3b",
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントに金額・時価総額の数値が含まれていない。金融商品名・銘柄・利回りの約束は含まれていない。正答率帯が中で、学習意欲の明示がコメントに含まれているため、C3は違反ではない。日本語は文法的に成立している。学歴・現状・知識を見下す表現はない。ユーモアが人格攻撃になっていない。真剣類型へのhumorレーンが混入していない。だ・である調とです・ます調が混在していない。"
+  },
+  {
+    "id": "07-mid-quiz-balanced",
+    "label": "29歳・短大卒・預金と少額NISA混在",
+    "comment": "29歳の若さによる複利期間の長さと、少額NISAの実践開始が最大の強みである。日本銀行券にオールインしている状態。一見堅く見えて、実は一点集中のリスクを取っている。NISA積立の枠を徐々に拡大し、資産配分を多様化することで、インフレリスクを軽減できる。若さを活かし、少額からの積み重ねで資産形成の土台を固めていくことが、今後の成長を支える。",
+    "seconds": 2.66,
+    "model": "qwen3:30b-a3b",
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントには金額・時価総額の数値が含まれていない。金融商品名・銘柄・利回りの約束は含まれていない。正答率帯が中だが、学習意欲の明示がないためC3はfalse。日本語は自然で文法破綻はない。学歴・現状・知識を見下す表現はない。ユーモアが人格攻撃になっておらず、顔文字も含まれていない。真剣類型へのhumorレーン混入はない。だ・である調が統一されている。"
+  },
+  {
+    "id": "08-low-quiz-high-income",
+    "label": "38歳・年収高め・金融知識は低め",
+    "comment": "安定した年収を維持する能力が、資産形成の基盤を形成している。大学卒の学習基盤は、金融知識の習得を容易にする構造的強みである。日本銀行券にオールインしている状態。一見堅く見えて、実は一点集中のリスクを取っている。少額から資産配分の見直しを始めて、シンプルな分散を意識する。少しずつ行動を始めることが、長期的な資産形成の鍵となる。今後の成長が期待される。",
+    "seconds": 2.84,
+    "model": "qwen3:30b-a3b",
+    "regen_attempt": 1,
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントに金額・時価総額の数値が含まれていない。金融商品名・銘柄・利回りの約束がない。正答率帯が低で学習意欲の明示がないが、コメントは「少しずつ行動を始めることが、長期的な資産形成の鍵となる」と学習意欲を示唆していない。日本語は自然で文法破綻がない。学歴・現状・知識を見下す表現はない。ユーモアが人格攻撃になっていない。真剣類型への humor レーン混入はない。文体はだ・である調で統一されている。"
+  },
+  {
+    "id": "09-senior-experienced",
+    "label": "50歳・長期運用経験あり",
+    "comment": "50歳・長期運用経験ありの資産運用者を査定する。  \n褒めポイント：  \n1. 20年以上の長期運用経験と定期的な見直しで資産運用の土台が確固たる  \n2. 金融クイズ90％の正答率から、金融知識の高さと判断力の信頼性が確認できる  \n\n伸びしろの提案：  \n1. 退職までの期間を考慮し、資産配分の見直しを進める  \n2. 基礎は完成している。次はステークスを上げる——リスク許容度の範囲で、より積極的な配分を検討するフェーズにある  \n\n総評：積み重ねた知識を活かし、退職準備に向けた最適化を加速させるべきである。",
+    "seconds": 2.54,
+    "model": "qwen3:30b-a3b",
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントには金額や時価総額の数値が含まれていない。金融商品名や利回りの約束はなく、一般概念の説明のみ。正答率帯が高であるため、学習意欲の美化は該当しない。日本語は自然で文法破綻なし。学歴や現状を下に見る表現はない。ユーモアや人格攻撃はなく、真剣な内容。文体はだ・である調で統一されている。"
+  },
+  {
+    "id": "10-junior-college-cash",
+    "label": "25歳・貯金少なめ・クイズ高得点",
+    "comment": "褒めポイントは、金融クイズ高正答率で知識の質が確認できることであり、貯金少なめでも家計管理への意欲を継続している点である。  \n\n伸びしろの提案：能力は高いのにバンクロールがない。ステーキングを受けるべきプレイヤーとして、少額積立で資産形成を開始し、現金預金の一点集中を避け分散を検討する。  \n\n総評：知識と行動力が共鳴する状態であり、今後の資産成長が期待できる。",
+    "seconds": 2.56,
+    "model": "qwen3:30b-a3b",
+    "checks": {
+      "C1_amount_numbers": false,
+      "C2_product_promise": false,
+      "C3_attribute_beautify": false,
+      "C4_broken_japanese": false,
+      "C5_condescending": false,
+      "C6_humor_personal_attack": false,
+      "C7_humor_sensitive_overkill": false,
+      "C8_style_mix": false
+    },
+    "verdict": "PASS",
+    "reason": "コメントには金額や時価総額の数値が含まれていない。金融商品名や利回りの約束はなく、一般概念の「バンクロール」「ステーキング」が使われている。属性の美化や事実の読み替えはなく、正答率が高いため学習意欲の明示は不要。日本語は自然で文法破綻はない。学歴や現状を見下す表現や人格攻撃、ユーモアの混入、文体の混在もない。"
+  }
+]
