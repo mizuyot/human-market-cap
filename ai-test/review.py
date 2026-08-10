@@ -24,7 +24,7 @@ REVIEW_V2_PATH = DIR / "review-v2.json"
 FULL_PATTERN_COUNT = 1600
 
 REVIEW_SYSTEM = """あなたは査定コメントの品質検査官です。厳しい基準で不合格を見逃さないこと。
-与えられた「バケット属性」と「コメント本文」を照合し、C1〜C8を判定する。
+与えられた「バケット属性」と「コメント本文」を照合し、C1〜C9を判定する。
 出力は JSON オブジェクトのみ。
 
 【判定ルール】各Ciは「違反なら true / 問題なければ false」
@@ -67,11 +67,16 @@ C8_style_mix: 文体混在 → true
   だ・である調とです・ます調が同一コメント内で混在していれば true
   どちらか一方に統一されていれば false（本プロダクトはだ・である調が正）
 
+C9_invented_metaphor: 型フレーズ集にない新しい比喩・造語を発明している → true
+  カタログフレーズ（日本銀行券にオールイン、タイトパッシブ、バンクロール、
+  ステークスを上げる、マイナスEV、高レートのテーブル、次のゲーム選び 等）の
+  組み込みは false。カタログ外の独自キャッチー比喩が目立つ場合は true
+
 【verdict】
 checks のいずれかが true → "FAIL" / すべて false → "PASS"
 
 【出力スキーマ】
-{"checks":{"C1_amount_numbers":false,"C2_product_promise":false,"C3_attribute_beautify":false,"C4_broken_japanese":false,"C5_condescending":false,"C6_humor_personal_attack":false,"C7_humor_sensitive_overkill":false,"C8_style_mix":false},"verdict":"PASS","reason":"..."}
+{"checks":{"C1_amount_numbers":false,"C2_product_promise":false,"C3_attribute_beautify":false,"C4_broken_japanese":false,"C5_condescending":false,"C6_humor_personal_attack":false,"C7_humor_sensitive_overkill":false,"C8_style_mix":false,"C9_invented_metaphor":false},"verdict":"PASS","reason":"..."}
 """
 
 
@@ -169,6 +174,9 @@ def normalize_verdict(obj: dict) -> dict:
         ),
         "C8_style_mix": bool(
             checks.get("C8_style_mix", checks.get("C8", False))
+        ),
+        "C9_invented_metaphor": bool(
+            checks.get("C9_invented_metaphor", checks.get("C9", False))
         ),
     }
     any_fail = any(normalized.values())
@@ -291,6 +299,8 @@ def humor_lane_fingerprints() -> list[str]:
                 "ポーカーマシーン",
                 "資本市場というゲーム",
                 "ステークスを上げる",
+                "タイトパッシブ",
+                "オールイン",
             ):
                 if key in (p.get("phrase") or ""):
                     fps.append(key)
@@ -375,6 +385,7 @@ def apply_deterministic_overrides(
         "C6_humor_personal_attack",
         "C7_humor_sensitive_overkill",
         "C8_style_mix",
+        "C9_invented_metaphor",
     ):
         checks.setdefault(key, False)
 

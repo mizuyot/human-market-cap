@@ -33,9 +33,12 @@ def format_humor_catalog(phrases: list[dict], *, lanes: set[str] | None = None) 
         lane = p.get("lane", "humor")
         if lanes is not None and lane not in lanes:
             continue
-        lines.append(
+        line = (
             f"- {p['id']} [{lane}]: 「{p['phrase']}」（使う状況: {p['use_when']}）"
         )
+        if p.get("note"):
+            line += f"\n  補足: {p['note']}"
+        lines.append(line)
     return "\n".join(lines) if lines else "（このレーンに使えるフレーズなし）"
 
 
@@ -167,6 +170,12 @@ def build_user_prompt(
     no_think: bool,
     fix_reason: str | None = None,
 ) -> str:
+    # プロファイル入力（パイロット）: text / hint / phraseLane
+    if bucket.get("text") and bucket.get("bucketId"):
+        return build_profile_user_prompt(
+            bucket, no_think=no_think, fix_reason=fix_reason
+        )
+
     text = (
         "次のユーザー類型について、査定コメントを生成してください。\n"
         f"- 類型ラベル: {bucket['label']}\n"
@@ -191,6 +200,49 @@ def build_user_prompt(
             "humor レーンの型フレーズのみ使用可。serious レーンは禁止。"
             "状況に合う humor フレーズがあれば1本だけ組み込み、無ければ使わない。"
             "新しい比喩の発明は禁止。ポーカー用語への注釈・言い換えは付けない。"
+            "全文をだ・である調で統一すること。\n"
+        )
+    if fix_reason:
+        text += (
+            f"\n【重要】前回の不合格理由: {fix_reason}。"
+            "この点を必ず修正すること。\n"
+        )
+    if no_think:
+        text += "\n/no_think\n"
+    return text
+
+
+def build_profile_user_prompt(
+    profile: dict,
+    *,
+    no_think: bool,
+    fix_reason: str | None = None,
+) -> str:
+    suggest = profile.get("suggestedPhraseIds") or []
+    suggest_s = "、".join(suggest) if suggest else "なし（無理に使わない）"
+    lane = profile.get("phraseLane") or "humor"
+    text = (
+        "次のユーザー類型について、査定コメントを生成してください。\n"
+        f"- バケットID: {profile.get('bucketId')}\n"
+        f"- グループ: {profile.get('group')}（{profile.get('groupLabel')}）\n"
+        f"- 属性記述: {profile.get('text')}\n"
+        f"- コメント核ヒント: {profile.get('hint')}\n"
+        f"- 推奨フレーズID（任意）: {suggest_s}\n"
+        "金額・時価総額の数値はコメントに書かない。\n"
+    )
+    if lane == "serious":
+        text += (
+            "\n【トーン指定】serious レーンの型フレーズのみ使用可。humor レーンは禁止。"
+            "状況に合う serious フレーズがあれば1本だけ組み込み、無ければ使わない。"
+            "新しい比喩の発明は禁止。ポーカー用語への注釈・言い換えは付けない。"
+            "全文をだ・である調で統一すること。\n"
+        )
+    else:
+        text += (
+            "\n【トーン指定】humor レーンの型フレーズのみ使用可。serious レーンは禁止。"
+            "状況に合う humor フレーズがあれば1本だけ組み込み、無ければ使わない。"
+            "新しい比喩の発明は禁止。ポーカー用語への注釈・言い換えは付けない。"
+            "フレーズに補足(note)がある場合は、提案本文でその方針に従うこと。"
             "全文をだ・である調で統一すること。\n"
         )
     if fix_reason:

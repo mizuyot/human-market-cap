@@ -1,0 +1,2033 @@
+[
+  {
+    "bucketId": "G6-A3-mid-A1-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P001",
+    "spotlight": "G6×ピーク後×資産ほぼゼロ"
+  },
+  {
+    "bucketId": "G6-A1-high-A1-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A1",
+      "incomeRel": "high",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は10年超。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H14"
+    ],
+    "pilotId": "P002",
+    "spotlight": "G6×収入高×若い"
+  },
+  {
+    "bucketId": "G6-A3-high-A1-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P003"
+  },
+  {
+    "bucketId": "G6-A3-high-A2-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A2",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P004"
+  },
+  {
+    "bucketId": "G6-A1-mid-A3-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A1",
+      "incomeRel": "mid",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は10年超。 年収は職種水準並み。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P005"
+  },
+  {
+    "bucketId": "G6-A2-low-A4-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A2",
+      "incomeRel": "low",
+      "assetBehavior": "A4",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3〜10年。 年収は職種水準より低め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H13"
+    ],
+    "pilotId": "P006"
+  },
+  {
+    "bucketId": "G6-A2-high-A5-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A2",
+      "incomeRel": "high",
+      "assetBehavior": "A5",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3〜10年。 年収は職種水準より高め。 高資産（3000万円以上）。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H14"
+    ],
+    "pilotId": "P007"
+  },
+  {
+    "bucketId": "G6-A3-mid-A1-low",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P008"
+  },
+  {
+    "bucketId": "G6-A1-low-A2-low",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A2",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は10年超。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P009"
+  },
+  {
+    "bucketId": "G6-A1-high-A3-low",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A1",
+      "incomeRel": "high",
+      "assetBehavior": "A3",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は10年超。 年収は職種水準より高め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H14"
+    ],
+    "pilotId": "P010"
+  },
+  {
+    "bucketId": "G6-A2-mid-A4-low",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A2",
+      "incomeRel": "mid",
+      "assetBehavior": "A4",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3〜10年。 年収は職種水準並み。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [],
+    "pilotId": "P011"
+  },
+  {
+    "bucketId": "G6-A3-low-A5-low",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A5",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準より低め。 高資産（3000万円以上）。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P012"
+  },
+  {
+    "bucketId": "G6-A3-high-A1-mid",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A1",
+      "quizBand": "mid"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P013"
+  },
+  {
+    "bucketId": "G6-A1-mid-A2-mid",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A1",
+      "incomeRel": "mid",
+      "assetBehavior": "A2",
+      "quizBand": "mid"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は10年超。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P014"
+  },
+  {
+    "bucketId": "G6-A2-low-A3-mid",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A2",
+      "incomeRel": "low",
+      "assetBehavior": "A3",
+      "quizBand": "mid"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3〜10年。 年収は職種水準より低め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P015"
+  },
+  {
+    "bucketId": "G6-A2-high-A4-mid",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A2",
+      "incomeRel": "high",
+      "assetBehavior": "A4",
+      "quizBand": "mid"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3〜10年。 年収は職種水準より高め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H14"
+    ],
+    "pilotId": "P016"
+  },
+  {
+    "bucketId": "G6-A3-mid-A5-mid",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A5",
+      "quizBand": "mid"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準並み。 高資産（3000万円以上）。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P017"
+  },
+  {
+    "bucketId": "G6-A1-low-A1-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は10年超。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P018"
+  },
+  {
+    "bucketId": "G6-A3-low-A2-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A2",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P019"
+  },
+  {
+    "bucketId": "G6-A2-low-A3-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A2",
+      "incomeRel": "low",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3〜10年。 年収は職種水準より低め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P020"
+  },
+  {
+    "bucketId": "G6-A3-mid-A4-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A4",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準並み。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P021"
+  },
+  {
+    "bucketId": "G6-A1-high-A5-high",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A1",
+      "incomeRel": "high",
+      "assetBehavior": "A5",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は10年超。 年収は職種水準より高め。 高資産（3000万円以上）。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H14"
+    ],
+    "pilotId": "P022"
+  },
+  {
+    "bucketId": "G6-A3-low-A1-low",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P023"
+  },
+  {
+    "bucketId": "G6-A2-low-A2-low",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A2",
+      "incomeRel": "low",
+      "assetBehavior": "A2",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3〜10年。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P024"
+  },
+  {
+    "bucketId": "G6-A3-mid-A3-low",
+    "group": "G6",
+    "groupLabel": "短期集中（芸能・夜職）",
+    "axes": {
+      "group": "G6",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A3",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "短期集中型（芸能・夜職・ヒット依存）の職種。 主戦場の残り年数は3年未満、またはピーク経過後。 年収は職種水準並み。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げる窓の短さ",
+    "phraseLane": "serious",
+    "suggestedPhraseIds": [
+      "H15"
+    ],
+    "pilotId": "P025"
+  },
+  {
+    "bucketId": "G7-A3-mid-A1-low",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 38〜49歳。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P026",
+    "spotlight": "G7×クイズ低"
+  },
+  {
+    "bucketId": "G7-A4-mid-A1-high",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A4",
+      "incomeRel": "mid",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 50歳以上。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P027"
+  },
+  {
+    "bucketId": "G7-A3-low-A2-high",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A2",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 38〜49歳。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P028"
+  },
+  {
+    "bucketId": "G7-A1-high-A3-high",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A1",
+      "incomeRel": "high",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 18〜27歳。 年収は職種水準より高め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P029"
+  },
+  {
+    "bucketId": "G7-A4-mid-A4-high",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A4",
+      "incomeRel": "mid",
+      "assetBehavior": "A4",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 50歳以上。 年収は職種水準並み。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H13"
+    ],
+    "pilotId": "P030"
+  },
+  {
+    "bucketId": "G7-A3-low-A5-high",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A5",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 38〜49歳。 年収は職種水準より低め。 高資産（3000万円以上）。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P031"
+  },
+  {
+    "bucketId": "G7-A2-high-A1-low",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A2",
+      "incomeRel": "high",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 28〜37歳。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P032"
+  },
+  {
+    "bucketId": "G7-A4-mid-A2-low",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A4",
+      "incomeRel": "mid",
+      "assetBehavior": "A2",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 50歳以上。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P033"
+  },
+  {
+    "bucketId": "G7-A3-low-A3-low",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A3",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 38〜49歳。 年収は職種水準より低め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P034"
+  },
+  {
+    "bucketId": "G7-A1-high-A4-low",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A1",
+      "incomeRel": "high",
+      "assetBehavior": "A4",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 18〜27歳。 年収は職種水準より高め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H09",
+      "H07"
+    ],
+    "pilotId": "P035"
+  },
+  {
+    "bucketId": "G7-A4-mid-A5-low",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A4",
+      "incomeRel": "mid",
+      "assetBehavior": "A5",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 50歳以上。 年収は職種水準並み。 高資産（3000万円以上）。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P036"
+  },
+  {
+    "bucketId": "G7-A3-low-A1-mid",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A1",
+      "quizBand": "mid"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 38〜49歳。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P037"
+  },
+  {
+    "bucketId": "G7-A1-high-A2-mid",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A1",
+      "incomeRel": "high",
+      "assetBehavior": "A2",
+      "quizBand": "mid"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 18〜27歳。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P038"
+  },
+  {
+    "bucketId": "G7-A4-mid-A3-mid",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A4",
+      "incomeRel": "mid",
+      "assetBehavior": "A3",
+      "quizBand": "mid"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 50歳以上。 年収は職種水準並み。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P039"
+  },
+  {
+    "bucketId": "G7-A3-low-A4-mid",
+    "group": "G7",
+    "groupLabel": "ギャンブルプロ",
+    "axes": {
+      "group": "G7",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A4",
+      "quizBand": "mid"
+    },
+    "subType": null,
+    "text": "ギャンブル・専業トレーダー系職種。 38〜49歳。 年収は職種水準より低め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: バンクロール管理が本業",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H09",
+      "H07"
+    ],
+    "pilotId": "P040"
+  },
+  {
+    "bucketId": "G8-A3-high-A1-high",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": "homemaker",
+    "text": "世帯の家計運営を担う立場。世帯資産の運用判断者としての側面を持つ。 38〜49歳。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 世帯の家計運営・世帯資産の運用判断者としての側面",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P041",
+    "spotlight": "G8 homemaker"
+  },
+  {
+    "bucketId": "G8-A2-mid-A2-high",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A2",
+      "incomeRel": "mid",
+      "assetBehavior": "A2",
+      "quizBand": "high"
+    },
+    "subType": "homemaker",
+    "text": "世帯の家計運営を担う立場。世帯資産の運用判断者としての側面を持つ。 28〜37歳。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 世帯の家計運営・世帯資産の運用判断者としての側面",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P042"
+  },
+  {
+    "bucketId": "G8-A1-low-A3-high",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": "homemaker",
+    "text": "世帯の家計運営を担う立場。世帯資産の運用判断者としての側面を持つ。 18〜27歳。 年収は職種水準より低め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 世帯の家計運営・世帯資産の運用判断者としての側面",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P043"
+  },
+  {
+    "bucketId": "G8-A3-high-A4-high",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A4",
+      "quizBand": "high"
+    },
+    "subType": "homemaker",
+    "text": "世帯の家計運営を担う立場。世帯資産の運用判断者としての側面を持つ。 38〜49歳。 年収は職種水準より高め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 世帯の家計運営・世帯資産の運用判断者としての側面",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H13"
+    ],
+    "pilotId": "P044"
+  },
+  {
+    "bucketId": "G8-A2-mid-A5-high",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A2",
+      "incomeRel": "mid",
+      "assetBehavior": "A5",
+      "quizBand": "high"
+    },
+    "subType": "homemaker",
+    "text": "世帯の家計運営を担う立場。世帯資産の運用判断者としての側面を持つ。 28〜37歳。 年収は職種水準並み。 高資産（3000万円以上）。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 世帯の家計運営・世帯資産の運用判断者としての側面",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P045"
+  },
+  {
+    "bucketId": "G8-A1-low-A1-low",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": "nonRegular",
+    "text": "雇用が不安定で賃金上昇が緩やか。防衛資金の優先度が最も高い層。 18〜27歳。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 防衛資金の優先度が最も高い層",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P046"
+  },
+  {
+    "bucketId": "G8-A3-high-A2-low",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A2",
+      "quizBand": "low"
+    },
+    "subType": "nonRegular",
+    "text": "雇用が不安定で賃金上昇が緩やか。防衛資金の優先度が最も高い層。 38〜49歳。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 防衛資金の優先度が最も高い層",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P047"
+  },
+  {
+    "bucketId": "G8-A2-mid-A3-low",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A2",
+      "incomeRel": "mid",
+      "assetBehavior": "A3",
+      "quizBand": "low"
+    },
+    "subType": "nonRegular",
+    "text": "雇用が不安定で賃金上昇が緩やか。防衛資金の優先度が最も高い層。 28〜37歳。 年収は職種水準並み。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 防衛資金の優先度が最も高い層",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P048"
+  },
+  {
+    "bucketId": "G8-A1-low-A4-low",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A4",
+      "quizBand": "low"
+    },
+    "subType": "nonRegular",
+    "text": "雇用が不安定で賃金上昇が緩やか。防衛資金の優先度が最も高い層。 18〜27歳。 年収は職種水準より低め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 防衛資金の優先度が最も高い層",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [],
+    "pilotId": "P049"
+  },
+  {
+    "bucketId": "G8-A3-high-A5-low",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A5",
+      "quizBand": "low"
+    },
+    "subType": "nonRegular",
+    "text": "雇用が不安定で賃金上昇が緩やか。防衛資金の優先度が最も高い層。 38〜49歳。 年収は職種水準より高め。 高資産（3000万円以上）。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 防衛資金の優先度が最も高い層",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P050"
+  },
+  {
+    "bucketId": "G8-A2-mid-A1-mid",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A2",
+      "incomeRel": "mid",
+      "assetBehavior": "A1",
+      "quizBand": "mid"
+    },
+    "subType": "unemployed",
+    "text": "現在就労なし。再稼働時の選択肢設計が主題。 28〜37歳。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 再稼働時の選択肢設計が主題",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P051",
+    "spotlight": "G8 unemployed"
+  },
+  {
+    "bucketId": "G8-A1-low-A2-mid",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A2",
+      "quizBand": "mid"
+    },
+    "subType": "unemployed",
+    "text": "現在就労なし。再稼働時の選択肢設計が主題。 18〜27歳。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 再稼働時の選択肢設計が主題",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P052"
+  },
+  {
+    "bucketId": "G8-A3-high-A3-mid",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A3",
+      "quizBand": "mid"
+    },
+    "subType": "unemployed",
+    "text": "現在就労なし。再稼働時の選択肢設計が主題。 38〜49歳。 年収は職種水準より高め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 再稼働時の選択肢設計が主題",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P053"
+  },
+  {
+    "bucketId": "G8-A2-mid-A4-mid",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A2",
+      "incomeRel": "mid",
+      "assetBehavior": "A4",
+      "quizBand": "mid"
+    },
+    "subType": "unemployed",
+    "text": "現在就労なし。再稼働時の選択肢設計が主題。 28〜37歳。 年収は職種水準並み。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 再稼働時の選択肢設計が主題",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [],
+    "pilotId": "P054"
+  },
+  {
+    "bucketId": "G8-A1-low-A5-mid",
+    "group": "G8",
+    "groupLabel": "非就労・低安定",
+    "axes": {
+      "group": "G8",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A5",
+      "quizBand": "mid"
+    },
+    "subType": "unemployed",
+    "text": "現在就労なし。再稼働時の選択肢設計が主題。 18〜27歳。 年収は職種水準より低め。 高資産（3000万円以上）。 金融クイズ正答率は中程度（2〜3点/5点）。",
+    "hint": "コメント核: 再稼働時の選択肢設計が主題",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P055"
+  },
+  {
+    "bucketId": "G1-A1-mid-A1-high",
+    "group": "G1",
+    "groupLabel": "安定型",
+    "axes": {
+      "group": "G1",
+      "ageBand": "A1",
+      "incomeRel": "mid",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "安定志向の会社員系職種。 18〜27歳。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 入金力と時間",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P056"
+  },
+  {
+    "bucketId": "G1-A4-low-A2-high",
+    "group": "G1",
+    "groupLabel": "安定型",
+    "axes": {
+      "group": "G1",
+      "ageBand": "A4",
+      "incomeRel": "low",
+      "assetBehavior": "A2",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "安定志向の会社員系職種。 50歳以上。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 入金力と時間",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P057"
+  },
+  {
+    "bucketId": "G1-A2-high-A3-high",
+    "group": "G1",
+    "groupLabel": "安定型",
+    "axes": {
+      "group": "G1",
+      "ageBand": "A2",
+      "incomeRel": "high",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "安定志向の会社員系職種。 28〜37歳。 年収は職種水準より高め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 入金力と時間",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P058"
+  },
+  {
+    "bucketId": "G1-A1-mid-A4-high",
+    "group": "G1",
+    "groupLabel": "安定型",
+    "axes": {
+      "group": "G1",
+      "ageBand": "A1",
+      "incomeRel": "mid",
+      "assetBehavior": "A4",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "安定志向の会社員系職種。 18〜27歳。 年収は職種水準並み。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 入金力と時間",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H13"
+    ],
+    "pilotId": "P059"
+  },
+  {
+    "bucketId": "G1-A4-low-A5-high",
+    "group": "G1",
+    "groupLabel": "安定型",
+    "axes": {
+      "group": "G1",
+      "ageBand": "A4",
+      "incomeRel": "low",
+      "assetBehavior": "A5",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "安定志向の会社員系職種。 50歳以上。 年収は職種水準より低め。 高資産（3000万円以上）。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 入金力と時間",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P060"
+  },
+  {
+    "bucketId": "G1-A2-high-A1-low",
+    "group": "G1",
+    "groupLabel": "安定型",
+    "axes": {
+      "group": "G1",
+      "ageBand": "A2",
+      "incomeRel": "high",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "安定志向の会社員系職種。 28〜37歳。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 入金力と時間",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P061"
+  },
+  {
+    "bucketId": "G1-A1-mid-A2-low",
+    "group": "G1",
+    "groupLabel": "安定型",
+    "axes": {
+      "group": "G1",
+      "ageBand": "A1",
+      "incomeRel": "mid",
+      "assetBehavior": "A2",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "安定志向の会社員系職種。 18〜27歳。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 入金力と時間",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P062"
+  },
+  {
+    "bucketId": "G1-A4-low-A3-low",
+    "group": "G1",
+    "groupLabel": "安定型",
+    "axes": {
+      "group": "G1",
+      "ageBand": "A4",
+      "incomeRel": "low",
+      "assetBehavior": "A3",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "安定志向の会社員系職種。 50歳以上。 年収は職種水準より低め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 入金力と時間",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P063"
+  },
+  {
+    "bucketId": "G1-A2-high-A4-low",
+    "group": "G1",
+    "groupLabel": "安定型",
+    "axes": {
+      "group": "G1",
+      "ageBand": "A2",
+      "incomeRel": "high",
+      "assetBehavior": "A4",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "安定志向の会社員系職種。 28〜37歳。 年収は職種水準より高め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 入金力と時間",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [],
+    "pilotId": "P064"
+  },
+  {
+    "bucketId": "G2-A4-mid-A3-high",
+    "group": "G2",
+    "groupLabel": "高収入エリート",
+    "axes": {
+      "group": "G2",
+      "ageBand": "A4",
+      "incomeRel": "mid",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "高収入エリート系職種。 50歳以上。 年収は職種水準並み。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げるうちの資産転換",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P065",
+    "spotlight": "G2×高資産×寝かせ型"
+  },
+  {
+    "bucketId": "G2-A4-mid-A1-high",
+    "group": "G2",
+    "groupLabel": "高収入エリート",
+    "axes": {
+      "group": "G2",
+      "ageBand": "A4",
+      "incomeRel": "mid",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "高収入エリート系職種。 50歳以上。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げるうちの資産転換",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P066"
+  },
+  {
+    "bucketId": "G2-A3-low-A2-high",
+    "group": "G2",
+    "groupLabel": "高収入エリート",
+    "axes": {
+      "group": "G2",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A2",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "高収入エリート系職種。 38〜49歳。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げるうちの資産転換",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P067"
+  },
+  {
+    "bucketId": "G2-A3-mid-A3-high",
+    "group": "G2",
+    "groupLabel": "高収入エリート",
+    "axes": {
+      "group": "G2",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "高収入エリート系職種。 38〜49歳。 年収は職種水準並み。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げるうちの資産転換",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P068"
+  },
+  {
+    "bucketId": "G2-A4-mid-A4-high",
+    "group": "G2",
+    "groupLabel": "高収入エリート",
+    "axes": {
+      "group": "G2",
+      "ageBand": "A4",
+      "incomeRel": "mid",
+      "assetBehavior": "A4",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "高収入エリート系職種。 50歳以上。 年収は職種水準並み。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げるうちの資産転換",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H13"
+    ],
+    "pilotId": "P069"
+  },
+  {
+    "bucketId": "G2-A3-low-A5-high",
+    "group": "G2",
+    "groupLabel": "高収入エリート",
+    "axes": {
+      "group": "G2",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A5",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "高収入エリート系職種。 38〜49歳。 年収は職種水準より低め。 高資産（3000万円以上）。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 稼げるうちの資産転換",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P070"
+  },
+  {
+    "bucketId": "G2-A1-high-A1-low",
+    "group": "G2",
+    "groupLabel": "高収入エリート",
+    "axes": {
+      "group": "G2",
+      "ageBand": "A1",
+      "incomeRel": "high",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "高収入エリート系職種。 18〜27歳。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げるうちの資産転換",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P071"
+  },
+  {
+    "bucketId": "G2-A4-mid-A2-low",
+    "group": "G2",
+    "groupLabel": "高収入エリート",
+    "axes": {
+      "group": "G2",
+      "ageBand": "A4",
+      "incomeRel": "mid",
+      "assetBehavior": "A2",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "高収入エリート系職種。 50歳以上。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げるうちの資産転換",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P072"
+  },
+  {
+    "bucketId": "G2-A3-low-A3-low",
+    "group": "G2",
+    "groupLabel": "高収入エリート",
+    "axes": {
+      "group": "G2",
+      "ageBand": "A3",
+      "incomeRel": "low",
+      "assetBehavior": "A3",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "高収入エリート系職種。 38〜49歳。 年収は職種水準より低め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 稼げるうちの資産転換",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P073"
+  },
+  {
+    "bucketId": "G3-A2-low-A1-high",
+    "group": "G3",
+    "groupLabel": "専門職",
+    "axes": {
+      "group": "G3",
+      "ageBand": "A2",
+      "incomeRel": "low",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "専門資格・専門キャリア系職種。 28〜37歳。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 人的資本が最強資産",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P074"
+  },
+  {
+    "bucketId": "G3-A4-high-A2-high",
+    "group": "G3",
+    "groupLabel": "専門職",
+    "axes": {
+      "group": "G3",
+      "ageBand": "A4",
+      "incomeRel": "high",
+      "assetBehavior": "A2",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "専門資格・専門キャリア系職種。 50歳以上。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 人的資本が最強資産",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P075"
+  },
+  {
+    "bucketId": "G3-A3-mid-A3-high",
+    "group": "G3",
+    "groupLabel": "専門職",
+    "axes": {
+      "group": "G3",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "専門資格・専門キャリア系職種。 38〜49歳。 年収は職種水準並み。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 人的資本が最強資産",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P076"
+  },
+  {
+    "bucketId": "G3-A2-low-A4-high",
+    "group": "G3",
+    "groupLabel": "専門職",
+    "axes": {
+      "group": "G3",
+      "ageBand": "A2",
+      "incomeRel": "low",
+      "assetBehavior": "A4",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "専門資格・専門キャリア系職種。 28〜37歳。 年収は職種水準より低め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 人的資本が最強資産",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H13"
+    ],
+    "pilotId": "P077"
+  },
+  {
+    "bucketId": "G3-A4-high-A5-high",
+    "group": "G3",
+    "groupLabel": "専門職",
+    "axes": {
+      "group": "G3",
+      "ageBand": "A4",
+      "incomeRel": "high",
+      "assetBehavior": "A5",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "専門資格・専門キャリア系職種。 50歳以上。 年収は職種水準より高め。 高資産（3000万円以上）。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 人的資本が最強資産",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P078"
+  },
+  {
+    "bucketId": "G3-A3-mid-A1-low",
+    "group": "G3",
+    "groupLabel": "専門職",
+    "axes": {
+      "group": "G3",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "専門資格・専門キャリア系職種。 38〜49歳。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 人的資本が最強資産",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P079"
+  },
+  {
+    "bucketId": "G3-A2-low-A2-low",
+    "group": "G3",
+    "groupLabel": "専門職",
+    "axes": {
+      "group": "G3",
+      "ageBand": "A2",
+      "incomeRel": "low",
+      "assetBehavior": "A2",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "専門資格・専門キャリア系職種。 28〜37歳。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 人的資本が最強資産",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P080"
+  },
+  {
+    "bucketId": "G3-A4-high-A3-low",
+    "group": "G3",
+    "groupLabel": "専門職",
+    "axes": {
+      "group": "G3",
+      "ageBand": "A4",
+      "incomeRel": "high",
+      "assetBehavior": "A3",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "専門資格・専門キャリア系職種。 50歳以上。 年収は職種水準より高め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 人的資本が最強資産",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P081"
+  },
+  {
+    "bucketId": "G3-A3-mid-A4-low",
+    "group": "G3",
+    "groupLabel": "専門職",
+    "axes": {
+      "group": "G3",
+      "ageBand": "A3",
+      "incomeRel": "mid",
+      "assetBehavior": "A4",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "専門資格・専門キャリア系職種。 38〜49歳。 年収は職種水準並み。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 人的資本が最強資産",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [],
+    "pilotId": "P082"
+  },
+  {
+    "bucketId": "G4-A2-mid-A1-high",
+    "group": "G4",
+    "groupLabel": "テック知識",
+    "axes": {
+      "group": "G4",
+      "ageBand": "A2",
+      "incomeRel": "mid",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "テック・知識労働系職種。 28〜37歳。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: スキル再投資",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P083"
+  },
+  {
+    "bucketId": "G4-A1-low-A2-high",
+    "group": "G4",
+    "groupLabel": "テック知識",
+    "axes": {
+      "group": "G4",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A2",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "テック・知識労働系職種。 18〜27歳。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: スキル再投資",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P084"
+  },
+  {
+    "bucketId": "G4-A3-high-A3-high",
+    "group": "G4",
+    "groupLabel": "テック知識",
+    "axes": {
+      "group": "G4",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "テック・知識労働系職種。 38〜49歳。 年収は職種水準より高め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: スキル再投資",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P085"
+  },
+  {
+    "bucketId": "G4-A2-mid-A4-high",
+    "group": "G4",
+    "groupLabel": "テック知識",
+    "axes": {
+      "group": "G4",
+      "ageBand": "A2",
+      "incomeRel": "mid",
+      "assetBehavior": "A4",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "テック・知識労働系職種。 28〜37歳。 年収は職種水準並み。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: スキル再投資",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H13"
+    ],
+    "pilotId": "P086"
+  },
+  {
+    "bucketId": "G4-A1-low-A5-high",
+    "group": "G4",
+    "groupLabel": "テック知識",
+    "axes": {
+      "group": "G4",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A5",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "テック・知識労働系職種。 18〜27歳。 年収は職種水準より低め。 高資産（3000万円以上）。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: スキル再投資",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P087"
+  },
+  {
+    "bucketId": "G4-A3-high-A1-low",
+    "group": "G4",
+    "groupLabel": "テック知識",
+    "axes": {
+      "group": "G4",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "テック・知識労働系職種。 38〜49歳。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: スキル再投資",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P088"
+  },
+  {
+    "bucketId": "G4-A2-mid-A2-low",
+    "group": "G4",
+    "groupLabel": "テック知識",
+    "axes": {
+      "group": "G4",
+      "ageBand": "A2",
+      "incomeRel": "mid",
+      "assetBehavior": "A2",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "テック・知識労働系職種。 28〜37歳。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: スキル再投資",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P089"
+  },
+  {
+    "bucketId": "G4-A1-low-A3-low",
+    "group": "G4",
+    "groupLabel": "テック知識",
+    "axes": {
+      "group": "G4",
+      "ageBand": "A1",
+      "incomeRel": "low",
+      "assetBehavior": "A3",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "テック・知識労働系職種。 18〜27歳。 年収は職種水準より低め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: スキル再投資",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P090"
+  },
+  {
+    "bucketId": "G4-A3-high-A4-low",
+    "group": "G4",
+    "groupLabel": "テック知識",
+    "axes": {
+      "group": "G4",
+      "ageBand": "A3",
+      "incomeRel": "high",
+      "assetBehavior": "A4",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "テック・知識労働系職種。 38〜49歳。 年収は職種水準より高め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: スキル再投資",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [],
+    "pilotId": "P091"
+  },
+  {
+    "bucketId": "G5-A2-high-A1-high",
+    "group": "G5",
+    "groupLabel": "独立経営",
+    "axes": {
+      "group": "G5",
+      "ageBand": "A2",
+      "incomeRel": "high",
+      "assetBehavior": "A1",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "独立・経営系職種。 28〜37歳。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 事業と個人資産の分離",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P092"
+  },
+  {
+    "bucketId": "G5-A1-mid-A2-high",
+    "group": "G5",
+    "groupLabel": "独立経営",
+    "axes": {
+      "group": "G5",
+      "ageBand": "A1",
+      "incomeRel": "mid",
+      "assetBehavior": "A2",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "独立・経営系職種。 18〜27歳。 年収は職種水準並み。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 事業と個人資産の分離",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P093"
+  },
+  {
+    "bucketId": "G5-A4-low-A3-high",
+    "group": "G5",
+    "groupLabel": "独立経営",
+    "axes": {
+      "group": "G5",
+      "ageBand": "A4",
+      "incomeRel": "low",
+      "assetBehavior": "A3",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "独立・経営系職種。 50歳以上。 年収は職種水準より低め。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 事業と個人資産の分離",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P094"
+  },
+  {
+    "bucketId": "G5-A2-high-A4-high",
+    "group": "G5",
+    "groupLabel": "独立経営",
+    "axes": {
+      "group": "G5",
+      "ageBand": "A2",
+      "incomeRel": "high",
+      "assetBehavior": "A4",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "独立・経営系職種。 28〜37歳。 年収は職種水準より高め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 事業と個人資産の分離",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H13"
+    ],
+    "pilotId": "P095"
+  },
+  {
+    "bucketId": "G5-A1-mid-A5-high",
+    "group": "G5",
+    "groupLabel": "独立経営",
+    "axes": {
+      "group": "G5",
+      "ageBand": "A1",
+      "incomeRel": "mid",
+      "assetBehavior": "A5",
+      "quizBand": "high"
+    },
+    "subType": null,
+    "text": "独立・経営系職種。 18〜27歳。 年収は職種水準並み。 高資産（3000万円以上）。 金融クイズ正答率は高い（4〜5点/5点）。",
+    "hint": "コメント核: 事業と個人資産の分離",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P096"
+  },
+  {
+    "bucketId": "G5-A4-low-A1-low",
+    "group": "G5",
+    "groupLabel": "独立経営",
+    "axes": {
+      "group": "G5",
+      "ageBand": "A4",
+      "incomeRel": "low",
+      "assetBehavior": "A1",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "独立・経営系職種。 50歳以上。 年収は職種水準より低め。 資産はほぼゼロ（100万円未満）で、再投資率も20%未満。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 事業と個人資産の分離",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H08"
+    ],
+    "pilotId": "P097"
+  },
+  {
+    "bucketId": "G5-A2-high-A2-low",
+    "group": "G5",
+    "groupLabel": "独立経営",
+    "axes": {
+      "group": "G5",
+      "ageBand": "A2",
+      "incomeRel": "high",
+      "assetBehavior": "A2",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "独立・経営系職種。 28〜37歳。 年収は職種水準より高め。 資産はほぼゼロ（100万円未満）だが、再投資率は20%以上。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 事業と個人資産の分離",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H11",
+      "H07"
+    ],
+    "pilotId": "P098"
+  },
+  {
+    "bucketId": "G5-A1-mid-A3-low",
+    "group": "G5",
+    "groupLabel": "独立経営",
+    "axes": {
+      "group": "G5",
+      "ageBand": "A1",
+      "incomeRel": "mid",
+      "assetBehavior": "A3",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "独立・経営系職種。 18〜27歳。 年収は職種水準並み。 資産は100万〜3000万円あるが再投資率10%未満で寝かせ気味。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 事業と個人資産の分離",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [
+      "H06"
+    ],
+    "pilotId": "P099"
+  },
+  {
+    "bucketId": "G5-A4-low-A4-low",
+    "group": "G5",
+    "groupLabel": "独立経営",
+    "axes": {
+      "group": "G5",
+      "ageBand": "A4",
+      "incomeRel": "low",
+      "assetBehavior": "A4",
+      "quizBand": "low"
+    },
+    "subType": null,
+    "text": "独立・経営系職種。 50歳以上。 年収は職種水準より低め。 資産は100万〜3000万円あり、再投資率10%以上で運用寄り。 金融クイズ正答率は低い（0〜1点/5点）。",
+    "hint": "コメント核: 事業と個人資産の分離",
+    "phraseLane": "humor",
+    "suggestedPhraseIds": [],
+    "pilotId": "P100"
+  }
+]
