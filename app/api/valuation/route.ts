@@ -6,8 +6,8 @@ import type {
 } from "../../api-types";
 import {
   APPEARANCES,
-  EDUCATIONS,
   OCCUPATIONS,
+  resolveEducationKey,
   type CalculatorInputs,
 } from "../../model";
 import { getD1 } from "../../../db";
@@ -51,13 +51,15 @@ function validateInputs(raw: unknown): CalculatorInputs {
   const input = raw as Partial<CalculatorInputs>;
   const age = boundedNumber(input.age, "年齢", 18, 80);
   if (!Number.isInteger(age)) throw new ApiError(400, "年齢は整数で入力してください。");
-  if (!isKey(EDUCATIONS, input.education)) throw new ApiError(400, "学歴を選択してください。");
+  if (typeof input.education !== "string") throw new ApiError(400, "学歴を選択してください。");
+  const education = resolveEducationKey(input.education);
+  if (!education) throw new ApiError(400, "学歴を選択してください。");
   if (!isKey(APPEARANCES, input.appearance)) throw new ApiError(400, "容姿を選択してください。");
   if (!isKey(OCCUPATIONS, input.occupation)) throw new ApiError(400, "職業を選択してください。");
   return {
     age,
     annualIncome: boundedNumber(input.annualIncome, "年収", 0, 100_000),
-    education: input.education as CalculatorInputs["education"],
+    education,
     appearance: input.appearance as CalculatorInputs["appearance"],
     occupation: input.occupation as CalculatorInputs["occupation"],
     financialAssets: boundedNumber(input.financialAssets, "金融資産", 0, 1_000_000),

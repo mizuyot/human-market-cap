@@ -31,11 +31,12 @@ test("share cards include rarity, market metaphors, and quiz badges", async () =
   assert.match(source, /EVだけは億万長者/);
   assert.match(source, /静かなる資本家/);
   assert.doesNotMatch(source, /市場の怪物|再建待ったなし|成長余地あり|ぞろ目プレミア/);
-  assert.match(source, /賢者・利回りMAX/);
+  assert.match(source, /賢者・利回り最高/);
   assert.match(source, /カモ/);
   assert.match(source, /ストップ高/);
   assert.match(source, /上場廃止勧告・監理銘柄入り/);
   assert.match(source, /TOPIXに負けています/);
+  assert.match(source, /市場平均を上回っています/);
 });
 
 test("all hidden titles have optimized avatar assets", async () => {

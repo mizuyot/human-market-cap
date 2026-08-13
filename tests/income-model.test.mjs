@@ -30,15 +30,25 @@ test("income below the floor closes 35 percent of the remaining gap", () => {
   assert.ok(nextFloor < result.occupationIncomeFloor + 5);
 });
 
-test("post-career income follows a separate common transition path", () => {
-  const result = calculateMarketCap({ ...base, age: 59, annualIncome: 1000, occupation: "fund" });
+test("post-career income follows a separate common transition path", async () => {
+  const { getOccupation } = await import("../app/model.ts");
+  const fund = getOccupation("fund");
+  const age = fund.primaryEnd - 1;
+  const result = calculateMarketCap({ ...base, age, annualIncome: 1000, occupation: "fund" });
   assert.equal(result.projections[0].salary, 1000);
   assert.ok(Math.abs(result.projections[1].salary - result.transitionBaseIncome * (1 + INFLATION_RATE)) < .001);
   assert.ok(result.projections[1].salary < result.projections[1].rawSalary);
 });
 
-test("already past primaryEnd uses transition income from year one", () => {
-  const result = calculateMarketCap({ ...base, age: 62, annualIncome: 1200, occupation: "fund" });
+test("already past primaryEnd uses transition income from year one", async () => {
+  const { getOccupation } = await import("../app/model.ts");
+  const fund = getOccupation("fund");
+  const result = calculateMarketCap({
+    ...base,
+    age: fund.primaryEnd + 2,
+    annualIncome: 1200,
+    occupation: "fund",
+  });
   assert.equal(result.projections[0].survival, 0);
   assert.ok(Math.abs(result.projections[0].salary - result.transitionBaseIncome) < .001);
   assert.ok(result.projections[0].salary < 1200);

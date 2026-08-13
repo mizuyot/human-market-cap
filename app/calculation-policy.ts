@@ -9,6 +9,22 @@ import type { OccupationParam } from "./model.ts";
 /** 毎年のインフレ加算（年収成長・転職後年収） */
 export const INFLATION_RATE = 0.02;
 
+/** v20: Upside / Resilience シナリオの相対係数 */
+export const SCENARIO_FACTORS = {
+  upside: {
+    careerRiskMultiplier: 0.7,
+    returnBoost: 0.008,
+    optionMultiplier: 1.35,
+    salaryGrowthBoost: 0.012,
+  },
+  resilience: {
+    careerRiskMultiplier: 1.45,
+    returnBoost: -0.008,
+    optionMultiplier: 0.55,
+    salaryGrowthBoost: -0.01,
+  },
+} as const;
+
 /** 転職後年収の年次成長（インフレ相当） */
 export const TRANSITION_INCOME_GROWTH = INFLATION_RATE;
 

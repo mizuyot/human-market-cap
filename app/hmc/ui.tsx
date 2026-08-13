@@ -163,7 +163,7 @@ export function WizardProgress({
       aria-label="査定の進行状況"
     >
       <div className="wizard-progress-meta">
-        <span className="step-counter">STEP {step} / 4</span>
+        <span className="step-counter">ステップ {step} / 4</span>
         <span>残り{current.minutesLeft}</span>
       </div>
       <div className="wizard-progress-bar" aria-hidden="true">

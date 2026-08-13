@@ -29,8 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const imageUrl = `${origin}/og-v16.png`;
   return {
     metadataBase: new URL(origin),
-    title: "人間時価総額 CALCULATOR",
-    description: "60職業・学歴・資産・金融判断から、あなたの残りのキャリア価値をDCF的に査定します。",
+    title: "人間時価総額",
+    description: "60職業・学歴・資産・金融判断から、あなたの残りのキャリア価値を査定します。",
     alternates: {
       canonical: "/",
     },
@@ -39,15 +39,15 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
     },
     openGraph: {
-      title: "人間時価総額 CALCULATOR",
+      title: "人間時価総額",
       description: "あなたの価値を、数字にする。",
       url: origin,
-      siteName: "人間時価総額 CALCULATOR",
-      images: [{ url: imageUrl, width: 1200, height: 630, alt: "人間時価総額 CALCULATOR" }],
+      siteName: "人間時価総額",
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: "人間時価総額" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "人間時価総額 CALCULATOR",
+      title: "人間時価総額",
       description: "あなたの価値を、数字にする。",
       images: [imageUrl],
     },

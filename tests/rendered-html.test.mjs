@@ -17,11 +17,12 @@ test("server-renders the HMC calculator", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /<title>人間時価総額 CALCULATOR<\/title>/i);
+  assert.match(html, /<title>人間時価総額<\/title>/i);
   assert.match(html, /あなたの価値を、/);
-  assert.match(html, /STEP/);
+  assert.match(html, /ステップ/);
   assert.match(html, /次へ/);
   assert.match(html, /基本情報/);
-  assert.match(html, /HUMAN CAPITAL/);
+  assert.match(html, /時価総額/);
+  assert.match(html, /aria-label="人間時価総額"/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });

@@ -45,7 +45,7 @@ test("every occupation has an age-adjusted income floor without spouse credit", 
   for (const occupation of OCCUPATIONS) {
     assert.ok(Number.isFinite(occupationIncomeFloor(occupation, 35)), occupation.key);
   }
-  assert.equal(occupationIncomeFloor(getOccupation("homemaker"), 35), 350);
+  assert.equal(occupationIncomeFloor(getOccupation("homemaker"), 35), 500);
   assert.equal(getOccupation("homemaker").specialNote?.includes("配偶者の収入・与信は含めません"), true);
   assert.equal(occupationIncomeFloor(getOccupation("unemployed"), 35), 0);
 });

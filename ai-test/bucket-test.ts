@@ -98,7 +98,7 @@ console.log("\n=== 年齢帯 G6 primaryEnd (host=45) ===");
 
 console.log("\n=== 年収相対 境界 ===");
 {
-  const base = OCCUPATION_BASE_INCOME.listedGeneral; // 400
+  const base = OCCUPATION_BASE_INCOME.listedGeneral; // 520 (v20)
   assertEq(resolveIncomeRel("listedGeneral", base * 0.79), "low", "比0.79 → low");
   assertEq(resolveIncomeRel("listedGeneral", base * 0.8), "mid", "比0.8 → mid");
   assertEq(resolveIncomeRel("listedGeneral", base * 1.5), "mid", "比1.5 → mid");

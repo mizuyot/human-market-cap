@@ -5,6 +5,11 @@ import {
   FLOOR_PRE_PEAK_MIN,
   INFLATION_RATE,
 } from "./calculation-policy.ts";
+import {
+  V20_POTENTIAL_INCOME,
+  V20_RETIREMENT_EXTENSION,
+  V20_RETIREMENT_TARGET,
+} from "./occupation-v20.ts";
 
 export interface EducationParam {
   key: string;
@@ -46,13 +51,11 @@ export interface OccupationParam {
 
 export const EDUCATIONS = [
   { key: "top100", label: "海外有名大学（Top100圏）", multiplier: 1.060, nw: 95 },
-  { key: "tokyoKyotoDoctor", label: "東京大学・京都大学 博士", multiplier: 1.055, nw: 93 },
-  { key: "tokyoKyotoMaster", label: "東京大学・京都大学 修士", multiplier: 1.050, nw: 90 },
+  { key: "tokyoKyotoGraduate", label: "東京大学・京都大学 大学院（修士・博士）", multiplier: 1.053, nw: 92 },
   { key: "tokyoKyotoBachelor", label: "東京大学・京都大学 学部", multiplier: 1.045, nw: 88 },
-  { key: "eliteDoctor", label: "一橋・東京科学・その他旧帝大 博士", multiplier: 1.040, nw: 85 },
-  { key: "eliteMaster", label: "一橋・東京科学・その他旧帝大 修士", multiplier: 1.035, nw: 82 },
+  { key: "eliteGraduate", label: "一橋・東京科学・その他旧帝大 大学院（修士・博士）", multiplier: 1.038, nw: 84 },
   { key: "eliteBachelor", label: "一橋・東京科学・その他旧帝大 学部", multiplier: 1.030, nw: 80 },
-  { key: "sokeiGraduate", label: "早稲田・慶應 大学院", multiplier: 1.025, nw: 77 },
+  { key: "sokeiGraduate", label: "早稲田・慶應 大学院（修士・博士）", multiplier: 1.025, nw: 77 },
   { key: "sokeiBachelor", label: "早稲田・慶應 学部", multiplier: 1.020, nw: 74 },
   { key: "upperUniversity", label: "上位国公立・上智・東京理科", multiplier: 1.015, nw: 68 },
   { key: "march", label: "MARCH・関関同立", multiplier: 1.010, nw: 61 },
@@ -207,20 +210,54 @@ export type AppearanceKey = typeof APPEARANCES[number]["key"];
 export type OccupationKey = typeof OCCUPATIONS[number]["key"];
 export type OccupationCategoryKey = typeof OCCUPATION_CATEGORIES[number]["key"];
 
-export const OCCUPATION_BASE_INCOME: Record<string, number> = {
-  fund: 1200, investmentBank: 1000, bankFinance: 450, consultant: 600, fullTimeTrader: 400,
-  doctor: 900, dentist: 500, lawyer: 500, accountant: 450, nurse: 400, medicalSpecialist: 380,
-  software: 450, aiEngineer: 600, foreignTech: 800, productData: 550, researcher: 400, creative: 300, mangaArtist: 240,
-  listedManager: 700, listedGeneral: 400, sme: 300, nonRegular: 180, skilled: 320, service: 260, public: 350,
-  teacher: 350, childcare: 260, bureaucrat: 450, pilot: 900, cabinCrew: 350, beautician: 240,
-  founder: 300, angelInvestor: 500, businessOwner: 350, freelancer: 350, reseller: 300, farmerFisher: 300,
-  monk: 250, politician: 600,
-  entertainment: 240, influencer: 200, athlete: 400, proGamer: 200, comedian: 120, voiceActor: 180,
-  boatCycleRacer: 600, boardGamePro: 300, sumo: 300, traditionalActor: 400,
-  host: 300, hostess: 300, sexWorker: 350, nightlifeFreelance: 280, clubOwner: 500,
-  pokerLive: 350, pokerOnline: 350, slotProfessional: 300, professionalGambler: 300,
-  homemaker: 350, unemployed: 0,
+/** 旧学歴キー → 統合後キー（過去データ・互換用） */
+const EDUCATION_ALIASES: Record<string, EducationKey> = {
+  tokyoKyotoDoctor: "tokyoKyotoGraduate",
+  tokyoKyotoMaster: "tokyoKyotoGraduate",
+  eliteDoctor: "eliteGraduate",
+  eliteMaster: "eliteGraduate",
 };
+
+export function normalizeEducationKey(key: string): EducationKey {
+  const aliased = EDUCATION_ALIASES[key];
+  if (aliased) return aliased;
+  if (EDUCATIONS.some((item) => item.key === key)) return key as EducationKey;
+  return "university";
+}
+
+/** フォーム・API用。未知の学歴キーは null。 */
+export function resolveEducationKey(key: string): EducationKey | null {
+  const aliased = EDUCATION_ALIASES[key];
+  if (aliased) return aliased;
+  if (EDUCATIONS.some((item) => item.key === key)) return key as EducationKey;
+  return null;
+}
+
+/** v20: ポテンシャル年収アンカー（実収平均ではない） */
+export const OCCUPATION_BASE_INCOME: Record<string, number> = { ...V20_POTENTIAL_INCOME };
+
+/**
+ * v19 職業定義へ v20 の就労年齢を適用する。
+ * 延長: retirement を上げ、primaryEnd も同差分だけ伸ばす。
+ * 短縮: 主職終了を早め、拡張キャリアは現行 retirement まで残す。
+ */
+export function applyV20CareerAges(job: OccupationParam): OccupationParam {
+  const ext = V20_RETIREMENT_EXTENSION[job.key];
+  const target = V20_RETIREMENT_TARGET[job.key];
+  if (ext === undefined || target === undefined) return job;
+
+  if (ext >= 0) {
+    const retirement = target;
+    const primaryEnd = Math.min(retirement, job.primaryEnd + ext);
+    return { ...job, retirement, primaryEnd };
+  }
+
+  return {
+    ...job,
+    primaryEnd: Math.min(target, job.retirement),
+    retirement: job.retirement,
+  };
+}
 
 export function occupationIncomeFloor(job: OccupationParam, age: number): number {
   const base = OCCUPATION_BASE_INCOME[job.key] ?? 0;
@@ -261,9 +298,29 @@ export interface AnnualProjection {
   balance: number;
 }
 
+export type ScenarioId = "base" | "upside" | "resilience";
+
+export interface ScenarioQuote {
+  id: ScenarioId;
+  label: string;
+  marketCapMan: number;
+  salaryIncomeMan: number;
+  careerOptionMan: number;
+  assetIncomeMan: number;
+  initialAssetsMan: number;
+}
+
+export interface ValueDriver {
+  id: string;
+  label: string;
+  direction: "up" | "down";
+  amountMan: number;
+}
+
 export interface CalculationResult {
   marketCapMan: number;
   salaryIncomeMan: number;
+  careerOptionMan: number;
   assetIncomeMan: number;
   effectiveReturn: number;
   financialAdjustment: number;
@@ -279,10 +336,17 @@ export interface CalculationResult {
   appearance: AppearanceParam;
   occupation: OccupationParam;
   projections: AnnualProjection[];
+  /** Base / Upside / Resilience（表示用。ランキングは base = marketCapMan） */
+  scenarios: ScenarioQuote[];
+  valueDrivers: ValueDriver[];
+  modelVersion: string;
 }
 
-export function getEducation(key: EducationKey): EducationParam {
-  return EDUCATIONS.find((item) => item.key === key) ?? EDUCATIONS[11];
+export function getEducation(key: string): EducationParam {
+  const normalized = normalizeEducationKey(key);
+  return EDUCATIONS.find((item) => item.key === normalized)
+    ?? EDUCATIONS.find((item) => item.key === "university")
+    ?? EDUCATIONS[0];
 }
 
 export function getAppearance(key: AppearanceKey): AppearanceParam {
@@ -290,13 +354,14 @@ export function getAppearance(key: AppearanceKey): AppearanceParam {
 }
 
 export function getOccupation(key: OccupationKey): OccupationParam {
-  return OCCUPATIONS.find((item) => item.key === key)
+  const base = OCCUPATIONS.find((item) => item.key === key)
     ?? OCCUPATIONS.find((item) => item.key === "listedGeneral")
     ?? OCCUPATIONS[0];
+  return applyV20CareerAges(base);
 }
 
 export function getOccupationsByCategory(category: OccupationCategoryKey): OccupationParam[] {
-  return OCCUPATIONS.filter((item) => item.category === category);
+  return OCCUPATIONS.filter((item) => item.category === category).map(applyV20CareerAges);
 }
 
 export const nwSalaryAdjustment = (nw: number) => Math.min(.0045, Math.max(-.0025, (nw - 50) * .0001));
@@ -341,4 +406,19 @@ export function formatMan(value: number): string {
 
 export function formatPercent(value: number, digits = 1): string {
   return `${value > 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`;
+}
+
+const RISK_LABEL_JA: Record<string, string> = {
+  "VERY LOW": "かなり低い",
+  LOW: "低い",
+  "MID-LOW": "やや低い",
+  MID: "中程度",
+  HIGH: "高い",
+  "VERY HIGH": "かなり高い",
+  EXTREME: "極端",
+};
+
+/** 職業リスクラベルを画面用の日本語にする */
+export function formatRiskLabel(riskLabel: string): string {
+  return RISK_LABEL_JA[riskLabel] ?? riskLabel;
 }

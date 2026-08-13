@@ -22,6 +22,7 @@ import {
   type OccupationKey,
   formatMan,
   formatPercent,
+  formatRiskLabel,
   getAppearance,
   getEducation,
   getOccupation,
@@ -219,12 +220,12 @@ function Charts({ result }: { result: CalculationResult }) {
     <div className="chart-scroll">
       <div className="chart-stage">
         <div className="chart-heading-row">
-          <div><span className="eyebrow">INCOME CURVE</span><h4>年収推移</h4></div>
+          <div><span className="eyebrow">年収の推移</span><h4>年収推移</h4></div>
           <span className="legend-dot blue">期待年収・拡大表示</span>
         </div>
         <SalaryCanvas data={data} />
         <div className="chart-heading-row asset-heading">
-          <div><span className="eyebrow">ASSET BUILD-UP</span><h4>資産推移</h4></div>
+          <div><span className="eyebrow">資産の積み上がり</span><h4>資産推移</h4></div>
           <div className="asset-legend">
             <span className="legend-dot purple">初期</span>
             <span className="legend-dot green">再投資</span>
@@ -240,7 +241,7 @@ function Charts({ result }: { result: CalculationResult }) {
                 <span className="asset-layer reinvested" style={{ height: Math.max(0, item.reinvested / max * 245) }} />
                 <span className="asset-layer initial" style={{ height: Math.max(2, item.initialAssets / max * 245) }} />
               </div>
-              {item.gains < 0 && <span className="loss-mark">LOSS</span>}
+              {item.gains < 0 && <span className="loss-mark">含み損</span>}
               <span className="age-label">{item.age}歳</span>
             </div>
           ))}
@@ -255,7 +256,7 @@ function Histogram({ ranking, score }: { ranking: RankingSnapshot; score: number
   const marker = logHistogramMarkerPercent(score, ranking.minScore, ranking.maxScore);
   return (
     <div className="histogram-wrap">
-      <div className="you-marker" style={{ left: `${marker}%` }}><span>YOU</span></div>
+      <div className="you-marker" style={{ left: `${marker}%` }}><span>あなた</span></div>
       <div className="histogram">
         {ranking.bins.map((item, index) => (
           <span
@@ -267,7 +268,7 @@ function Histogram({ ranking, score }: { ranking: RankingSnapshot; score: number
       </div>
       <div className="histogram-axis">
         <span>{formatAxisMan(ranking.minScore)}</span>
-        <span>LOG SCALE</span>
+        <span>対数表示</span>
         <span>{formatAxisMan(ranking.maxScore)}</span>
       </div>
     </div>
@@ -316,7 +317,7 @@ function QuizReview({ reviews }: { reviews: QuizReviewItem[] }) {
   return (
     <section className="result-card quiz-review-card">
       <div className="section-title">
-        <div><span className="eyebrow">LITERACY REVIEW</span><h3>金融判断の振り返り</h3></div>
+        <div><span className="eyebrow">金融クイズの振り返り</span><h3>金融判断の振り返り</h3></div>
         <span className="quiz-score-chip">{correct} / 5</span>
       </div>
       <p className="quiz-review-intro">各セットを開くと、あなたの回答と判断原則の解説を確認できます。</p>
@@ -377,7 +378,7 @@ function getHiddenTitle(display: DisplayResult, ranking: RankingSnapshot | null,
   if (inputs.education === "middleSchool" && inputs.occupation === "fund") {
     return { title: "下剋上", avatar: "/title-avatars/gekokujo.jpg" };
   }
-  if (inputs.education === "tokyoKyotoDoctor" && inputs.occupation === "nonRegular") {
+  if (inputs.education === "tokyoKyotoGraduate" && inputs.occupation === "nonRegular") {
     return { title: "高学歴ワーキングプア", avatar: "/title-avatars/high-education-working-poor.jpg" };
   }
   if (inputs.appearance === "top10" && inputs.occupation === "professionalGambler") {
@@ -404,14 +405,14 @@ function getHiddenTitle(display: DisplayResult, ranking: RankingSnapshot | null,
 function getResultFlavor(display: DisplayResult, ranking: RankingSnapshot | null, tier: string): ResultFlavor {
   const { quizCorrect } = display;
   const hiddenTitle = getHiddenTitle(display, ranking, tier);
-  const quizBadge = quizCorrect === 5 ? "賢者・利回りMAX" : quizCorrect === 0 ? "カモ" : `金融判断 ${quizCorrect}/5`;
+  const quizBadge = quizCorrect === 5 ? "賢者・利回り最高" : quizCorrect === 0 ? "カモ" : `金融判断 ${quizCorrect}/5`;
   const marketSignal = tier === "S"
     ? "ストップ高"
     : tier === "D"
       ? "上場廃止勧告・監理銘柄入り"
       : ranking && ranking.deviation < 50
         ? "TOPIXに負けています"
-        : "市場平均をアウトパフォーム";
+        : "市場平均を上回っています";
   return {
     title: hiddenTitle?.title ?? null,
     avatar: hiddenTitle?.avatar ?? null,
@@ -467,7 +468,7 @@ async function createShareCardCanvas(payload: ShareCardPayload): Promise<HTMLCan
 
   context.fillStyle = accent;
   context.font = "500 24px 'Noto Sans JP', sans-serif";
-  context.fillText("HMC / HUMAN MARKET CAPITAL", 78, 84);
+  context.fillText("HMC / 人間時価総額", 78, 84);
   context.textAlign = "right";
   context.font = "700 23px 'Noto Sans JP', sans-serif";
   context.fillText(payload.marketSignal, 1120, 84);
@@ -485,7 +486,7 @@ async function createShareCardCanvas(payload: ShareCardPayload): Promise<HTMLCan
   context.fillRect(76, 297, 208, 72);
   context.fillStyle = "#15110a";
   context.font = "700 37px 'Noto Sans JP', sans-serif";
-  context.fillText(`${payload.tier} TIER`, 102, 345);
+  context.fillText(`${payload.tier}ランク`, 102, 345);
   context.fillStyle = "#f2eee5";
   context.font = "700 40px 'Noto Sans JP', sans-serif";
   context.fillText(`偏差値 ${payload.deviation}`, 326, 345);
@@ -846,7 +847,7 @@ export default function HumanMarketCapApp() {
     const summary = [
       "【人間時価総額 CALCULATOR】",
       `査定額：${formatMan(result.marketCapMan)}`,
-      `${tier} TIER｜${result.occupation.label}`,
+      `${tier}ランク｜${result.occupation.label}`,
       position,
       flavor?.title ? `隠し称号：${flavor.title}` : null,
       `金融リテラシー ${display.quizCorrect}/5点｜${flavor?.quizBadge ?? ""}`,
@@ -904,27 +905,44 @@ export default function HumanMarketCapApp() {
     <main className="hmc-app">
       <div className="app-shell">
         <header className="brand-bar">
-          <a className="brand" href="#top"><span className="brand-mark">HMC</span><span className="brand-name">HUMAN CAPITAL<br />DESK</span></a>
-          <span className="model-tag model-version">DCF MODEL / v19</span>
+          <a className="brand" href="#top" aria-label="人間時価総額">
+            <span className="brand-mark" aria-hidden="true">
+              <svg className="brand-mark-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1.5" y="1.5" width="45" height="45" rx="3" stroke="url(#hmcGold)" strokeWidth="1.5" />
+                <path d="M8 8H14M34 8H40M8 40H14M34 40H40" stroke="url(#hmcGold)" strokeWidth="1.5" strokeLinecap="square" />
+                <path d="M8 8V14M40 8V14M8 34V40M40 34V40" stroke="url(#hmcGold)" strokeWidth="1.5" strokeLinecap="square" />
+                <rect x="7" y="7" width="34" height="34" rx="1.5" stroke="rgba(246,185,78,0.28)" strokeWidth="1" />
+                <text x="24" y="28.5" textAnchor="middle" fill="#FFD078" fontFamily="Noto Sans JP, sans-serif" fontSize="12" fontWeight="800" letterSpacing="0.5">HMC</text>
+                <defs>
+                  <linearGradient id="hmcGold" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#FFD078" />
+                    <stop offset="0.5" stopColor="#F6B94E" />
+                    <stop offset="1" stopColor="#C4892E" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </span>
+          </a>
+          <span className="model-tag model-version">モデル v20</span>
         </header>
 
         <section className="intro" id="top">
-          <p className="eyebrow">PRICE YOUR POTENTIAL</p>
+          <p className="eyebrow">将来の稼ぎを、いま測る</p>
           <h1 className="hero-title">
             <span className="hero-title-line">あなたの価値を、</span>
             <span className="hero-title-line hero-title-accent">数字にする。</span>
           </h1>
-          <p className="intro-copy">属性・資産・金融知識から、残りのキャリアが生み出す価値をDCF的に査定します。</p>
+          <p className="intro-copy">現在の収入・職種のポテンシャル・資産・将来の選択肢から、将来の収益力を読みます。</p>
           <div className="formula-strip" aria-label="査定の計算式">
-            <span>給与所得 ＋ 資産所得 ＋ 初期資産</span>
-            <span className="formula-eq">＝ 時価総額</span>
+            <span>本業所得 ＋ キャリアの選択肢 ＋ 資産所得 ＋ 初期資産</span>
+            <span className="formula-eq">＝ 人間時価総額</span>
           </div>
           <div className="trust-row"><span>01 / 匿名ID</span><span>02 / 約3分</span><span>03 / 査定ごとに記録</span></div>
         </section>
 
         {challengeScoreYen !== null && (
           <section className="challenge-banner">
-            <span>MARKET CHALLENGE</span>
+            <span>チャレンジ査定</span>
             <strong>{formatShareScore(challengeScoreYen / 10000)}に挑戦する</strong>
             <p>シェアした人の査定額を超えられるか。条件を入力して勝負してください。</p>
             <a href="#valuation-form">診断を始める →</a>
@@ -932,7 +950,7 @@ export default function HumanMarketCapApp() {
         )}
 
         <form className="calculator-form" id="valuation-form" onSubmit={submit} noValidate>
-          <div className="form-heading"><div><span className="eyebrow">VALUATION SHEET</span><h2>査定情報</h2></div></div>
+          <div className="form-heading"><div><span className="eyebrow">査定シート</span><h2>査定情報</h2></div></div>
 
           <div className="valuation-layout">
             <aside className="wizard-sidebar" aria-label="ステップ一覧">
@@ -1105,8 +1123,8 @@ export default function HumanMarketCapApp() {
                         <div><span>キャリアリスク</span><strong>{(job.careerRisk * 100).toFixed(1)}%</strong></div>
                       </div>
                       <div className="curve-preview"><span>賃金カーブ</span><MiniCurve occupation={inputs.occupation} /></div>
-                      <div className="risk-line"><span>主職{job.primaryEnd}歳まで / 転職後{Math.round(job.transitionIncomeRate * 100)}% / 容姿×{job.appearanceMultiplier.toFixed(1)}</span><b className={`risk-badge risk-${job.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>基準年収水準: {job.riskLabel}</b></div>
-                      <div className="job-income-floor">現在年齢の職業別基準年収：<strong>{occupationIncomeFloor(job, inputs.age).toLocaleString("ja-JP")}万円</strong></div>
+                      <div className="risk-line"><span>主職{job.primaryEnd}歳まで / 転職後{Math.round(job.transitionIncomeRate * 100)}% / 容姿×{job.appearanceMultiplier.toFixed(1)}</span><b className={`risk-badge risk-${job.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>リスク水準: {formatRiskLabel(job.riskLabel)}</b></div>
+                      <div className="job-income-floor">現在年齢のポテンシャル年収：<strong>{occupationIncomeFloor(job, inputs.age).toLocaleString("ja-JP")}万円</strong></div>
                       {job.specialNote && <div className={`job-special-note ${job.key === "aiEngineer" ? "ai-strongest" : ""}`}>{job.specialNote}</div>}
                     </div>
                     <FieldError id="occupation-error" message={fieldErrors.occupation} />
@@ -1222,9 +1240,9 @@ export default function HumanMarketCapApp() {
                     {activeQuiz && activePart && (quizPhase === "A" || quizPhase === "B") && (
                       <div className="quiz-stage">
                         <div className="quiz-progress-row">
-                          <span>SET {quizIndex + 1} / 5</span>
+                          <span>セット {quizIndex + 1} / 5</span>
                           <div><i style={{ width: `${(quizIndex + (quizPhase === "B" ? .5 : 0)) / 5 * 100}%` }} /></div>
-                          <b className={`quiz-timer${timeLeft <= 5 ? " urgent" : ""}`}>{timeLeft}<small>SEC</small></b>
+                          <b className={`quiz-timer${timeLeft <= 5 ? " urgent" : ""}`}>{timeLeft}<small>秒</small></b>
                         </div>
                         <div className="quiz-set-heading"><span>{activeQuiz.id.toUpperCase()}</span><strong>{activeQuiz.title}</strong></div>
                         {activeQuiz.lead && <p className="quiz-lead">{activeQuiz.lead}</p>}
@@ -1301,39 +1319,60 @@ export default function HumanMarketCapApp() {
 
         {display && result && (
           <section className="results" ref={resultRef}>
-            <div className="result-divider"><span>VALUATION REPORT</span><b>査定完了</b></div>
+            <div className="result-divider"><span>査定結果</span><b>査定完了</b></div>
             <section className={`market-hero tier-${tier} flavor-${flavor?.variant ?? "standard"}`}>
-              <div className="hero-badges"><span className="tier-badge">{tier} TIER</span><span className={`risk-badge risk-${result.occupation.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>{result.occupation.riskLabel} RISK</span></div>
-              <p>あなたの人間時価総額</p><h2>{formatMan(result.marketCapMan)}</h2><span className="hero-en">ESTIMATED HUMAN MARKET CAPITAL</span>
+              <div className="hero-badges"><span className="tier-badge">{tier}ランク</span><span className="model-tag">標準シナリオ</span><span className={`risk-badge risk-${result.occupation.riskLabel.toLowerCase().replace(/\s/g, "-")}`}>{formatRiskLabel(result.occupation.riskLabel)}リスク</span></div>
+              <p>人間時価総額 / 将来の収益ポテンシャル評価</p><h2>{formatMan(result.marketCapMan)}</h2><span className="hero-en">標準シナリオでの見積もり</span>
               {flavor && <div className={`result-flavor ${flavor.title ? "has-hidden-title" : ""}`}>
                 {flavor.avatar && <img className="hidden-title-avatar" src={flavor.avatar} alt={`${flavor.title}の称号アバター`} />}
                 <div className="result-flavor-copy">
                   <span>{flavor.marketSignal}</span>
-                  {flavor.title && <><em>HIDDEN TITLE UNLOCKED</em><strong>隠し称号：{flavor.title}</strong></>}
+                  {flavor.title && <><em>隠し称号を解除</em><strong>隠し称号：{flavor.title}</strong></>}
                   <b>{flavor.quizBadge}</b>
                 </div>
               </div>}
-              <Trace title="時価総額の計算トレース"><p>給与所得 {formatMan(result.salaryIncomeMan)} ＋ 資産所得 {formatMan(result.assetIncomeMan)} ＋ 初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)}</p><p>残余{result.yearsRemaining}年の期待キャッシュフローを全補正で調整しています。資産所得は運用益のみで、初期資産の元本は別枠で加算します。</p></Trace>
+              <div className="scenario-strip" aria-label="シナリオ比較">
+                {result.scenarios.map((scenario) => (
+                  <div key={scenario.id} className={`scenario-chip scenario-${scenario.id}${scenario.id === "base" ? " is-active" : ""}`}>
+                    <span>{scenario.label}</span>
+                    <strong>{formatMan(scenario.marketCapMan)}</strong>
+                  </div>
+                ))}
+              </div>
+              {result.valueDrivers.length > 0 && (
+                <div className="driver-tape" aria-label="価値への寄与">
+                  {result.valueDrivers.map((driver) => (
+                    <span key={driver.id} className={`driver-chip driver-${driver.direction}`}>
+                      {driver.direction === "up" ? "+" : "−"} {driver.label}
+                      <em>{formatMan(driver.direction === "up" ? driver.amountMan : -driver.amountMan)}</em>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <Trace title="算定の内訳を見る">
+                <p>本業所得 {formatMan(result.salaryIncomeMan)} ＋ キャリアの選択肢 {formatMan(result.careerOptionMan)} ＋ 資産所得 {formatMan(result.assetIncomeMan)} ＋ 初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)}</p>
+                <p>残余{result.yearsRemaining}年。ポテンシャル年収を下限に、キャリアの選択肢を別建てで加算しています。この数値は将来の収益ポテンシャルの試算で、実際の収入・雇用・人格的価値を示すものではありません。</p>
+              </Trace>
             </section>
 
             {result.occupation.specialNote && <p className={`result-job-note ${result.occupation.key === "aiEngineer" ? "ai-strongest" : ""}`}>{result.occupation.specialNote}</p>}
 
             {challengeScoreYen !== null && (
               <div className={`challenge-result ${display.scoreYen >= challengeScoreYen ? "win" : "lose"}`}>
-                <span>{display.scoreYen >= challengeScoreYen ? "CHALLENGE WON" : "CHALLENGE LOST"}</span>
-                <strong>{display.scoreYen >= challengeScoreYen ? "勝利・ストップ高" : "惜敗・追証発生"}</strong>
+                <span>{display.scoreYen >= challengeScoreYen ? "チャレンジ成功" : "チャレンジ惜敗"}</span>
+                <strong>{display.scoreYen >= challengeScoreYen ? "勝ちました" : "届きませんでした"}</strong>
                 <p>挑戦者との差：{display.scoreYen >= challengeScoreYen ? "＋" : "−"}{formatMan(Math.abs(display.scoreYen - challengeScoreYen) / 10000)}</p>
               </div>
             )}
 
             <section className="result-card share-card">
               <div className="share-card-heading">
-                <span>SHARE CARD</span>
+                <span>シェア用カード</span>
                 <strong>{flavor?.title ? "隠し称号つき結果カードが出現" : "結果カードができました"}</strong>
               </div>
               <div className="share-image-frame">
                 {shareImageUrl
-                  ? <img src={shareImageUrl} alt={`人間時価総額 ${formatShareScore(result.marketCapMan)}、${tier} TIER${ranking ? `、偏差値${ranking.deviation.toFixed(1)}` : ""}のシェアカード`} />
+                  ? <img src={shareImageUrl} alt={`人間時価総額 ${formatShareScore(result.marketCapMan)}、${tier}ランク${ranking ? `、偏差値${ranking.deviation.toFixed(1)}` : ""}のシェアカード`} />
                   : <div className="share-image-loading"><span />結果カードを生成しています…</div>}
               </div>
               <button type="button" className="x-share-button" onClick={shareResultImage} disabled={sharingImage}><span>𝕏</span><strong>{sharingImage ? "シェア画像を準備中…" : "Xで結果カードをシェア"}</strong><b>→</b></button>
@@ -1346,19 +1385,20 @@ export default function HumanMarketCapApp() {
             )}
 
             <section className="result-card ranking-card">
-              <div className="section-title"><div><span className="eyebrow">MARKET POSITION</span><h3>市場ポジション</h3></div><span className={`connection ${ranking ? "online" : ""}`}>{ranking ? "LIVE" : "WAIT"}</span></div>
+              <div className="section-title"><div><span className="eyebrow">市場での位置</span><h3>市場ポジション</h3></div><span className={`connection ${ranking ? "online" : ""}`}>{ranking ? "取得済み" : "取得中"}</span></div>
               {ranking ? <><div className="ranking-kpis"><div><span>全体順位</span><strong><em>{ranking.rank}</em> / {ranking.total}</strong></div><div><span>偏差値</span><strong><em>{ranking.deviation.toFixed(1)}</em></strong></div><div><span>上位</span><strong><em>{ranking.topPercent.toFixed(1)}</em>%</strong></div><div><span>掲示板</span><strong><em>{ranking.leaderboardRank}</em> / {ranking.leaderboardTotal}</strong></div></div><Histogram ranking={ranking} score={display.scoreYen} /><p className="demo-note">全体順位・偏差値・分布は査定履歴全体との比較です（ダミーデータ除く）。掲示板は表示用の上位約1,000件です。</p></> : <div className="ranking-loading"><span />ランキングを照合しています…</div>}
             </section>
 
             <section className="kpi-grid">
-              <article className="result-card kpi-card"><span className="kpi-icon blue">01</span><p>給与所得総額</p><h3>{formatMan(result.salaryIncomeMan)}</h3><Trace title="給与所得の計算トレース"><p>年収起点へ職業カーブ・インフレ2%・ネットワーク指数・容姿を毎年適用。</p><p>離職時は所得ゼロではなく、職業別の転職後所得率へ移行する期待値モデルです。</p></Trace></article>
-              <article className="result-card kpi-card"><span className="kpi-icon gold">02</span><p>資産所得総額</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の計算トレース"><p>初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)} に年収の{Math.round(display.inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用した運用益。元本自体は時価総額へ別加算。</p></Trace></article>
+              <article className="result-card kpi-card"><span className="kpi-icon blue">01</span><p>本業所得</p><h3>{formatMan(result.salaryIncomeMan)}</h3><Trace title="本業所得の内訳"><p>入力年収とポテンシャル年収を起点に、職業カーブ・インフレ2%・ネットワーク指数・容姿を毎年適用。</p><p>離職時は所得ゼロではなく、職業別の転職後所得率へ移行する期待値モデルです。</p></Trace></article>
+              <article className="result-card kpi-card"><span className="kpi-icon cyan">02</span><p>キャリアの選択肢</p><h3>{formatMan(result.careerOptionMan)}</h3><Trace title="キャリアの選択肢の内訳"><p>スキル転用・昇格・副業・顧問など、職種ごとの選択肢価値を本体所得から別建てで計上。</p><p>上振れシナリオでは比率を上げ、守りシナリオでは抑えて表示します。</p></Trace></article>
+              <article className="result-card kpi-card"><span className="kpi-icon gold">03</span><p>資産所得</p><h3>{formatMan(result.assetIncomeMan)}</h3><Trace title="資産所得の内訳"><p>初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)} に年収の{Math.round(display.inputs.reinvestmentRate * 100)}%を毎年追加。</p><p>実効利回り {(result.effectiveReturn * 100).toFixed(2)}%で複利運用した運用益。元本自体は時価総額へ別加算。</p></Trace></article>
             </section>
 
-            <section className="result-card charts-card"><div className="section-title"><div><span className="eyebrow">LIFETIME PROJECTION</span><h3>生涯キャッシュフロー</h3></div><span className="scroll-hint">代表年齢を表示</span></div><Charts result={result} /></section>
+            <section className="result-card charts-card"><div className="section-title"><div><span className="eyebrow">生涯の見通し</span><h3>生涯キャッシュフロー</h3></div><span className="scroll-hint">代表年齢を表示</span></div><Charts result={result} /></section>
 
             <section className="result-card assumptions-card">
-              <div className="section-title"><div><span className="eyebrow">APPLIED ASSUMPTIONS</span><h3>試算の前提条件</h3></div></div>
+              <div className="section-title"><div><span className="eyebrow">試算の前提</span><h3>試算の前提条件</h3></div></div>
               <div className="assumption-list">
                 <div><span>残余就労年数</span><strong>{result.yearsRemaining}年（{display.inputs.age}→{result.occupation.retirement}歳）</strong></div>
                 <div><span>主職終了年齢</span><strong>{result.occupation.primaryEnd}歳</strong></div>
@@ -1368,7 +1408,9 @@ export default function HumanMarketCapApp() {
                 <div><span>転職補正</span><strong>{formatPercent(result.nwTransitionAdjustment, 1)}</strong></div>
                 <div><span>転職後所得率</span><strong>{(result.transitionIncomeRate * 100).toFixed(1)}%</strong></div>
                 <div><span>転職後の初期基準年収</span><strong>{Math.round(result.transitionBaseIncome).toLocaleString("ja-JP")}万円</strong></div>
-                <div><span>職業別基準年収</span><strong>{result.occupationIncomeFloor.toLocaleString("ja-JP")}万円</strong></div>
+                <div><span>ポテンシャル年収アンカー</span><strong>{result.occupationIncomeFloor.toLocaleString("ja-JP")}万円</strong></div>
+                <div><span>キャリアオプション</span><strong>{formatMan(result.careerOptionMan)}</strong></div>
+                <div><span>モデル版</span><strong>{result.modelVersion.toUpperCase()}</strong></div>
                 <div><span>容姿→給与</span><strong>{formatPercent(result.appearanceSalaryAdjustment, 2)} / 年</strong></div>
                 <div><span>容姿→利回り</span><strong>{formatPercent(result.appearanceReturnAdjustment, 1)}</strong></div>
                 <div><span>職業別基本利回り</span><strong>{formatPercent(result.occupation.baseReturn)}</strong></div>
@@ -1378,15 +1420,16 @@ export default function HumanMarketCapApp() {
                 <div><span>キャリア変動リスク</span><strong>{(result.occupation.careerRisk * 100).toFixed(1)}% / 年</strong></div>
               </div>
               <div className="model-notes">
-                <p><b>INCOME FLOOR</b> 初年度は入力年収をそのまま採用します。年収が職業別基準の25%未満なら翌年に基準まで回復し、25%以上・基準未満なら毎年差額の35%ずつ近づく仮定です。</p>
-                <p><b>CAREER CHANGE</b> 転職後は元の職業カーブを引き継がず、年齢別の共通再就職水準と職業別の転職後所得率から始め、以後は年2%で推移する単純化モデルです。</p>
-                <p><b>SIMPLIFIED DCF</b> 厳密な現在価値への割引計算ではなく、キャリア継続確率で調整した将来所得を累計するDCF風の簡易モデルです。</p>
-                <p><b>ASSET MODEL</b> 現金・金融資産・不動産・その他資産を合算し、資産種別によらず同じ実効利回りで運用する簡易モデルです。</p>
+                <p><b>ポテンシャル年収</b> 職業値は実収平均ではなく、専門性・可搬性・副収入を含むポテンシャル年収です。初年度は入力年収を採用し、基準の25%未満なら翌年に回復、未満なら毎年差額の35%ずつ近づきます。</p>
+                <p><b>キャリアの選択肢</b> 本体所得とは別に、職種カテゴリごとの比率で将来の選択肢価値を加算します。</p>
+                <p><b>3つのシナリオ</b> 標準はいちばん起きやすい見積もり、上振れは成長・副収入が進んだ場合、守りは継続性が弱い場合です。ランキング比較には標準を使います。</p>
+                <p><b>簡易DCF</b> 厳密な現在価値への割引計算ではなく、キャリア継続確率で調整した将来所得を累計する簡易モデルです。</p>
+                <p><b>資産モデル</b> 現金・金融資産・不動産・その他資産を合算し、資産種別によらず同じ実効利回りで運用する簡易モデルです。</p>
               </div>
             </section>
 
             <section className="result-card factors-card">
-              <div className="section-title"><div><span className="eyebrow">VALUATION FACTORS</span><h3>評価ファクター</h3></div></div>
+              <div className="section-title"><div><span className="eyebrow">評価の要因</span><h3>評価ファクター</h3></div></div>
               <Factor label="金融リテラシー" value={display.quizCorrect / 5 * 100} caption={`${display.quizCorrect}/5`} />
               <Factor label="実効利回り" value={(result.effectiveReturn + .06) / .16 * 100} caption={`${(result.effectiveReturn * 100).toFixed(2)}%`} />
               <Factor label="ネットワーク指数" value={result.education.nw} caption={`${result.education.nw}`} />
@@ -1398,14 +1441,14 @@ export default function HumanMarketCapApp() {
             <QuizReview reviews={display.reviews} />
 
             <section className="result-card analysis-card">
-              <div className="section-title"><div><span className="eyebrow">ANALYST NOTES</span><h3>分析コメント</h3></div></div>
-              <div className="analyst-stamp"><span>{tier}</span><div><strong>{tier === "S" ? "超優良人材" : tier === "A" ? "成長優良人材" : tier === "B" ? "安定成長人材" : tier === "C" ? "改善余地あり" : "再建プラン推奨"}</strong><small>HMC ANALYST RATING</small></div></div>
+              <div className="section-title"><div><span className="eyebrow">分析メモ</span><h3>分析コメント</h3></div></div>
+              <div className="analyst-stamp"><span>{tier}</span><div><strong>{tier === "S" ? "超優良人材" : tier === "A" ? "成長優良人材" : tier === "B" ? "安定成長人材" : tier === "C" ? "改善余地あり" : "再建プラン推奨"}</strong><small>HMC評価</small></div></div>
               <ol>{notes(result).map((note) => <li key={note}>{note}</li>)}</ol>
-              <p className="risk-warning"><b>RISK NOTICE</b> この査定は入力条件に基づく期待値です。実際の収入・運用成果を保証するものではありません。</p>
+              <p className="risk-warning"><b>ご注意</b> この数値は、入力情報とモデル前提に基づく将来の収益ポテンシャルの試算です。実際の収入、雇用可能性、金融商品の価値、人格的価値を示すものではありません。</p>
             </section>
 
             <section className="closing-message">
-              <span className="eyebrow">ONE LAST THING</span>
+              <span className="eyebrow">さいごに</span>
               <h3>人生は、決算書ではありません。</h3>
               <p>企業はお金を稼ぐのが目的。でも人間の目的は、お金ではありません。死ぬ時にいくら資産があってもあの世に持ち込めないのだから。</p>
             </section>
@@ -1416,8 +1459,8 @@ export default function HumanMarketCapApp() {
         )}
 
         <footer>
-          <span className="footer-meta">HMC CALCULATOR / v19</span>
-          <p className="footer-meta">ENTERTAINMENT × FINANCIAL EDUCATION</p>
+          <span className="footer-meta">人間時価総額 / v20</span>
+          <p className="footer-meta">エンタメ × 金融リテラシー</p>
           <nav className="legal-links" aria-label="法務・問い合わせ">
             <a href="/privacy">プライバシー</a>
             <a href="/terms">利用規約</a>
