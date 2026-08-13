@@ -23,6 +23,6 @@ test("server-renders the HMC calculator", async () => {
   assert.match(html, /次へ/);
   assert.match(html, /基本情報/);
   assert.match(html, /時価総額/);
-  assert.match(html, /aria-label="人間時価総額"/);
+  assert.match(html, /aria-label="最初からやり直す"/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });

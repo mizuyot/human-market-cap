@@ -357,6 +357,145 @@ interface ShareCardPayload {
   marketSignal: string;
   variant: "premium" | "surge" | "standard" | "warning";
   url: string;
+  /** 万円単位の時価総額（結果カードの色分け用） */
+  marketCapMan: number;
+}
+
+type ShareCardTone = "rainbow" | "purple" | "gold" | "silver" | "bronze" | "green";
+
+interface ShareCardTheme {
+  tone: ShareCardTone;
+  bg: string;
+  panel: string;
+  accent: string;
+  accentSoft: string;
+  score: string;
+  muted: string;
+  text: string;
+  tierText: string;
+  glow: string;
+  borderStops: string[];
+}
+
+/** marketCapMan は万円。例: 10億円 = 100_000 */
+function shareCardTheme(marketCapMan: number): ShareCardTheme {
+  if (marketCapMan >= 1_000_000) {
+    return {
+      tone: "rainbow",
+      bg: "#07070f",
+      panel: "#101018",
+      accent: "#ff7ad9",
+      accentSoft: "rgba(255,122,217,.28)",
+      score: "#ffffff",
+      muted: "#b7b3c9",
+      text: "#f7f4ff",
+      tierText: "#120816",
+      glow: "rgba(120, 90, 255, .35)",
+      borderStops: ["#ff4d4d", "#ff9f1a", "#ffe066", "#5dff8a", "#4db8ff", "#b56bff", "#ff4d4d"],
+    };
+  }
+  if (marketCapMan >= 300_000) {
+    return {
+      tone: "purple",
+      bg: "#0c0714",
+      panel: "#160d24",
+      accent: "#c4b5fd",
+      accentSoft: "rgba(167,139,250,.30)",
+      score: "#e9d5ff",
+      muted: "#b8a8d4",
+      text: "#f5efff",
+      tierText: "#1a0b2e",
+      glow: "rgba(124, 58, 237, .38)",
+      borderStops: ["#7c3aed", "#c4b5fd", "#a855f7"],
+    };
+  }
+  if (marketCapMan >= 100_000) {
+    return {
+      tone: "gold",
+      bg: "#080704",
+      panel: "#15110a",
+      accent: "#ffe08a",
+      accentSoft: "rgba(255, 214, 120, .38)",
+      score: "#ffe9a8",
+      muted: "#c9b789",
+      text: "#fff6df",
+      tierText: "#1a1205",
+      glow: "rgba(255, 204, 90, .48)",
+      borderStops: ["#8a6418", "#f6b94e", "#fff1b0", "#ffd078", "#c4892e", "#fff6c8"],
+    };
+  }
+  if (marketCapMan >= 50_000) {
+    return {
+      tone: "silver",
+      bg: "#0a0c10",
+      panel: "#15191f",
+      accent: "#d7dde7",
+      accentSoft: "rgba(192,199,209,.28)",
+      score: "#eef2f7",
+      muted: "#9aa3af",
+      text: "#eef2f7",
+      tierText: "#12161c",
+      glow: "rgba(180, 190, 205, .28)",
+      borderStops: ["#8b95a5", "#e8eef5", "#aeb6c2"],
+    };
+  }
+  if (marketCapMan >= 30_000) {
+    return {
+      tone: "bronze",
+      bg: "#100b08",
+      panel: "#1b120c",
+      accent: "#d9a066",
+      accentSoft: "rgba(205,127,50,.28)",
+      score: "#efc08a",
+      muted: "#b39a82",
+      text: "#f4e6d6",
+      tierText: "#1b120c",
+      glow: "rgba(184, 115, 51, .30)",
+      borderStops: ["#8a4b1f", "#cd7f32", "#e0a86a"],
+    };
+  }
+  return {
+    tone: "green",
+    bg: "#050a07",
+    panel: "#0c1610",
+    accent: "#5fbf7a",
+    accentSoft: "rgba(47, 133, 90, .32)",
+    score: "#8fe3a6",
+    muted: "#7fa88a",
+    text: "#dff7e6",
+    tierText: "#06140b",
+    glow: "rgba(34, 120, 72, .34)",
+    borderStops: ["#14532d", "#2f855a", "#4ade80"],
+  };
+}
+
+function createBorderGradient(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  stops: string[],
+) {
+  const gradient = context.createLinearGradient(0, 0, width, height);
+  const last = Math.max(1, stops.length - 1);
+  stops.forEach((color, index) => gradient.addColorStop(index / last, color));
+  return gradient;
+}
+
+function createScoreFill(
+  context: CanvasRenderingContext2D,
+  theme: ShareCardTheme,
+  x: number,
+  y: number,
+  width: number,
+) {
+  if (theme.tone === "rainbow" || theme.tone === "purple" || theme.tone === "gold") {
+    const gradient = context.createLinearGradient(x, y, x + width, y);
+    theme.borderStops.forEach((color, index) => {
+      gradient.addColorStop(index / Math.max(1, theme.borderStops.length - 1), color);
+    });
+    return gradient;
+  }
+  return theme.score;
 }
 
 interface ResultFlavor {
@@ -407,7 +546,7 @@ function getResultFlavor(display: DisplayResult, ranking: RankingSnapshot | null
   const hiddenTitle = getHiddenTitle(display, ranking, tier);
   const quizBadge = quizCorrect === 5 ? "賢者・利回り最高" : quizCorrect === 0 ? "カモ" : `金融判断 ${quizCorrect}/5`;
   const marketSignal = tier === "S"
-    ? "ストップ高"
+    ? "最高評価"
     : tier === "D"
       ? "上場廃止勧告・監理銘柄入り"
       : ranking && ranking.deviation < 50
@@ -448,20 +587,59 @@ async function createShareCardCanvas(payload: ShareCardPayload): Promise<HTMLCan
   const context = canvas.getContext("2d");
   if (!context) return canvas;
 
-  const accent = payload.variant === "warning" ? "#f87171" : payload.variant === "standard" ? "#d4a843" : "#f0d487";
-  context.fillStyle = payload.variant === "warning" ? "#100a0a" : "#0a0a0a";
+  const theme = shareCardTheme(payload.marketCapMan);
+  const accent = theme.accent;
+  context.fillStyle = theme.bg;
   context.fillRect(0, 0, canvas.width, canvas.height);
   const glow = context.createRadialGradient(1060, 40, 0, 1060, 40, 600);
-  glow.addColorStop(0, payload.variant === "warning" ? "rgba(248,113,113,.25)" : "rgba(212,168,67,.28)");
-  glow.addColorStop(1, "rgba(212,168,67,0)");
+  glow.addColorStop(0, theme.glow);
+  glow.addColorStop(1, "rgba(0,0,0,0)");
   context.fillStyle = glow;
   context.fillRect(0, 0, canvas.width, canvas.height);
-  context.strokeStyle = accent;
+
+  if (theme.tone === "rainbow") {
+    // Soft rainbow wash behind the score area
+    const wash = context.createLinearGradient(60, 160, 1140, 320);
+    theme.borderStops.forEach((color, index) => {
+      wash.addColorStop(index / Math.max(1, theme.borderStops.length - 1), `${color}33`);
+    });
+    context.fillStyle = wash;
+    context.fillRect(48, 150, 1104, 180);
+  } else if (theme.tone === "purple") {
+    const wash = context.createLinearGradient(60, 120, 1140, 420);
+    wash.addColorStop(0, "rgba(124,58,237,.22)");
+    wash.addColorStop(1, "rgba(168,85,247,.05)");
+    context.fillStyle = wash;
+    context.fillRect(40, 100, 1120, 360);
+  } else if (theme.tone === "gold") {
+    const wash = context.createLinearGradient(80, 140, 1120, 340);
+    wash.addColorStop(0, "rgba(255, 214, 120, .08)");
+    wash.addColorStop(0.45, "rgba(255, 236, 170, .26)");
+    wash.addColorStop(1, "rgba(196, 137, 46, .10)");
+    context.fillStyle = wash;
+    context.fillRect(48, 140, 1104, 200);
+    const sheen = context.createLinearGradient(100, 200, 980, 280);
+    sheen.addColorStop(0, "rgba(255,255,255,0)");
+    sheen.addColorStop(0.45, "rgba(255,255,255,.14)");
+    sheen.addColorStop(1, "rgba(255,255,255,0)");
+    context.fillStyle = sheen;
+    context.fillRect(72, 190, 980, 90);
+  } else if (theme.tone === "green") {
+    const wash = context.createLinearGradient(60, 120, 1140, 420);
+    wash.addColorStop(0, "rgba(20, 83, 45, .28)");
+    wash.addColorStop(1, "rgba(47, 133, 90, .08)");
+    context.fillStyle = wash;
+    context.fillRect(40, 100, 1120, 360);
+  }
+
+  const border = createBorderGradient(context, canvas.width, canvas.height, theme.borderStops);
+  context.strokeStyle = border;
   context.lineWidth = 3;
   context.strokeRect(29, 29, 1142, 572);
-  context.fillStyle = accent;
+  context.fillStyle = border;
   context.fillRect(29, 29, 10, 572);
-  if (payload.variant === "premium") {
+  if (payload.variant === "premium" || theme.tone === "rainbow" || theme.tone === "purple" || theme.tone === "gold") {
+    context.strokeStyle = theme.accentSoft;
     context.lineWidth = 2;
     context.strokeRect(43, 43, 1114, 544);
   }
@@ -473,21 +651,21 @@ async function createShareCardCanvas(payload: ShareCardPayload): Promise<HTMLCan
   context.font = "700 23px 'Noto Sans JP', sans-serif";
   context.fillText(payload.marketSignal, 1120, 84);
   context.textAlign = "left";
-  context.fillStyle = "#8d8980";
+  context.fillStyle = theme.muted;
   context.font = "500 25px 'Noto Sans JP', sans-serif";
   context.fillText("あなたの人間時価総額", 78, 143);
 
-  context.fillStyle = "#f0d487";
   const scoreSize = fitCanvasText(context, payload.score, 1035, 98, 62);
+  context.fillStyle = createScoreFill(context, theme, 72, 180, 980);
   context.font = `700 ${scoreSize}px "Noto Sans JP", sans-serif`;
   context.fillText(payload.score, 72, 259);
 
-  context.fillStyle = accent;
+  context.fillStyle = border;
   context.fillRect(76, 297, 208, 72);
-  context.fillStyle = "#15110a";
+  context.fillStyle = theme.tierText;
   context.font = "700 37px 'Noto Sans JP', sans-serif";
   context.fillText(`${payload.tier}ランク`, 102, 345);
-  context.fillStyle = "#f2eee5";
+  context.fillStyle = theme.text;
   context.font = "700 40px 'Noto Sans JP', sans-serif";
   context.fillText(`偏差値 ${payload.deviation}`, 326, 345);
 
@@ -498,11 +676,11 @@ async function createShareCardCanvas(payload: ShareCardPayload): Promise<HTMLCan
     context.font = `700 ${titleSize}px "Noto Sans JP", sans-serif`;
     context.fillText(`隠し称号：${payload.title}`, 78, 414);
   }
-  context.fillStyle = "#f2eee5";
+  context.fillStyle = theme.text;
   context.font = "600 25px 'Noto Sans JP', sans-serif";
   context.fillText(`金融リテラシー ${payload.quiz}`, 78, 458);
 
-  context.fillStyle = "#aaa59c";
+  context.fillStyle = theme.muted;
   const occupationSize = fitCanvasText(context, payload.occupation, contentWidth, 27, 20);
   context.font = `600 ${occupationSize}px "Noto Sans JP", sans-serif`;
   context.fillText(payload.occupation, 78, 503);
@@ -524,17 +702,17 @@ async function createShareCardCanvas(payload: ShareCardPayload): Promise<HTMLCan
       // The text result remains shareable even if an avatar asset fails to load.
     }
   }
-  context.strokeStyle = "#38342d";
+  context.strokeStyle = theme.accentSoft;
   context.lineWidth = 2;
   context.beginPath();
   context.moveTo(78, 523);
   context.lineTo(1122, 523);
   context.stroke();
 
-  context.fillStyle = "#f2eee5";
+  context.fillStyle = theme.text;
   context.font = "600 25px 'Noto Sans JP', sans-serif";
   context.fillText("あなたも算出してみる →", 78, 559);
-  context.fillStyle = "#9c978e";
+  context.fillStyle = theme.muted;
   context.font = "500 17px 'Noto Sans JP', sans-serif";
   context.fillText(payload.url, 78, 586);
   context.fillStyle = accent;
@@ -627,6 +805,27 @@ export default function HumanMarketCapApp() {
       props: challenge ? { challengeScoreYen: challenge } : undefined,
     });
   }, []);
+
+  function restartValuation() {
+    setDisplay(null);
+    setRanking(null);
+    setShareImageUrl("");
+    setShareFeedback("");
+    setQuestions([]);
+    setAttemptId("");
+    setQuizAnswers({});
+    setQuizIndex(0);
+    setQuizPhase("idle");
+    setTimeLeft(QUIZ_SECONDS);
+    setError("");
+    setQuizLoading(false);
+    setCalculating(false);
+    setWizardStep(1);
+    setFieldErrors({});
+    setStepNavError("");
+    setInputs({ ...DEFAULTS });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   function number(field: keyof InputState, value: number) {
     setInputs((current) => ({ ...current, [field]: Number.isFinite(value) ? value : 0 }));
@@ -832,6 +1031,7 @@ export default function HumanMarketCapApp() {
         marketSignal: flavor.marketSignal,
         variant: flavor.variant,
         url: challengeUrl(display.scoreYen).replace(/^https?:\/\//, ""),
+        marketCapMan: result.marketCapMan,
       });
       setShareImageUrl(canvas.toDataURL("image/png"));
     };
@@ -876,6 +1076,7 @@ export default function HumanMarketCapApp() {
         marketSignal: flavor.marketSignal,
         variant: flavor.variant,
         url: challengeUrl(display.scoreYen).replace(/^https?:\/\//, ""),
+        marketCapMan: result.marketCapMan,
       });
       const file = canvasToPngFile(canvas);
       const summary = shareText() ?? "#人間時価総額";
@@ -905,7 +1106,16 @@ export default function HumanMarketCapApp() {
     <main className="hmc-app">
       <div className="app-shell">
         <header className="brand-bar">
-          <a className="brand" href="#top" aria-label="人間時価総額">
+          <a
+            className="brand"
+            href="#top"
+            aria-label="最初からやり直す"
+            title="最初からやり直す"
+            onClick={(event) => {
+              event.preventDefault();
+              restartValuation();
+            }}
+          >
             <span className="brand-mark" aria-hidden="true">
               <svg className="brand-mark-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="1.5" y="1.5" width="45" height="45" rx="3" stroke="url(#hmcGold)" strokeWidth="1.5" />
@@ -1453,7 +1663,7 @@ export default function HumanMarketCapApp() {
               <p>企業はお金を稼ぐのが目的。でも人間の目的は、お金ではありません。死ぬ時にいくら資産があってもあの世に持ち込めないのだから。</p>
             </section>
 
-            <button className="revise-button" type="button" onClick={() => { setDisplay(null); setRanking(null); window.scrollTo({ top: 0, behavior: "smooth" }); }}>条件を修正して再計算する</button>
+            <button className="revise-button" type="button" onClick={restartValuation}>条件を修正して再計算する</button>
             <button type="button" className="x-share-button x-share-button-bottom" onClick={shareResultImage} disabled={sharingImage}><span>𝕏</span><strong>Xで結果カードをシェア</strong><b>→</b></button>
           </section>
         )}

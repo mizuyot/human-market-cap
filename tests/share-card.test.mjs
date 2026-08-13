@@ -33,10 +33,18 @@ test("share cards include rarity, market metaphors, and quiz badges", async () =
   assert.doesNotMatch(source, /市場の怪物|再建待ったなし|成長余地あり|ぞろ目プレミア/);
   assert.match(source, /賢者・利回り最高/);
   assert.match(source, /カモ/);
-  assert.match(source, /ストップ高/);
+  assert.match(source, /最高評価/);
+  assert.doesNotMatch(source, /ストップ高/);
   assert.match(source, /上場廃止勧告・監理銘柄入り/);
   assert.match(source, /TOPIXに負けています/);
   assert.match(source, /市場平均を上回っています/);
+  assert.match(source, /shareCardTheme/);
+  assert.match(source, /1_000_000/);
+  assert.match(source, /tone: "rainbow"/);
+  assert.match(source, /tone: "purple"/);
+  assert.match(source, /tone: "silver"/);
+  assert.match(source, /tone: "green"/);
+  assert.match(source, /最初からやり直す/);
 });
 
 test("all hidden titles have optimized avatar assets", async () => {
