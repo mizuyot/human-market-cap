@@ -3,6 +3,20 @@ import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } fr
 import handler from "vinext/server/app-router-entry";
 import { withSecurityHeaders } from "../app/security-headers";
 
+// Some local SSR / workerd paths miss WeakRef; React RSC needs it.
+if (typeof WeakRef === "undefined") {
+  // eslint-disable-next-line no-global-assign -- local runtime polyfill
+  globalThis.WeakRef = class WeakRef<T extends WeakKey> {
+    #value: T | undefined;
+    constructor(value: T) {
+      this.#value = value;
+    }
+    deref(): T | undefined {
+      return this.#value;
+    }
+  } as typeof WeakRef;
+}
+
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
