@@ -1234,6 +1234,39 @@ fieldset legend { padding: 0; width: 100%; }
   letter-spacing: .02em;
 }
 .next-moves-revise { margin-top: 2px; }
+.catalog-comments-card { border-color: rgba(212,168,67,.35); }
+.catalog-comments-list { display: grid; gap: 12px; margin: 16px 0; }
+.catalog-comment {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.18);
+}
+.catalog-comment-index {
+  color: var(--gold);
+  font: 700 13px/1.2 var(--type-gothic);
+  letter-spacing: .06em;
+  padding-top: 2px;
+}
+.catalog-comment-body strong {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--text);
+  font: 600 14px/1.45 var(--type-gothic);
+}
+.catalog-comment-body p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.catalog-comment.slot-special {
+  border-color: rgba(212,168,67,.55);
+  background: linear-gradient(135deg, rgba(212,168,67,.1), rgba(0,0,0,.2));
+}
+.catalog-comment.slot-special strong { color: var(--gold-light); }
 .result-job-note { margin: 0 0 10px; padding: 12px 14px; border: 1px solid var(--border-gold); background: rgba(212,168,67,.055); color: var(--gold-light); font: 600 11px/1.7 var(--type-gothic); }
 .challenge-result { margin-bottom: 10px; padding: 15px; border: 1px solid var(--border); background: #10100f; }
 .challenge-result > span { font-size: 11px; letter-spacing: .1em; }

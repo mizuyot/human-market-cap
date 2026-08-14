@@ -34,6 +34,10 @@ import {
   nwTransitionAdjustment,
   occupationIncomeFloor,
 } from "./model";
+import {
+  selectResultComments,
+  type SelectedComment,
+} from "./comment-catalog";
 import type {
   PublicQuizSet,
   QuizAnswers,
@@ -287,24 +291,6 @@ function Factor({ label, value, caption }: { label: string; value: number; capti
       <div className="factor-track"><span style={{ width: `${Math.min(100, Math.max(0, value))}%` }} /></div>
     </div>
   );
-}
-
-function notes(result: CalculationResult): string[] {
-  return [
-    result.occupation.careerRisk >= .07
-      ? `キャリア変動リスクが年率${(result.occupation.careerRisk * 100).toFixed(1)}%と高水準です。別職種へ移った場合の所得を含めて期待値を調整しています。`
-      : result.occupation.careerRisk <= .01
-        ? "キャリア持続性が高く、長期間の給与キャッシュフローが評価を下支えしています。"
-        : "キャリアの成長余地と継続リスクは中位です。専門性の更新が評価維持の鍵になります。",
-    result.effectiveReturn >= .06
-      ? "実効利回りはかなり高い水準です。上限は設けていませんが、期待値が高いほど下方リスク管理も重要です。"
-      : result.effectiveReturn < .01
-        ? "資産運用の寄与が弱く、金融リテラシーの改善効果が大きい状態です。"
-        : "資産所得は健全な補助エンジンです。再投資率を維持すると後半ほど複利が効きます。",
-    result.yearsRemaining < 10
-      ? "残余就労年数が短いため、既存資産の保全とキャッシュフロー設計が優先です。"
-      : `残余就労年数は${result.yearsRemaining}年。小さな成長率差でも累計価値には大きく効く時間軸です。`,
-  ];
 }
 
 function answerLabel(set: PublicQuizSet, phase: "a" | "b", answer: number | null): string {
@@ -614,6 +600,49 @@ function tierStampLabel(tier: string): string {
   if (tier === "B") return "安定成長人材";
   if (tier === "C") return "これから積み上げる局面";
   return "伸びしろが大きい局面";
+}
+
+function CatalogCommentsCard({
+  comments,
+  tier,
+}: {
+  comments: SelectedComment[];
+  tier: string;
+}) {
+  if (comments.length === 0) return null;
+  return (
+    <section className="result-card catalog-comments-card">
+      <div className="section-title">
+        <div>
+          <span className="eyebrow">分析コメント</span>
+          <h3>査定の読み解き</h3>
+        </div>
+      </div>
+      <div className="analyst-stamp">
+        <span>{tier}</span>
+        <div>
+          <strong>{tierStampLabel(tier)}</strong>
+          <small>HMC評価</small>
+        </div>
+      </div>
+      <div className="catalog-comments-list">
+        {comments.map((comment, index) => (
+          <article key={comment.id} className={`catalog-comment slot-${comment.slot}`}>
+            <span className="catalog-comment-index">{String(index + 1).padStart(2, "0")}</span>
+            <div className="catalog-comment-body">
+              <strong>{comment.title}</strong>
+              <p>{comment.body}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+      <p className="risk-warning">
+        <b>ご注意</b>
+        {" "}
+        この数値は、入力情報とモデル前提に基づく将来の収益ポテンシャルの試算です。実際の収入、雇用可能性、金融商品の価値、人格的価値を示すものではありません。
+      </p>
+    </section>
+  );
 }
 
 function fitCanvasText(context: CanvasRenderingContext2D, text: string, maxWidth: number, startingSize: number, minimumSize: number) {
@@ -1058,6 +1087,38 @@ export default function HumanMarketCapApp() {
     () => display && result ? getResultFlavor(display, ranking, tier) : null,
     [display, ranking, result, tier],
   );
+
+  const catalogComments = useMemo(() => {
+    if (!display || !result) return [];
+    const inputs = display.inputs;
+    return selectResultComments({
+      age: inputs.age,
+      annualIncome: inputs.annualIncome,
+      education: inputs.education,
+      appearance: inputs.appearance,
+      occupation: inputs.occupation,
+      financialAssets: inputs.financialAssets,
+      realEstateAssets: inputs.realEstateAssets,
+      otherAssets: inputs.otherAssets,
+      reinvestmentRate: inputs.reinvestmentRate,
+      quizCorrect: display.quizCorrect,
+      wrongQuizIds: display.reviews.filter((review) => !review.passed).map((review) => review.id),
+      quizSetIds: display.reviews.map((review) => review.id),
+      marketCapMan: result.marketCapMan,
+      salaryIncomeMan: result.salaryIncomeMan,
+      assetIncomeMan: result.assetIncomeMan,
+      careerOptionMan: result.careerOptionMan,
+      yearsRemaining: result.yearsRemaining,
+      occupationPeak: result.occupation.peak,
+      occupationPrimaryEnd: result.occupation.primaryEnd,
+      occupationCareerRisk: result.occupation.careerRisk,
+      occupationRetirement: result.occupation.retirement,
+      rankingTopPercent: ranking?.topPercent ?? null,
+      rankingDeviation: ranking?.deviation ?? null,
+      previousScoreYen: display.previousScoreYen,
+      scoreYen: display.scoreYen,
+    });
+  }, [display, ranking, result]);
 
   function challengeUrl(scoreYen: number) {
     const url = new URL(window.location.pathname, window.location.origin);
@@ -1712,12 +1773,7 @@ export default function HumanMarketCapApp() {
 
             <QuizReview reviews={display.reviews} />
 
-            <section className="result-card analysis-card">
-              <div className="section-title"><div><span className="eyebrow">分析メモ</span><h3>分析コメント</h3></div></div>
-              <div className="analyst-stamp"><span>{tier}</span><div><strong>{tierStampLabel(tier)}</strong><small>HMC評価</small></div></div>
-              <ol>{notes(result).map((note) => <li key={note}>{note}</li>)}</ol>
-              <p className="risk-warning"><b>ご注意</b> この数値は、入力情報とモデル前提に基づく将来の収益ポテンシャルの試算です。実際の収入、雇用可能性、金融商品の価値、人格的価値を示すものではありません。</p>
-            </section>
+            <CatalogCommentsCard comments={catalogComments} tier={tier} />
 
             <section className="closing-message">
               <span className="eyebrow">さいごに</span>
