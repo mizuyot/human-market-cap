@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { calculateMarketCap } from "../app/server/calculation.ts";
-import { OCCUPATION_BASE_INCOME, getOccupation } from "../app/model.ts";
+import { OCCUPATION_BASE_INCOME, getOccupation, getTier } from "../app/model.ts";
 import { MODEL_VERSION, V20_POTENTIAL_INCOME } from "../app/occupation-v20.ts";
 
 const sample = {
@@ -53,4 +53,34 @@ test("valuation returns quote scenarios and career option", () => {
     ) < 1e-6,
   );
   assert.ok(result.valueDrivers.length >= 2);
+});
+
+test("B/C/D valuations include soft next-move uplift estimates", () => {
+  const low = calculateMarketCap({
+    ...sample,
+    annualIncome: 280,
+    financialAssets: 20,
+    reinvestmentRate: 0.05,
+    correctAnswers: 1,
+    occupation: "nonRegular",
+  });
+  assert.ok(["B", "C", "D"].includes(getTier(low.marketCapMan)));
+  assert.ok(low.nextMoves.length >= 1);
+  assert.ok(low.nextMoves.length <= 3);
+  for (const move of low.nextMoves) {
+    assert.ok(move.upliftMan >= 50);
+    assert.ok(move.title.length > 0);
+    assert.ok(move.reason.length > 0);
+  }
+  const high = calculateMarketCap({
+    ...sample,
+    annualIncome: 2000,
+    financialAssets: 20000,
+    occupation: "doctor",
+    correctAnswers: 5,
+    reinvestmentRate: 0.4,
+  });
+  if (getTier(high.marketCapMan) === "S" || getTier(high.marketCapMan) === "A") {
+    assert.equal(high.nextMoves.length, 0);
+  }
 });

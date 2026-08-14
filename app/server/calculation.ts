@@ -14,6 +14,7 @@ import {
 import {
   type AnnualProjection,
   type CalculationResult,
+  type NextMove,
   type OccupationParam,
   type ScenarioId,
   type ScenarioQuote,
@@ -23,6 +24,7 @@ import {
   getAppearance,
   getEducation,
   getOccupation,
+  getTier,
   nwSalaryAdjustment,
   nwTransitionAdjustment,
   occupationIncomeFloor,
@@ -56,7 +58,7 @@ function runProjection(
   input: ScoredCalculatorInputs,
   job: OccupationParam,
   tuning: ScenarioTuning,
-): Omit<CalculationResult, "scenarios" | "valueDrivers" | "modelVersion" | "careerOptionMan"> & {
+): Omit<CalculationResult, "scenarios" | "valueDrivers" | "nextMoves" | "modelVersion" | "careerOptionMan"> & {
   careerOptionMan: number;
   initialAssetsMan: number;
 } {
@@ -218,6 +220,117 @@ function buildValueDrivers(
     .slice(0, 4);
 }
 
+/** 目安額を優しめに丸める（細かい差で不安にさせない） */
+function softRoundUpliftMan(delta: number): number {
+  const n = Math.max(0, Math.round(delta));
+  if (n < 80) return 0;
+  if (n < 500) return Math.round(n / 50) * 50;
+  if (n < 3000) return Math.round(n / 100) * 100;
+  if (n < 10000) return Math.round(n / 500) * 500;
+  return Math.round(n / 1000) * 1000;
+}
+
+function baseMarketCapMan(input: ScoredCalculatorInputs): number {
+  const job = getOccupation(input.occupation);
+  return runProjection(input, withTunedJob(job, BASE_TUNING), BASE_TUNING).marketCapMan;
+}
+
+function buildNextMoves(
+  input: ScoredCalculatorInputs,
+  currentMan: number,
+  upsideMan: number,
+  occupationFloor: number,
+): NextMove[] {
+  const tier = getTier(currentMan);
+  if (tier === "S" || tier === "A") return [];
+
+  const candidates: NextMove[] = [];
+  const pushIfUseful = (
+    id: NextMove["id"],
+    title: string,
+    reason: string,
+    focus: NextMove["focus"],
+    nextMan: number,
+  ) => {
+    const upliftMan = softRoundUpliftMan(nextMan - currentMan);
+    if (upliftMan <= 0) return;
+    candidates.push({ id, title, reason, upliftMan, focus });
+  };
+
+  if (input.correctAnswers < 5) {
+    const targetQuiz = Math.min(5, Math.max(input.correctAnswers + 2, 4));
+    if (targetQuiz > input.correctAnswers) {
+      pushIfUseful(
+        "quiz",
+        "金融判断をもう少し伸ばす",
+        `いま ${input.correctAnswers}/5。${targetQuiz}/5 くらいまで伸びると、運用の寄与がやさしく効きやすくなります。`,
+        "quiz",
+        baseMarketCapMan({ ...input, correctAnswers: targetQuiz }),
+      );
+    }
+  }
+
+  if (input.reinvestmentRate < 0.25) {
+    const fromPct = Math.round(input.reinvestmentRate * 100);
+    const targetRate = Math.min(0.35, Math.max(0.25, input.reinvestmentRate + 0.15));
+    const toPct = Math.round(targetRate * 100);
+    pushIfUseful(
+      "reinvestment",
+      "毎年の積み立てを少し増やす",
+      `再投資 ${fromPct}% → ${toPct}% くらい。無理のない範囲でも、後半ほど複利が味方になります。`,
+      "reinvestment",
+      baseMarketCapMan({ ...input, reinvestmentRate: targetRate }),
+    );
+  }
+
+  const totalAssets = Math.max(0, input.financialAssets)
+    + Math.max(0, input.realEstateAssets)
+    + Math.max(0, input.otherAssets);
+  if (totalAssets < 200) {
+    const seedAdd = totalAssets < 50 ? 200 : 300;
+    pushIfUseful(
+      "seed-assets",
+      "最初の種銭を少し用意する",
+      `金融資産がまだ少ない局面です。種銭が加わると、資産所得がゆっくりエンジンになります。`,
+      "assets",
+      baseMarketCapMan({
+        ...input,
+        financialAssets: Math.max(0, input.financialAssets) + seedAdd,
+      }),
+    );
+  }
+
+  if (occupationFloor > 0 && input.annualIncome < occupationFloor * 0.72) {
+    const targetIncome = Math.round(
+      input.annualIncome + (occupationFloor - input.annualIncome) * 0.45,
+    );
+    if (targetIncome > input.annualIncome + 30) {
+      pushIfUseful(
+        "income-catchup",
+        "本業のキャッチアップが進むと",
+        `いまの年収から、職業ポテンシャルに少し近づくイメージです。急がなくて大丈夫です。`,
+        "income",
+        baseMarketCapMan({ ...input, annualIncome: targetIncome }),
+      );
+    }
+  }
+
+  const upsideLift = softRoundUpliftMan(upsideMan - currentMan);
+  if (upsideLift > 0) {
+    candidates.push({
+      id: "upside-path",
+      title: "成長や副収入がうまくいった場合",
+      reason: "上振れシナリオの目安です。いまの延長だけでなく、「うまくいったとき」も隣に置いてあります。",
+      upliftMan: upsideLift,
+      focus: "scenario",
+    });
+  }
+
+  return candidates
+    .sort((a, b) => b.upliftMan - a.upliftMan)
+    .slice(0, 3);
+}
+
 export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationResult {
   const baseJob = getOccupation(input.occupation);
   const base = runProjection(input, withTunedJob(baseJob, BASE_TUNING), BASE_TUNING);
@@ -259,6 +372,7 @@ export function calculateMarketCap(input: ScoredCalculatorInputs): CalculationRe
     projections: base.projections,
     scenarios,
     valueDrivers: buildValueDrivers(base, input),
+    nextMoves: buildNextMoves(input, base.marketCapMan, upside.marketCapMan, base.occupationIncomeFloor),
     modelVersion: MODEL_VERSION,
   };
 }

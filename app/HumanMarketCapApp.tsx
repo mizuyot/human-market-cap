@@ -18,6 +18,7 @@ import {
   type CalculatorInputs,
   type CalculationResult,
   type EducationKey,
+  type NextMove,
   type OccupationCategoryKey,
   type OccupationKey,
   formatMan,
@@ -544,13 +545,17 @@ function getHiddenTitle(display: DisplayResult, ranking: RankingSnapshot | null,
 function getResultFlavor(display: DisplayResult, ranking: RankingSnapshot | null, tier: string): ResultFlavor {
   const { quizCorrect } = display;
   const hiddenTitle = getHiddenTitle(display, ranking, tier);
-  const quizBadge = quizCorrect === 5 ? "賢者・利回り最高" : quizCorrect === 0 ? "カモ" : `金融判断 ${quizCorrect}/5`;
+  const quizBadge = quizCorrect === 5
+    ? "賢者・利回り最高"
+    : quizCorrect === 0
+      ? "金融リテラシー・これから本番"
+      : `金融判断 ${quizCorrect}/5`;
   const marketSignal = tier === "S"
     ? "最高評価"
     : tier === "D"
-      ? "上場廃止勧告・監理銘柄入り"
+      ? "伸びしろ銘柄・仕込み局面"
       : ranking && ranking.deviation < 50
-        ? "TOPIXに負けています"
+        ? "市場平均より下。ここから伸ばせる帯"
         : "市場平均を上回っています";
   return {
     title: hiddenTitle?.title ?? null,
@@ -559,6 +564,56 @@ function getResultFlavor(display: DisplayResult, ranking: RankingSnapshot | null
     marketSignal,
     variant: hiddenTitle ? "premium" : tier === "S" ? "surge" : tier === "D" ? "warning" : "standard",
   };
+}
+
+function softUpliftLabel(upliftMan: number): string {
+  return `おおよそ＋${formatMan(upliftMan)}くらい`;
+}
+
+function NextMovesCard({
+  moves,
+  onRevise,
+}: {
+  moves: NextMove[];
+  onRevise: () => void;
+}) {
+  if (moves.length === 0) return null;
+  return (
+    <section className="result-card next-moves-card">
+      <div className="section-title">
+        <div>
+          <span className="eyebrow">伸びしろガイド</span>
+          <h3>次に効く一手</h3>
+        </div>
+      </div>
+      <p className="next-moves-intro">
+        いまの数字は入口です。条件が少し変わると、おおよそこれくらい伸びやすい、という目安です。
+      </p>
+      <div className="next-moves-list">
+        {moves.map((move, index) => (
+          <article key={move.id} className="next-move-item">
+            <span className="next-move-index">{String(index + 1).padStart(2, "0")}</span>
+            <div className="next-move-body">
+              <strong>{move.title}</strong>
+              <p>{move.reason}</p>
+              <em>{softUpliftLabel(move.upliftMan)}</em>
+            </div>
+          </article>
+        ))}
+      </div>
+      <button className="revise-button next-moves-revise" type="button" onClick={onRevise}>
+        条件を変えて再計算する
+      </button>
+    </section>
+  );
+}
+
+function tierStampLabel(tier: string): string {
+  if (tier === "S") return "超優良人材";
+  if (tier === "A") return "成長優良人材";
+  if (tier === "B") return "安定成長人材";
+  if (tier === "C") return "これから積み上げる局面";
+  return "伸びしろが大きい局面";
 }
 
 function fitCanvasText(context: CanvasRenderingContext2D, text: string, maxWidth: number, startingSize: number, minimumSize: number) {
@@ -1208,7 +1263,7 @@ export default function HumanMarketCapApp() {
                         value={inputs.age}
                         invalid={Boolean(fieldErrors.age)}
                         describedBy={[fieldErrors.age ? "age-error" : "", "age-help"].filter(Boolean).join(" ") || undefined}
-                        onChange={(event) => number("age", Number(event.target.value))}
+                        onValueChange={(value) => number("age", value)}
                       />
                       <FieldHelp id="age-help">職業別の就労終了年齢までを残余就労期間として計算します。</FieldHelp>
                       <FieldError id="age-error" message={fieldErrors.age} />
@@ -1226,7 +1281,7 @@ export default function HumanMarketCapApp() {
                         value={inputs.annualIncome}
                         invalid={Boolean(fieldErrors.annualIncome)}
                         describedBy={[fieldErrors.annualIncome ? "income-error" : "", "income-help"].filter(Boolean).join(" ") || undefined}
-                        onChange={(event) => number("annualIncome", Number(event.target.value))}
+                        onValueChange={(value) => number("annualIncome", value)}
                       />
                       <FieldHelp id="income-help">額面年収です。将来の賃金カーブの起点になります。</FieldHelp>
                       <FieldError id="income-error" message={fieldErrors.annualIncome} />
@@ -1355,7 +1410,7 @@ export default function HumanMarketCapApp() {
                       value={inputs.financialAssets}
                       invalid={Boolean(fieldErrors.financialAssets)}
                       describedBy={fieldErrors.financialAssets ? "financial-error" : undefined}
-                      onChange={(event) => number("financialAssets", Number(event.target.value))}
+                      onValueChange={(value) => number("financialAssets", value)}
                     />
                     <FieldError id="financial-error" message={fieldErrors.financialAssets} />
                   </section>
@@ -1374,7 +1429,7 @@ export default function HumanMarketCapApp() {
                           value={inputs.realEstateAssets}
                           invalid={Boolean(fieldErrors.realEstateAssets)}
                           describedBy={fieldErrors.realEstateAssets ? "realestate-error" : "realestate-help"}
-                          onChange={(event) => number("realEstateAssets", Number(event.target.value))}
+                          onValueChange={(value) => number("realEstateAssets", value)}
                         />
                         <FieldHelp id="realestate-help">不動産資産</FieldHelp>
                         <FieldError id="realestate-error" message={fieldErrors.realEstateAssets} />
@@ -1390,7 +1445,7 @@ export default function HumanMarketCapApp() {
                           value={inputs.otherAssets}
                           invalid={Boolean(fieldErrors.otherAssets)}
                           describedBy={fieldErrors.otherAssets ? "other-error" : "other-help"}
-                          onChange={(event) => number("otherAssets", Number(event.target.value))}
+                          onValueChange={(value) => number("otherAssets", value)}
                         />
                         <FieldHelp id="other-help">その他資産（債券・金・時計など）</FieldHelp>
                         <FieldError id="other-error" message={fieldErrors.otherAssets} />
@@ -1559,11 +1614,18 @@ export default function HumanMarketCapApp() {
                   ))}
                 </div>
               )}
+              {(tier === "B" || tier === "C" || tier === "D") && (
+                <p className="soft-landing-line">いまの数字は入口。ここから上がる人のパターンが多いです。</p>
+              )}
               <Trace title="算定の内訳を見る">
                 <p>本業所得 {formatMan(result.salaryIncomeMan)} ＋ キャリアの選択肢 {formatMan(result.careerOptionMan)} ＋ 資産所得 {formatMan(result.assetIncomeMan)} ＋ 初期資産 {formatMan(display.inputs.financialAssets + display.inputs.realEstateAssets + display.inputs.otherAssets)}</p>
                 <p>残余{result.yearsRemaining}年。ポテンシャル年収を下限に、キャリアの選択肢を別建てで加算しています。この数値は将来の収益ポテンシャルの試算で、実際の収入・雇用・人格的価値を示すものではありません。</p>
               </Trace>
             </section>
+
+            {(tier === "B" || tier === "C" || tier === "D") && result.nextMoves.length > 0 && (
+              <NextMovesCard moves={result.nextMoves} onRevise={restartValuation} />
+            )}
 
             {result.occupation.specialNote && <p className={`result-job-note ${result.occupation.key === "aiEngineer" ? "ai-strongest" : ""}`}>{result.occupation.specialNote}</p>}
 
@@ -1652,7 +1714,7 @@ export default function HumanMarketCapApp() {
 
             <section className="result-card analysis-card">
               <div className="section-title"><div><span className="eyebrow">分析メモ</span><h3>分析コメント</h3></div></div>
-              <div className="analyst-stamp"><span>{tier}</span><div><strong>{tier === "S" ? "超優良人材" : tier === "A" ? "成長優良人材" : tier === "B" ? "安定成長人材" : tier === "C" ? "改善余地あり" : "再建プラン推奨"}</strong><small>HMC評価</small></div></div>
+              <div className="analyst-stamp"><span>{tier}</span><div><strong>{tierStampLabel(tier)}</strong><small>HMC評価</small></div></div>
               <ol>{notes(result).map((note) => <li key={note}>{note}</li>)}</ol>
               <p className="risk-warning"><b>ご注意</b> この数値は、入力情報とモデル前提に基づく将来の収益ポテンシャルの試算です。実際の収入、雇用可能性、金融商品の価値、人格的価値を示すものではありません。</p>
             </section>

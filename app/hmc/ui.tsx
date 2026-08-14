@@ -2,11 +2,14 @@
 
 import {
   type ButtonHTMLAttributes,
+  type FocusEvent,
   type InputHTMLAttributes,
   type ReactNode,
   type SelectHTMLAttributes,
   forwardRef,
+  useEffect,
   useId,
+  useRef,
   useState,
 } from "react";
 
@@ -45,22 +48,71 @@ export function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
+function commitNumberText(raw: string): number {
+  const trimmed = raw.trim();
+  if (trimmed === "") return 0;
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 export const NumberInputWithUnit = forwardRef<
   HTMLInputElement,
-  InputHTMLAttributes<HTMLInputElement> & {
+  Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange"> & {
     unit: string;
     invalid?: boolean;
     describedBy?: string;
+    value: number;
+    onValueChange: (value: number) => void;
   }
->(function NumberInputWithUnit({ unit, invalid, describedBy, ...props }, ref) {
+>(function NumberInputWithUnit({
+  unit,
+  invalid,
+  describedBy,
+  value,
+  onValueChange,
+  onBlur,
+  onFocus,
+  ...props
+}, ref) {
+  // null = 親の value を表示。入力中だけ文字列下書きを持ち、空欄を許可する。
+  const [draft, setDraft] = useState<string | null>(null);
+  const focusedRef = useRef(false);
+
+  useEffect(() => {
+    if (!focusedRef.current) setDraft(null);
+  }, [value]);
+
+  const display = draft !== null ? draft : String(value);
+
   return (
     <div className={`number-input ${invalid ? "is-invalid" : ""}`}>
       <input
         {...props}
         ref={ref}
         className="hmc-number"
+        value={display}
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
+        onFocus={(event) => {
+          focusedRef.current = true;
+          setDraft(String(value));
+          onFocus?.(event);
+        }}
+        onChange={(event) => {
+          const raw = event.target.value;
+          setDraft(raw);
+          if (raw.trim() === "") return;
+          const parsed = Number(raw);
+          if (!Number.isFinite(parsed)) return;
+          onValueChange(parsed);
+        }}
+        onBlur={(event: FocusEvent<HTMLInputElement>) => {
+          focusedRef.current = false;
+          const next = commitNumberText(draft ?? event.target.value);
+          setDraft(null);
+          onValueChange(next);
+          onBlur?.(event);
+        }}
       />
       <span aria-hidden="true">{unit}</span>
     </div>

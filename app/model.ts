@@ -317,6 +317,15 @@ export interface ValueDriver {
   amountMan: number;
 }
 
+/** B/C/D向けの「次に効く一手」。upliftMan は丸めた目安。 */
+export interface NextMove {
+  id: string;
+  title: string;
+  reason: string;
+  upliftMan: number;
+  focus: "quiz" | "reinvestment" | "assets" | "income" | "scenario";
+}
+
 export interface CalculationResult {
   marketCapMan: number;
   salaryIncomeMan: number;
@@ -339,6 +348,7 @@ export interface CalculationResult {
   /** Base / Upside / Resilience（表示用。ランキングは base = marketCapMan） */
   scenarios: ScenarioQuote[];
   valueDrivers: ValueDriver[];
+  nextMoves: NextMove[];
   modelVersion: string;
 }
 
